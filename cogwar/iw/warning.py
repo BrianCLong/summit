@@ -1,6 +1,8 @@
+import os
 import uuid
-from typing import Any, Dict, List
+from typing import Any
 
+from cogwar.innovation.cognitive_pressure_map import build_cognitive_pressure_map
 
 def generate_warning(indicators: list[dict[str, Any]]) -> dict[str, Any]:
     """
@@ -43,5 +45,17 @@ def generate_warning(indicators: list[dict[str, Any]]) -> dict[str, Any]:
         ],
         "evidence_refs": [ind["id"] for ind in indicators]
     }
+
+    if os.environ.get("COGWAR_INNOVATION", "false").lower() == "true":
+        budget = int(os.environ.get("COGWAR_DEFENSE_BUDGET", "4"))
+        pressure_map = build_cognitive_pressure_map(indicators, budget=budget)
+        warning["cognitive_pressure_map"] = pressure_map
+
+        dynamic_actions = [
+            item["label"] for item in pressure_map["recommended_portfolio"][:3]
+        ]
+        warning["recommended_defensive_actions"] = list(
+            dict.fromkeys(warning["recommended_defensive_actions"] + dynamic_actions)
+        )
 
     return warning

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "cogwar.cognitive_pressure_map.v1",
+  "type": "object",
+  "required": [
+    "version",
+    "budget",
+    "narrative_pressure",
+    "channel_heatmap",
+    "recommended_portfolio",
+    "expected_total_risk_reduction",
+    "defensive_only"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "CPME-V1"
+    },
+    "budget": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "narrative_pressure": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["narrative_id", "pressure_score"],
+        "properties": {
+          "narrative_id": {
+            "type": "string"
+          },
+          "pressure_score": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "channel_heatmap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["channel", "pressure_score"],
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "pressure_score": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "recommended_portfolio": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "narrative_id",
+          "action_id",
+          "label",
+          "channel",
+          "cost",
+          "expected_risk_reduction",
+          "score_per_cost"
+        ],
+        "properties": {
+          "narrative_id": { "type": "string" },
+          "action_id": { "type": "string" },
+          "label": { "type": "string" },
+          "channel": { "type": "string" },
+          "cost": { "type": "integer", "minimum": 1 },
+          "expected_risk_reduction": { "type": "number", "minimum": 0 },
+          "score_per_cost": { "type": "number", "minimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "expected_total_risk_reduction": {
+      "type": "number",
+      "minimum": 0
+    },
+    "defensive_only": {
+      "type": "boolean",
+      "const": true
+    }
+  },
+  "additionalProperties": false
+}
