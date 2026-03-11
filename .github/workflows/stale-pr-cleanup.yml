@@ -121,19 +121,19 @@ jobs:
               continue
             fi
 
-            COMMENT="⚠️ **Stale PR Notice**
+                                    COMMENT="⚠️ **Stale PR Notice**
 
-This PR has been inactive for 90+ days (last updated: $UPDATED).
+                        This PR has been inactive for 90+ days (last updated: $UPDATED).
 
-**Next Steps:**
-- If still relevant: Please rebase, update, and request review
-- If no longer needed: Consider closing to reduce backlog
+                        **Next Steps:**
+                        - If still relevant: Please rebase, update, and request review
+                        - If no longer needed: Consider closing to reduce backlog
 
-**Auto-close Policy:**
-PRs inactive for 180+ days will be automatically closed with a 7-day warning.
+                        **Auto-close Policy:**
+                        PRs inactive for 180+ days will be automatically closed with a 7-day warning.
 
----
-*This is an automated lifecycle management notice*"
+                        ---
+                        *This is an automated lifecycle management notice*"
 
             if [ "$DRY_RUN" = "false" ]; then
               gh pr comment $PR_NUM --repo ${{ github.repository }} --body "$COMMENT"
@@ -174,24 +174,24 @@ PRs inactive for 180+ days will be automatically closed with a 7-day warning.
             # Skip drafts
             if [ "$IS_DRAFT" = "true" ]; then
               continue
-            fi
+                        fi
 
-            COMMENT="🚨 **7-Day Auto-Close Warning**
+                                    COMMENT="🚨 **7-Day Auto-Close Warning**
 
-This PR has been inactive for 180+ days (last updated: $UPDATED).
+                        This PR has been inactive for 180+ days (last updated: $UPDATED).
 
-**Action Required:**
-This PR will be automatically closed in 7 days unless activity is detected.
+                        **Action Required:**
+                        This PR will be automatically closed in 7 days unless activity is detected.
 
-To prevent closure:
-- Add a comment
-- Push new commits
-- Request review
+                        To prevent closure:
+                        - Add a comment
+                        - Push new commits
+                        - Request review
 
-If closed, it can be reopened at any time.
+                        If closed, it can be reopened at any time.
 
----
-*Automated by Stale PR Lifecycle Management*"
+                        ---
+                        *Automated by Stale PR Lifecycle Management*"
 
             if [ "$DRY_RUN" = "false" ]; then
               gh pr comment $PR_NUM --repo ${{ github.repository }} --body "$COMMENT"
@@ -227,25 +227,25 @@ If closed, it can be reopened at any time.
             --limit 100 --json number,title,labels \
             > /tmp/scheduled.json
 
-          # This is a simplified version - full implementation would check label timestamp
-          cat /tmp/scheduled.json | jq -r '.[] | @json' | while read pr; do
-            PR_NUM=$(echo "$pr" | jq -r '.number')
-            PR_TITLE=$(echo "$pr" | jq -r '.title')
+                      # This is a simplified version - full implementation would check label timestamp
+                      cat /tmp/scheduled.json | jq -r '.[] | @json' | while read pr; do
+                        PR_NUM=$(echo "$pr" | jq -r '.number')
+                        PR_TITLE=$(echo "$pr" | jq -r '.title')
 
-            COMMENT="🔒 **Auto-Closed: Stale PR**
+                                    COMMENT="🔒 **Auto-Closed: Stale PR**
 
-This PR was automatically closed due to 180+ days of inactivity.
+                        This PR was automatically closed due to 180+ days of inactivity.
 
-**To Reopen:**
-If this work is still relevant, you can reopen this PR and it will resume normal lifecycle.
+                        **To Reopen:**
+                        If this work is still relevant, you can reopen this PR and it will resume normal lifecycle.
 
-**Rationale:**
-Automated closure prevents backlog accumulation and CI resource exhaustion (see GA Readiness Signal Report 2026-02-28).
+                        **Rationale:**
+            Automated closure prevents backlog accumulation and CI resource exhaustion (see GA Readiness Signal Report 2026-02-28).
 
----
-*Closed by Stale PR Lifecycle Management*"
+            ---
+            *Closed by Stale PR Lifecycle Management*"
 
-            if [ "$DRY_RUN" = "false" ]; then
+                        if [ "$DRY_RUN" = "false" ]; then
               gh pr close $PR_NUM --repo ${{ github.repository }} --comment "$COMMENT"
               echo "🔒 Closed PR #$PR_NUM: $PR_TITLE"
               sleep 2
