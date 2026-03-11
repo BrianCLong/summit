@@ -1,0 +1,59 @@
+{
+  "nodes": [
+    {
+      "id": "service:svc-api",
+      "type": "service",
+      "data": {
+        "name": "API Service",
+        "tier": "0",
+        "soxCritical": true
+      }
+    },
+    {
+      "id": "service:svc-db",
+      "type": "service",
+      "data": {
+        "name": "Database Service",
+        "tier": "0"
+      }
+    },
+    {
+      "id": "env:prod",
+      "type": "environment",
+      "data": {
+        "name": "Production",
+        "stage": "prod",
+        "region": "us-east-1"
+      }
+    },
+    {
+      "id": "incident:inc-123",
+      "type": "incident",
+      "data": {
+        "severity": "high",
+        "status": "open",
+        "occurredAt": "2024-03-25T10:00:00Z"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "svc-api:DEPENDS_ON:svc-db",
+      "from": "service:svc-api",
+      "to": "service:svc-db",
+      "type": "DEPENDS_ON"
+    },
+    {
+      "id": "svc-api:DEPLOYED_IN:prod",
+      "from": "service:svc-api",
+      "to": "env:prod",
+      "type": "DEPLOYED_IN"
+    },
+    {
+      "id": "inc-123:AFFECTS:svc-api",
+      "from": "incident:inc-123",
+      "to": "service:svc-api",
+      "type": "AFFECTS"
+    }
+  ]
+}
