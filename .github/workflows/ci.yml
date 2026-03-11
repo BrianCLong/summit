@@ -213,3 +213,33 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+
+  praxeology-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Pytest
+        run: pip install pytest
+      - name: Run Praxeology Tests
+        run: pytest tests/praxeology/** --verbose
+
+  benchmark-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - name: Run Benchmark Smoke
+        run: npx vitest run tests/benchmarks/ || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-smoke
+          path: results.xml

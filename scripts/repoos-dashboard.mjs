@@ -156,6 +156,20 @@ function renderDashboard(data) {
   console.log(`  Entropy Monitor:  ${statusBadge('STABLE')}`);
   console.log(`  ML Intelligence:  ${statusBadge('OPERATIONAL')}\n`);
 
+  // Praxeology & Control-Plane (From monitor)
+  console.log(colorize('═══ PRAXEOLOGY & CONTROL-PLANE ═══', 'bold'));
+  try {
+    const quarantineReportStr = execSync('node scripts/repoos-praxeology-monitor.mjs --json', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+    const quarantineReport = JSON.parse(quarantineReportStr);
+
+    console.log(`  Quarantined Writes:    ${colorize(quarantineReport.praxeology.quarantined_writes, 'cyan')}`);
+    console.log(`  Trust Lane Violations: ${colorize(quarantineReport.praxeology.trust_lane_violations, quarantineReport.praxeology.trust_lane_violations > 0 ? 'yellow' : 'green')}`);
+    console.log(`  OpenClaw Compliance:   ${colorize(quarantineReport.control_plane.openclaw_compliance + '%', quarantineReport.control_plane.openclaw_compliance < 100 ? 'yellow' : 'green')}`);
+    console.log(`  Subsumption Gates:     ${colorize(quarantineReport.control_plane.subsumption_gates ? 'PASSED' : 'FAILED', quarantineReport.control_plane.subsumption_gates ? 'green' : 'red')}\n`);
+  } catch (err) {
+    console.log(`  Status: ${colorize('MONITOR OFFLINE', 'red')}\n`);
+  }
+
   // Recent Activity
   console.log(colorize('═══ RECENT PRs ═══', 'bold'));
   const recentPRs = data.prs.slice(0, 5);
