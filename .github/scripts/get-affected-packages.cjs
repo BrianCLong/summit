@@ -2,6 +2,12 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * Computes affected workspace packages by diffing the PR branch against base.
+ * Falls back to all packages when critical repo-level files change or on errors.
+ *
+ * @returns {string[]} Relative package paths consumable by a GitHub Actions matrix.
+ */
 function getAffectedPackages() {
   const isMain = process.env.GITHUB_REF === 'refs/heads/main' || process.env.GITHUB_REF === 'refs/heads/master';
 
@@ -59,6 +65,11 @@ function getAffectedPackages() {
   }
 }
 
+/**
+ * Enumerates all package roots in `packages/`, `apps/`, plus legacy `client/` and `server/`.
+ *
+ * @returns {string[]} All package paths that can be built/tested independently.
+ */
 function getAllPackages() {
   const packages = [];
   const dirsToScan = ['packages', 'apps'];
