@@ -1,12 +1,12 @@
 import pytest
 import datetime
 from unittest.mock import patch, MagicMock
-from summit.registry.service import RegistryService
+from summit.registry.service import SkillRegistryService
 from summit.registry.model import AgentDefinition, RegistryDocument, RiskTier
 
 @pytest.fixture
 def mock_store():
-    # We patch at the place where RegistryService imports them or uses them
+    # We patch at the place where SkillRegistryService imports them or uses them
     with patch("summit.registry.service.load_registry") as mock_load, \
          patch("summit.registry.service.save_registry") as mock_save, \
          patch("summit.registry.service.emit") as mock_emit:
@@ -18,7 +18,7 @@ def test_create_agent(mock_store):
     # Mock initial empty registry
     mock_load.return_value = RegistryDocument(version="1.0", capabilities=[], agents=[])
 
-    service = RegistryService(registry_path="/tmp/registry.json")
+    service = SkillRegistryService(registry_path="/tmp/registry.json")
 
     agent_def = AgentDefinition(
         id="agent-1",
@@ -49,7 +49,7 @@ def test_get_agent(mock_store):
 
     mock_load.return_value = RegistryDocument(version="1.0", capabilities=[], agents=[agent_def])
 
-    service = RegistryService(registry_path="/tmp/registry.json")
+    service = SkillRegistryService(registry_path="/tmp/registry.json")
 
     result = service.get_agent("agent-1")
     assert result == agent_def
