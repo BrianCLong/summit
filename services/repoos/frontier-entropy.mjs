@@ -383,7 +383,6 @@ export class FrontierEntropyMonitor extends EventEmitter {
   _generateEvidenceId() {
     const hash = crypto.createHash('sha256');
     hash.update(this._getSourceCommit());
-    hash.update(Date.now().toString());
     return `entropy-${hash.digest('hex').substring(0, 8)}`;
   }
 
