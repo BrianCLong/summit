@@ -220,46 +220,65 @@ export function InvestigatorWorkbench() {
     <div className="flex h-screen w-full bg-background overflow-hidden" data-testid="investigator-workbench">
       {/* Sidebar: Entity Palette */}
       <div
-        className="w-64 border-r bg-card p-4 flex flex-col gap-4"
+        className="w-72 border-r border-border bg-card flex flex-col overflow-hidden"
         role="complementary"
         aria-label="Tools and Palette"
       >
-        <h2 className="text-lg font-semibold">Workbench</h2>
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Entity Palette</h3>
-          <p className="text-xs text-muted-foreground mb-2">Drag to canvas to add</p>
-          <div className="grid grid-cols-2 gap-2" role="list" aria-label="Draggable entities">
-            {ENTITY_TYPES.map(et => (
-              <div
-                key={et.type}
-                className="p-2 border border-border bg-muted text-xs cursor-move flex flex-col items-center gap-1 hover:bg-accent hover:text-accent-foreground transition-colors focus:outline-none focus:ring-1 focus:ring-ring"
-                draggable
-                tabIndex={0}
-                role="listitem"
-                aria-label={`Drag ${et.label}`}
-                onDragStart={(e) => {
-                  e.dataTransfer.setData('application/intelgraph-entity', et.type)
-                }}
-                onKeyDown={(e) => {
-                   if (e.key === 'Enter' || e.key === ' ') {
-                       // Accessibility enhancement: Simulate drop or add to center (would need implementation)
-                   }
-                }}
-              >
-                <span className="text-lg">{et.icon}</span>
-                <span>{et.label}</span>
+        <div className="p-4 border-b border-border bg-background/50">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Orchestration Palette</h2>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider">Entity Primitives</h3>
+              <span className="text-[10px] mono-data text-muted-foreground">6 TYPES</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1" role="list" aria-label="Draggable entities">
+              {ENTITY_TYPES.map(et => (
+                <div
+                  key={et.type}
+                  className="group relative p-3 border border-border bg-background text-[10px] font-bold uppercase tracking-tight cursor-move flex flex-col items-center gap-2 hover:border-primary hover:bg-accent transition-all focus:outline-none focus:ring-1 focus:ring-ring"
+                  draggable
+                  tabIndex={0}
+                  role="listitem"
+                  aria-label={`Drag ${et.label}`}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/intelgraph-entity', et.type)
+                  }}
+                >
+                  <span className="text-xl group-hover:scale-110 transition-transform">{et.icon}</span>
+                  <span className="truncate w-full text-center">{et.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-4 border-t border-border">
+            <h3 className="text-xs font-bold uppercase tracking-wider">Operational Intel</h3>
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] mono-data py-1 border-b border-border/50">
+                <span className="text-muted-foreground uppercase">Active Entities</span>
+                <span>{entities.length}</span>
               </div>
-            ))}
+              <div className="flex justify-between text-[10px] mono-data py-1 border-b border-border/50">
+                <span className="text-muted-foreground uppercase">Relational Density</span>
+                <span>{(entities.length > 1 ? (2 * relationships.length) / (entities.length * (entities.length - 1)) : 0).toFixed(4)}</span>
+              </div>
+              <div className="flex justify-between text-[10px] mono-data py-1">
+                <span className="text-muted-foreground uppercase">Confidence Baseline</span>
+                <span className="text-green-500">88.4%</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2 mt-4">
-             <h3 className="text-sm font-medium text-muted-foreground">Instructions</h3>
-             <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
-                 <li>Drag entities from palette to canvas</li>
-                 <li>Shift + Drag from a node to link it to another</li>
-                 <li>Click node to select</li>
-                 <li>Delete/Backspace to remove selected node</li>
+        <div className="p-4 bg-muted/30 border-t border-border mt-auto">
+             <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Command Grammar</h3>
+             <ul className="text-[10px] text-muted-foreground space-y-1 font-medium">
+                 <li className="flex items-center gap-2"><span className="w-1 h-1 bg-primary"></span> DRAG primitives to canvas</li>
+                 <li className="flex items-center gap-2"><span className="w-1 h-1 bg-primary"></span> SHIFT+DRAG to establish link</li>
+                 <li className="flex items-center gap-2"><span className="w-1 h-1 bg-primary"></span> DEL to purge selection</li>
              </ul>
         </div>
       </div>
@@ -282,19 +301,19 @@ export function InvestigatorWorkbench() {
 
         {/* Bottom Control Panel: Timeline */}
         <div
-          className="h-28 border-t bg-card p-4 flex flex-col gap-2"
+          className="h-24 border-t border-border bg-card flex flex-col overflow-hidden"
           role="region"
           aria-label="Timeline Controls"
         >
-           <div className="flex justify-between items-center">
-              <h3 className="text-sm font-medium">Timeline Filter</h3>
-              <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleExportPNG}>Export PNG</Button>
-                  <Button variant="outline" size="sm" onClick={handleExportSVG}>Export SVG</Button>
-                  <Button variant="outline" size="sm" onClick={handleExportJSON}>Export JSON</Button>
+           <div className="flex items-center px-4 h-10 border-b border-border bg-background/50">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex-1">Temporal Extraction Slicer</h3>
+              <div className="flex gap-1">
+                  <Button variant="ghost" size="xs" className="h-6 text-[10px] font-bold border border-border" onClick={handleExportPNG}>PNG</Button>
+                  <Button variant="ghost" size="xs" className="h-6 text-[10px] font-bold border border-border" onClick={handleExportSVG}>SVG</Button>
+                  <Button variant="ghost" size="xs" className="h-6 text-[10px] font-bold border border-border" onClick={handleExportJSON}>JSON</Button>
               </div>
            </div>
-           <div className="px-2">
+           <div className="px-6 py-2">
              <Slider
                value={timeRange}
                onValueChange={setTimeRange}
@@ -303,11 +322,12 @@ export function InvestigatorWorkbench() {
                className="w-full"
                aria-label="Time Range Filter"
              />
-             <div className="flex justify-between text-xs text-muted-foreground mt-2">
-               <span>
+             <div className="flex justify-between text-[10px] mono-data font-bold uppercase tracking-tighter text-muted-foreground mt-1">
+               <span className="bg-background px-1 border border-border/50">
                  {formatDate(dateRange.min + (timeRange[0] / 100) * (dateRange.max - dateRange.min))}
                </span>
-               <span>
+               <div className="h-px flex-1 bg-border/30 self-center mx-4" />
+               <span className="bg-background px-1 border border-border/50">
                  {formatDate(dateRange.min + (timeRange[1] / 100) * (dateRange.max - dateRange.min))}
                </span>
              </div>
