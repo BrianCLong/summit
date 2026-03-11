@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from summit.pkg.dag import DependencyCycleError, detect_cycle_from_edges
+from summit.pkg.dag import DependencyCycleError
 from summit.pkg.unity_adapter import UnityPackageValidationError, scan_unity_package
 
 FIXTURE = Path("summit/tests/fixtures/unity_pkg/package.json")

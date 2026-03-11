@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from summit.pkg.dag import DependencyCycleError, topological_order
+from summit.pkg.dag import DependencyCycleError, topological_sort
 from summit.pkg.semver import SemVerError, validate_semver
 from summit.pkg.unity_adapter import build_package_report
 

@@ -20,6 +20,7 @@
     "docker:prod": "docker-compose up",
     "test": "jest --runInBand",
     "test:quick": "echo 'Quick sanity check passed'",
+    "test:agents": "echo \"placeholder\"",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
     "test:web": "cd apps/web && npm test",
