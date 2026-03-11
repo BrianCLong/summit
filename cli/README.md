@@ -66,6 +66,19 @@ node dist/summit.js test
 node dist/summit.js release-dry-run --json
 ```
 
+
+### Predict CI Instability
+
+Use Summit's predictive architecture risk model to estimate CI instability for the next 7-14 days:
+
+```bash
+# Works with summit or summit-intel alias
+node dist/summit.js predict-ci /path/to/repo
+node dist/summit.js predict-ci /path/to/repo --json
+```
+
+This command prints a risk score, key architecture/change drivers, and a compact dashboard with likely high-risk changes.
+
 ### Initialize Configuration
 
 ```bash
