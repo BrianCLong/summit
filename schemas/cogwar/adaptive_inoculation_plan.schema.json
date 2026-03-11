@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AdaptiveInoculationPlan",
+  "type": "object",
+  "required": [
+    "plan_id",
+    "intent",
+    "decision",
+    "segments",
+    "interventions",
+    "recommended_actions"
+  ],
+  "properties": {
+    "plan_id": {
+      "type": "string"
+    },
+    "intent": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "string"
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "channel",
+          "narrative_family",
+          "segment_score",
+          "avg_confidence",
+          "indicator_ids",
+          "evidence_refs"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "narrative_family": {
+            "type": "string"
+          },
+          "segment_score": {
+            "type": "number",
+            "minimum": 0
+          },
+          "avg_confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "indicator_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "interventions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "priority",
+          "channel",
+          "narrative_family",
+          "action",
+          "expected_risk_reduction",
+          "evidence_refs"
+        ],
+        "properties": {
+          "priority": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "channel": {
+            "type": "string"
+          },
+          "narrative_family": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "expected_risk_reduction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "recommended_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

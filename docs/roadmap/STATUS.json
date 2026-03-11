@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-11T03:05:00Z",
+  "revision_note": "Added CogWar Adaptive Inoculation Graph (AIG-V1) defensive intervention planning, schema contracts, and warning-path integration.",
   "initiatives": [
     {
       "id": "antigravity-governance-ledger",
@@ -182,6 +182,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab. Added deterministic example and evidence budgeting notes in docs/standards/ru-ua-cogwar-lab.md."
+    },
+    {
+      "id": "cogwar-adaptive-inoculation-graph",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Shipped AIG-V1 defensive intervention graph synthesis with policy/feature gates, warning enrichment integration, schema `schemas/cogwar/adaptive_inoculation_plan.schema.json`, and unit tests under cogwar/tests."
     },
     {
       "id": "ip-claims-continuation-pack-c451-s480",

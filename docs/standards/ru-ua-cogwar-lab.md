@@ -76,6 +76,22 @@ outputs to shorten feedback loops and enforce evidence-first workflows.
 - **Threats Considered**: attribution laundering, prompt injection, PII leakage, noise flooding.
 - **Mitigations**: schema gates, evidence requirements, redaction rules, deterministic caps.
 
+## Innovation Extension: AIG-V1
+
+Adaptive Inoculation Graph (AIG-V1) adds a deterministic defensive planning layer that converts
+validated warning indicators into a ranked intervention graph:
+
+- **Module**: `cogwar/innovation/adaptive_inoculation_graph.py`
+- **Output contract**: `schemas/cogwar/adaptive_inoculation_plan.schema.json`
+- **Integration point**: `cogwar/iw/warning.py` (`adaptive_inoculation_plan` enrichment)
+- **Safety controls**:
+  - Enforced `COGWAR_INNOVATION=true` feature flag.
+  - Policy gate via `evaluate_request(intent)`; offensive intents are denied.
+  - Evidence preservation via `evidence_refs` and `indicator_ids` propagation.
+
+This extension is intentionally constrained to defensive recommendation synthesis and does not
+generate influence content.
+
 ## Source Index
 
 - PMC case study on narrative shifts vs events and narrative clusters:
