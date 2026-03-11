@@ -1,5 +1,7 @@
 {
-  "evidence_id": "evid-456",
-  "type": "log",
-  "content": {"message": "actor found"}
+  "evidence_id": "ev-002",
+  "run_id": "run-002",
+  "content_hash": "1234567890",
+  "metadata": {"type": "pcap", "size": 1024},
+  "invalid_property": true
 }

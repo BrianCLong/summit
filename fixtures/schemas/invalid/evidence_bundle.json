@@ -1,11 +1,6 @@
 {
-  "bundle_id": "bundle-789",
-  "objects": [
-    {
-      "evidence_id": "evid-456",
-      "type": "log",
-      "content": {"message": "actor found"},
-      "hash": "abcdef123456"
-    }
-  ]
+  "bundle_id": "bundle-002",
+  "run_id": "run-002",
+  "evidence_objects": ["ev-003", "ev-004"],
+  "missing_hash": true
 }

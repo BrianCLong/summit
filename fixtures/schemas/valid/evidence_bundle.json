@@ -1,11 +1,6 @@
 {
-  "bundle_id": "bnd-001",
-  "evidence_objects": ["evd-001", "evd-002"],
-  "manifest_hash": "manifest_hash_123",
-  "signatures": [
-    {
-      "signer_id": "signer-1",
-      "signature": "sig_abc"
-    }
-  ]
+  "bundle_id": "bundle-001",
+  "run_id": "run-001",
+  "evidence_objects": ["ev-001", "ev-002"],
+  "bundle_hash": "f6e5d4c3b2a1"
 }
