@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-const ALLOWED_PREFIXES = ['feature/', 'fix/', 'chore/', 'governance/', 'docs/', 'refactor/', 'test/'];
+const ALLOWED_PREFIXES = ['feature/', 'feat/', 'fix/', 'chore/', 'governance/', 'docs/', 'refactor/', 'test/'];
 
 interface HeatmapEntry {
     owner: string;

@@ -19,7 +19,7 @@ def check_budget(runtime_minutes, cost_usd):
             print(f"- {r}")
         sys.exit(1)
     else:
-        print("Within regression budget. Runtime: {}m, Cost: ${}".format(runtime_minutes, cost_usd))
+        print(f"Within regression budget. Runtime: {runtime_minutes}m, Cost: ${cost_usd}")
         sys.exit(0)
 
 if __name__ == "__main__":

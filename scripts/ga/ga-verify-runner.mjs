@@ -8,7 +8,7 @@ const steps = [
     command: 'bash',
     args: ['-lc', 'rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot'],
   },
-  { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
+  { name: 'typecheck', command: 'pnpm', args: ['typecheck'], env: { NODE_OPTIONS: '--max-old-space-size=8192' } },
   { name: 'lint', command: 'pnpm', args: ['lint'] },
   { name: 'build', command: 'pnpm', args: ['build'] },
   {
