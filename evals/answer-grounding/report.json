@@ -1,0 +1,76 @@
+{
+  "evaluation": "answer-grounding",
+  "total_cases": 3,
+  "total_claims": 5,
+  "total_grounded_claims": 3,
+  "overall_grounding_rate": 0.6,
+  "results": [
+    {
+      "case_id": "case_1_fully_grounded",
+      "answer": "The user service depends on the authentication service. The user service is deployed in the prod environment.",
+      "claims": [
+        {
+          "claim": "The user service depends on the authentication service",
+          "is_grounded": true,
+          "supporting_nodes": [
+            "n1",
+            "n2"
+          ],
+          "contradicting_nodes": [],
+          "fabricated_entities": []
+        },
+        {
+          "claim": "The user service is deployed in the prod environment",
+          "is_grounded": true,
+          "supporting_nodes": [
+            "n1"
+          ],
+          "contradicting_nodes": [],
+          "fabricated_entities": []
+        }
+      ],
+      "case_grounding_rate": 1.0
+    },
+    {
+      "case_id": "case_2_fabrication",
+      "answer": "The reporting service reads from the cache database. The cache database is located in the dev environment.",
+      "claims": [
+        {
+          "claim": "The reporting service reads from the cache database",
+          "is_grounded": true,
+          "supporting_nodes": [
+            "n1"
+          ],
+          "contradicting_nodes": [],
+          "fabricated_entities": []
+        },
+        {
+          "claim": "The cache database is located in the dev environment",
+          "is_grounded": false,
+          "supporting_nodes": [],
+          "contradicting_nodes": [],
+          "fabricated_entities": [
+            "cache database"
+          ]
+        }
+      ],
+      "case_grounding_rate": 0.5
+    },
+    {
+      "case_id": "case_3_contradiction",
+      "answer": "The payment service is deployed in the staging environment.",
+      "claims": [
+        {
+          "claim": "The payment service is deployed in the staging environment",
+          "is_grounded": false,
+          "supporting_nodes": [],
+          "contradicting_nodes": [
+            "n1"
+          ],
+          "fabricated_entities": []
+        }
+      ],
+      "case_grounding_rate": 0.0
+    }
+  ]
+}
