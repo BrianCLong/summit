@@ -1,5 +1,6 @@
 import { LLM } from './llm';
 import { MemoryStore } from '../memory/store';
+import { StrategyEngine } from './strategy-engine';
 
 export type AgentAction =
   | { type: 'search_tools'; query: string }
@@ -9,14 +10,23 @@ export type AgentAction =
 
 export class Planner {
   private memoryStore: MemoryStore;
+  private strategyEngine: StrategyEngine;
 
-  constructor(private tenantId: string, private runId: string, private llm: LLM) {
+  constructor(
+    private tenantId: string,
+    private runId: string,
+    private task: string,
+    private goalHints: string[],
+    private llm: LLM
+  ) {
     this.memoryStore = new MemoryStore();
+    this.strategyEngine = new StrategyEngine();
   }
 
   public async decide(): Promise<AgentAction> {
     const workingMemory = await this.memoryStore.getWorkingMemory(this.tenantId, this.runId);
     const lastEvents = await this.memoryStore.getEpisodicMemory(this.tenantId, this.runId);
+    const strategy = this.strategyEngine.assess(this.task, this.goalHints, lastEvents);
 
     // In a real implementation, the prompt would be constructed from the task, memory, and available tools.
     const prompt = `
@@ -25,6 +35,9 @@ export class Planner {
 
       RECENT_EVENTS:
       ${lastEvents.map(e => JSON.stringify(e.event_json)).join('\n') || 'No events yet.'}
+
+      STRATEGY_RECOMMENDATION:
+      ${JSON.stringify(strategy.recommended)}
 
       What is the next step?
     `;
@@ -38,9 +51,23 @@ export class Planner {
       const action = JSON.parse(response);
       return action as AgentAction;
     } catch (e) {
-      console.error("Failed to parse LLM response:", response);
-      // Fallback to a finish action in case of a parsing error.
-      return { type: 'finish', answer: 'I seem to have run into an unexpected error.', evidence: [] };
+      console.error('Failed to parse LLM response:', response);
+      if (strategy.recommended.nextAction === 'search_tools') {
+        return {
+          type: 'search_tools',
+          query: [this.task, ...this.goalHints].filter(Boolean).join(' ').trim(),
+        };
+      }
+
+      if (strategy.recommended.nextAction === 'fold_memory') {
+        return { type: 'fold_memory', reason: strategy.recommended.rationale };
+      }
+
+      return {
+        type: 'finish',
+        answer: 'Execution completed with governed fallback planning.',
+        evidence: [strategy.recommended.rationale],
+      };
     }
   }
 }

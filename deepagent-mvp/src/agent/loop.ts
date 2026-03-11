@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getIO } from '../server/realtime/socket';
 import { Planner } from './reasoning/planner';
+import { StrategyEngine } from './reasoning/strategy-engine';
 import { ToolRetriever } from '../tools/retriever';
 import { ToolExecutor } from '../tools/executor';
 import { MemoryStore } from './memory/store';
@@ -21,6 +22,7 @@ export class AgentLoop {
   private memoryFolding: MemoryFolding;
   private provenanceLedger: ProvenanceLedger;
   private llm: LLM;
+  private strategyEngine: StrategyEngine;
   private step = 0;
 
   constructor(
@@ -34,12 +36,13 @@ export class AgentLoop {
     this.runId = uuidv4();
     this.status = 'IDLE';
     this.llm = new LLM();
-    this.planner = new Planner(this.tenantId, this.runId, this.llm);
+    this.planner = new Planner(this.tenantId, this.runId, this.task, this.goalHints, this.llm);
     this.toolRetriever = new ToolRetriever();
     this.toolExecutor = new ToolExecutor();
     this.memoryStore = new MemoryStore();
     this.memoryFolding = new MemoryFolding(this.tenantId, this.llm, this.purpose);
     this.provenanceLedger = new ProvenanceLedger();
+    this.strategyEngine = new StrategyEngine();
   }
 
   public getRunId(): string {
@@ -60,6 +63,9 @@ export class AgentLoop {
 
     while (this.status === 'RUNNING') {
       this.step++;
+      const currentEvents = await this.memoryStore.getEpisodicMemory(this.tenantId, this.runId);
+      const strategy = this.strategyEngine.assess(this.task, this.goalHints, currentEvents);
+      await this.emitEvent('strategy-update', strategy);
       const action = await this.planner.decide();
       await this.emitEvent('action', action);
 
