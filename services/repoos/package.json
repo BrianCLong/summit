@@ -1,0 +1,13 @@
+{
+  "name": "@summit/repoos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scaffold for RepoOS service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}

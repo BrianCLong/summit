@@ -29,21 +29,20 @@ jobs:
         with:
           fetch-depth: 0  # Need full history for features
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: |
-          cd services/evolution-ledger
-          npm install
+          node-version: '22'
+          cache: 'pnpm'
 
       - name: Prepare PR context
         id: pr-context
         run: |
           # Build PR context JSON
-          PR_CONTEXT=$(cat <<EOF
+          PR_CONTEXT=$(cat <<EON
           {
             "prNumber": ${{ github.event.pull_request.number }},
             "title": "${{ github.event.pull_request.title }}",
@@ -51,16 +50,16 @@ jobs:
             "baseBranch": "${{ github.event.pull_request.base.ref }}",
             "headBranch": "${{ github.event.pull_request.head.ref }}",
             "state": "${{ github.event.pull_request.state }}",
-            "merged": ${{ github.event.pull_request.merged }},
-            "additions": ${{ github.event.pull_request.additions }},
-            "deletions": ${{ github.event.pull_request.deletions }},
-            "filesChanged": ${{ github.event.pull_request.changed_files }},
-            "commits": ${{ github.event.pull_request.commits }},
+            "merged": ${{ github.event.pull_request.merged || 'false' }},
+            "additions": ${{ github.event.pull_request.additions || 0 }},
+            "deletions": ${{ github.event.pull_request.deletions || 0 }},
+            "filesChanged": ${{ github.event.pull_request.changed_files || 0 }},
+            "commits": ${{ github.event.pull_request.commits || 0 }},
             "createdAt": "${{ github.event.pull_request.created_at }}",
             "updatedAt": "${{ github.event.pull_request.updated_at }}",
             "sha": "${{ github.event.pull_request.head.sha }}"
           }
-          EOF
+          EON
           )
 
           # Export for next step
@@ -103,9 +102,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.EVOLUTION_LEDGER_PASSWORD }}
         run: |
           # Emit event (gracefully handles missing database)
-          node scripts/evolution/emit-pr-event.mjs \
-            "${{ steps.event-type.outputs.EVENT_TYPE }}" \
-            "$PR_CONTEXT" || echo "⚠️  Evolution Ledger unavailable, skipping event emission"
+          node scripts/evolution/emit-pr-event.mjs             "${{ steps.event-type.outputs.EVENT_TYPE }}"             "$PR_CONTEXT" || echo "⚠️  Evolution Ledger unavailable, skipping event emission"
 
       - name: Comment on PR (optional)
         if: steps.event-type.outputs.EVENT_TYPE == 'pr_opened'
