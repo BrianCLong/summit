@@ -1,0 +1,248 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.ai/schemas/evidence/resurrection-report/v1.0.0",
+  "title": "Historical Resurrection Report",
+  "description": "Deterministic evidence artifact for git history resurrection analysis",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "sourceCommit",
+    "summary",
+    "candidates"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version for this evidence artifact"
+    },
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^resurrection-[0-9a-f]{8}$",
+      "description": "Unique identifier for this evidence artifact (e.g., resurrection-a1b2c3d4)"
+    },
+    "sourceCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "description": "Full git commit SHA that generated this report"
+    },
+    "sourceBranch": {
+      "type": "string",
+      "description": "Branch name where analysis was performed"
+    },
+    "config": {
+      "type": "object",
+      "required": ["lookbackDays", "maxCommits"],
+      "properties": {
+        "lookbackDays": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of days to look back in git history"
+        },
+        "maxCommits": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum number of commits to analyze"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["totalCommits", "concerns", "filesImpacted", "entropy"],
+      "properties": {
+        "totalCommits": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total commits analyzed"
+        },
+        "concerns": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of distinct concerns identified"
+        },
+        "filesImpacted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total files touched by analyzed commits"
+        },
+        "entropy": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Shannon entropy of concern distribution"
+        },
+        "lanes": {
+          "type": "object",
+          "description": "Candidate distribution across triage lanes",
+          "required": ["A", "B", "C", "D"],
+          "properties": {
+            "A": {
+              "type": "object",
+              "required": ["count", "description"],
+              "properties": {
+                "count": { "type": "integer", "minimum": 0 },
+                "description": { "type": "string" }
+              }
+            },
+            "B": {
+              "type": "object",
+              "required": ["count", "description"],
+              "properties": {
+                "count": { "type": "integer", "minimum": 0 },
+                "description": { "type": "string" }
+              }
+            },
+            "C": {
+              "type": "object",
+              "required": ["count", "description"],
+              "properties": {
+                "count": { "type": "integer", "minimum": 0 },
+                "description": { "type": "string" }
+              }
+            },
+            "D": {
+              "type": "object",
+              "required": ["count", "description"],
+              "properties": {
+                "count": { "type": "integer", "minimum": 0 },
+                "description": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "concerns": {
+      "type": "object",
+      "description": "Concern clusters with commit lists",
+      "patternProperties": {
+        "^[a-z-]+$": {
+          "type": "object",
+          "required": ["count", "patchSize", "commits"],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of commits in this concern"
+            },
+            "patchSize": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total LOC across all commits"
+            },
+            "commits": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "List of short commit hashes"
+            }
+          }
+        }
+      }
+    },
+    "topFiles": {
+      "type": "array",
+      "description": "Most frequently touched files",
+      "items": {
+        "type": "object",
+        "required": ["file", "touchCount", "concerns"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "File path"
+          },
+          "touchCount": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of times file was touched"
+          },
+          "concerns": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Concerns affecting this file"
+          }
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "description": "Resurrection candidates ranked by score",
+      "items": {
+        "type": "object",
+        "required": ["hash", "shortHash", "subject", "score", "lane"],
+        "properties": {
+          "hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$",
+            "description": "Full commit SHA"
+          },
+          "shortHash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{7}$",
+            "description": "Short commit hash"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Commit message subject line"
+          },
+          "author": {
+            "type": "string",
+            "description": "Commit author"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Commit timestamp in ISO 8601 format"
+          },
+          "concern": {
+            "type": "string",
+            "description": "Detected concern category"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 200,
+            "description": "Resurrection candidate score (0-200)"
+          },
+          "lane": {
+            "enum": ["A", "B", "C", "D"],
+            "description": "Triage lane assignment"
+          },
+          "duplicate": {
+            "type": "boolean",
+            "description": "Whether candidate is detected as duplicate"
+          },
+          "duplicateOf": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{7}$",
+            "description": "Short hash of original commit if duplicate"
+          },
+          "fileCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of files changed"
+          },
+          "patchSize": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total insertions + deletions"
+          },
+          "insertions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Lines inserted"
+          },
+          "deletions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Lines deleted"
+          },
+          "files": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of files changed"
+          }
+        }
+      }
+    }
+  }
+}
