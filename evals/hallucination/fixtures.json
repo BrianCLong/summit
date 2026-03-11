@@ -1,0 +1,141 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "id": "svc-auth",
+        "type": "service",
+        "name": "AuthService",
+        "description": "Handles authentication",
+        "path": "/auth",
+        "environment": "prod",
+        "authority": ["core-team"],
+        "lifecycle": "active",
+        "tags": ["security"]
+      },
+      {
+        "id": "db-users",
+        "type": "database",
+        "name": "UserDB",
+        "description": "User credentials store",
+        "path": "/db/users",
+        "environment": "prod",
+        "authority": ["data-team"],
+        "lifecycle": "active",
+        "tags": ["storage", "pii"]
+      },
+      {
+        "id": "svc-payment",
+        "type": "service",
+        "name": "PaymentService",
+        "description": "Handles payments",
+        "path": "/payments",
+        "environment": "prod",
+        "authority": ["finance-team"],
+        "lifecycle": "active",
+        "tags": ["finance"]
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-auth-reads-users",
+        "type": "reads_from",
+        "from": "svc-auth",
+        "to": "db-users",
+        "authority": ["core-team"],
+        "provenance_required": true,
+        "data": ["credentials"]
+      },
+      {
+        "id": "edge-payment-depends-auth",
+        "type": "depends_on",
+        "from": "svc-payment",
+        "to": "svc-auth",
+        "authority": ["finance-team"],
+        "provenance_required": false,
+        "data": []
+      }
+    ],
+    "provenance": {
+      "source": "manual",
+      "timestamp": "2023-10-27T10:00:00Z",
+      "actor": "admin",
+      "evidence": ["manual entry"]
+    }
+  },
+  "cases": [
+    {
+      "id": "case-1",
+      "question": "What database does the AuthService read from?",
+      "answer": "AuthService reads from UserDB and accesses user credentials.",
+      "claims": [
+        {
+          "id": "claim-1-1",
+          "text": "AuthService reads from UserDB",
+          "entities": ["svc-auth", "db-users"],
+          "relationship": "reads_from",
+          "is_factual": true
+        },
+        {
+          "id": "claim-1-2",
+          "text": "AuthService accesses credentials",
+          "entities": ["svc-auth", "db-users"],
+          "relationship": "reads_from",
+          "is_factual": true
+        }
+      ]
+    },
+    {
+      "id": "case-2",
+      "question": "What services does PaymentService depend on?",
+      "answer": "PaymentService depends on AuthService and NotificationService.",
+      "claims": [
+        {
+          "id": "claim-2-1",
+          "text": "PaymentService depends on AuthService",
+          "entities": ["svc-payment", "svc-auth"],
+          "relationship": "depends_on",
+          "is_factual": true
+        },
+        {
+          "id": "claim-2-2",
+          "text": "PaymentService depends on NotificationService",
+          "entities": ["svc-payment", "svc-notification"],
+          "relationship": "depends_on",
+          "is_factual": false,
+          "hallucination_type": "entity_fabrication"
+        }
+      ]
+    },
+    {
+      "id": "case-3",
+      "question": "Does PaymentService write to UserDB?",
+      "answer": "Yes, PaymentService writes to UserDB.",
+      "claims": [
+        {
+          "id": "claim-3-1",
+          "text": "PaymentService writes to UserDB",
+          "entities": ["svc-payment", "db-users"],
+          "relationship": "writes_to",
+          "is_factual": false,
+          "hallucination_type": "unsupported_claim"
+        }
+      ]
+    },
+    {
+      "id": "case-4",
+      "question": "Is AuthService deprecated?",
+      "answer": "AuthService is deprecated.",
+      "claims": [
+        {
+          "id": "claim-4-1",
+          "text": "AuthService is deprecated",
+          "entities": ["svc-auth"],
+          "attribute": "lifecycle",
+          "value": "deprecated",
+          "is_factual": false,
+          "hallucination_type": "factual_inconsistency"
+        }
+      ]
+    }
+  ]
+}
