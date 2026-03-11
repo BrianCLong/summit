@@ -3,7 +3,7 @@
 ## 1. Release Target
 - **Source SHA**: `28a5fe9da3199c4925054fee87f737a1ab401340`
 - **Version**: `4.1.15-rc.1`
-- **Candidate Date**: `$(date -u +"%Y-%m-%dT%H:%M:%SZ")`
+- **Candidate Date**: SET AT CUT TIME — see stamp file `artifacts/rc-readiness-stamp.txt`
 - **Status**: READY FOR AUDIT
 
 ## 2. Governance Gates Status
