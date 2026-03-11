@@ -110,11 +110,11 @@ def main() -> int:
         if not isinstance(index["items"], (list, dict)):
             print("FAIL index.json 'items' must be an array or object")
             return 3
-    elif "evidence" in index:
+    elif "evidence" in index or "mappings" in index:
         # Legacy support
         pass
     else:
-        print("FAIL index.json must contain top-level 'items' array or 'evidence' object")
+        print("FAIL index.json must contain top-level 'items' array or 'evidence' object or 'mappings' or 'mappings'")
         return 3
     # determinism: forbid timestamps outside stamp.json (simple heuristic)
     forbidden = []
