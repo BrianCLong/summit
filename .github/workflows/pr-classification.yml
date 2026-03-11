@@ -32,12 +32,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd services/evolution-ledger
-          pnpm install
-          cd ../..
-          cd services/repoos
-          pnpm install
-          cd ../..
+          npm install --prefix services/evolution-ledger
+          npm install --prefix services/repoos
 
       - name: Classify PR
         id: classify
