@@ -1,0 +1,109 @@
+name: Summit PR Copilot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  architecture-copilot:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analyze pull request architecture impact
+        id: summit_copilot
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- summit-pr-copilot -->';
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const basehead = `${pr.base.sha}...${pr.head.sha}`;
+
+            const comparison = await github.rest.repos.compareCommitsWithBasehead({
+              owner,
+              repo,
+              basehead,
+              per_page: 100,
+            });
+
+            const files = comparison.data.files ?? [];
+            const fileNames = files.map((file) => file.filename);
+            const topLevel = fileNames
+              .map((file) => file.split('/')[0])
+              .filter(Boolean);
+            const subsystemCount = new Set(topLevel).size;
+
+            const sharedTouchCount = fileNames.filter((file) => {
+              return (
+                file.startsWith('packages/') ||
+                file.startsWith('server/src/shared/') ||
+                file.startsWith('apps/web/src/shared/') ||
+                file.startsWith('docs/governance/')
+              );
+            }).length;
+
+            const insertionCount = files.reduce((sum, file) => sum + (file.additions ?? 0), 0);
+            const deletionCount = files.reduce((sum, file) => sum + (file.deletions ?? 0), 0);
+            const delta = insertionCount + deletionCount;
+
+            const fanInIncrease = Math.min(99, Math.round((sharedTouchCount * 8) + (subsystemCount * 3)));
+            const ciInstabilityProbability = Math.min(95, Math.round((delta / 40) + (subsystemCount * 9) + (sharedTouchCount * 6)));
+
+            const driftTrend = fanInIncrease >= 30 ? 'increasing' : 'stable';
+            const recommendation = driftTrend === 'increasing'
+              ? 'Isolate boundary changes behind a shared contract before merge.'
+              : 'Proceed, and preserve current dependency boundaries.';
+
+            const body = [
+              marker,
+              '⚠️ **Summit Architecture Copilot**',
+              '',
+              `- Subsystems affected: **${subsystemCount}**`,
+              `- Dependency fan-in increase (proxy): **+${fanInIncrease}%**`,
+              `- Architecture drift: **${driftTrend}**`,
+              `- CI instability probability (heuristic): **${ciInstabilityProbability}%**`,
+              '',
+              '**Recommendation**',
+              recommendation,
+              '',
+              `_Inputs: ${files.length} changed files, ${insertionCount} additions, ${deletionCount} deletions._`,
+            ].join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
+
+            const existing = comments.find((comment) => comment.body && comment.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body,
+              });
+            }
+
+            core.summary
+              .addHeading('Summit PR Copilot')
+              .addTable([
+                [{data: 'Metric', header: true}, {data: 'Value', header: true}],
+                ['Subsystems affected', String(subsystemCount)],
+                ['Dependency fan-in increase', `+${fanInIncrease}%`],
+                ['CI instability probability', `${ciInstabilityProbability}%`],
+              ])
+              .write();
