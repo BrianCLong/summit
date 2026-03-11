@@ -12,7 +12,7 @@ def load_index():
         data = json.loads(INDEX.read_text(encoding="utf-8"))
         items = []
         # Support both 'items' and 'evidence' top-level keys
-        container = data.get("items") or data.get("evidence")
+        container = data.get("items") or data.get("evidence") or data.get("mappings")
         if container is None:
             print("index.json must contain 'items' or 'evidence' field")
             sys.exit(1)

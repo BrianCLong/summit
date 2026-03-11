@@ -21,7 +21,7 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items = idx.get("items", {})
+    items = idx.get("items") or idx.get("evidence") or idx.get("mappings", {})
     if not isinstance(items, dict) or not items:
         fail("evidence/index.json must contain non-empty 'items' map")
 
