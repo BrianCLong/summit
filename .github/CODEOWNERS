@@ -95,3 +95,6 @@
 
 # Platform interface (spine) - requires 2 approvals for API stability
 /platform-interface/ @BrianCLong @intelgraph-api
+
+# Mission defaults
+* @intelgraph-core

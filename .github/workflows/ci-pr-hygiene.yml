@@ -1,0 +1,154 @@
+name: PR Hygiene
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    name: Auto Label PRs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Apply PR Labels
+        uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594 # v4.3.0
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          sync-labels: false
+
+  size-enforcement:
+    name: PR Size Enforcement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Size
+        uses: actions/github-script@00f12e3e20659f42342b1c0226afda7f7c042325 # v6.4.0
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+
+            const additions = pr.additions || 0;
+            const deletions = pr.deletions || 0;
+            const totalChanges = additions + deletions;
+
+            console.log(`Total changes: ${totalChanges}`);
+
+            // Allow override via label
+            const hasOverride = pr.labels.some(l => l.name === 'override-size');
+            if (hasOverride) {
+              console.log('Size override label detected. Skipping size enforcement.');
+              return;
+            }
+
+            // Block XXL PRs
+            if (totalChanges > 1000) {
+              core.setFailed(`PR is too large (${totalChanges} lines). XXL PRs (>1000 lines) are blocked. Please break it down or use the 'override-size' label.`);
+            }
+            // Warn on XL PRs
+            else if (totalChanges > 500) {
+              core.warning(`PR is large (${totalChanges} lines). XL PRs (>500 lines) are discouraged. Consider breaking it down.`);
+            }
+
+  auto-assign-reviewers:
+    name: Auto Request Reviewers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Request Reviewers from CODEOWNERS
+        uses: actions/github-script@00f12e3e20659f42342b1c0226afda7f7c042325 # v6.4.0
+        with:
+          script: |
+            // A clean and functional CODEOWNERS parser using picomatch (which is built into actions/github-script environment) or a simple fallback
+            // We can also just use the built-in minimatch from actions/github-script if needed.
+            // Actually, GitHub automatically assigns reviewers from CODEOWNERS natively when the repository setting is enabled.
+            // Since the mission specifically asks to "Auto-request reviewers based on CODEOWNERS" via a workflow,
+            // we will implement a clean parser here.
+
+            const fs = require('fs');
+            if (!fs.existsSync('.github/CODEOWNERS')) return;
+
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+
+            // Fetch changed files
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+            const changedFiles = files.map(f => f.filename);
+
+            const codeownersContent = fs.readFileSync('.github/CODEOWNERS', 'utf8');
+            const lines = codeownersContent.split('\n');
+            const reviewersToAdd = new Set();
+
+            // Helper function to match simple globs (since we don't have full minimatch imported directly)
+            function matchPattern(file, pattern) {
+              if (pattern === '*') return true;
+
+              // Remove leading slash if present
+              if (pattern.startsWith('/')) {
+                pattern = pattern.substring(1);
+                // Exact path match or directory match
+                if (file === pattern || file.startsWith(pattern + '/')) return true;
+                if (pattern.endsWith('/') && file.startsWith(pattern)) return true;
+              } else {
+                // Anywhere match
+                if (pattern.endsWith('/')) {
+                   if (file.includes('/' + pattern) || file.startsWith(pattern)) return true;
+                } else if (pattern.startsWith('*.')) {
+                   const ext = pattern.substring(1);
+                   if (file.endsWith(ext)) return true;
+                } else {
+                   if (file.includes(pattern)) return true;
+                }
+              }
+              return false;
+            }
+
+            for (const file of changedFiles) {
+              for (let i = lines.length - 1; i >= 0; i--) {
+                const line = lines[i].trim();
+                if (!line || line.startsWith('#')) continue;
+
+                const parts = line.split(/\s+/);
+                const pattern = parts[0];
+                const owners = parts.slice(1);
+
+                if (matchPattern(file, pattern)) {
+                  owners.forEach(o => {
+                    const cleanOwner = o.replace('@', '');
+                    if (cleanOwner !== author) {
+                      reviewersToAdd.add(cleanOwner);
+                    }
+                  });
+                  break; // Last match wins
+                }
+              }
+            }
+
+            const reviewers = Array.from(reviewersToAdd);
+            console.log(`Assigning reviewers: ${reviewers.join(', ')}`);
+
+            if (reviewers.length > 0) {
+              const userReviewers = reviewers.filter(r => !r.includes('/'));
+              const teamReviewers = reviewers.filter(r => r.includes('/')).map(r => r.split('/')[1]);
+
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  reviewers: userReviewers,
+                  team_reviewers: teamReviewers
+                });
+              } catch (error) {
+                console.log('Error assigning reviewers:', error.message);
+              }
+            }
