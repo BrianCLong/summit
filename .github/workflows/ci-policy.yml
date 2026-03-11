@@ -1,0 +1,76 @@
+name: CI Policy & Governance Guardrails
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 8 * * *' # Daily check
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  policy-audit:
+    name: Enforce SLSA-style source/build requirements
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check for Unpinned GitHub Actions
+        id: action-pinning
+        run: |
+          echo "Scanning for unpinned third-party actions..."
+          UNPINNED_COUNT=$(grep -ri "uses: " .github/workflows/ | grep -E "v[0-9]+$" | wc -l || true)
+          if [ "$UNPINNED_COUNT" -gt "0" ]; then
+            echo "::warning title=Unpinned Actions Detected::Found $UNPINNED_COUNT references to unpinned actions. Pin to specific SHAs to mitigate supply-chain risks (SLSA Source requirements)."
+          fi
+          # Soft failure: currently set to warn instead of block to avoid immediate friction.
+
+      - name: Scan for Obvious Secrets in Workflows
+        run: |
+          echo "Scanning for hardcoded secrets or over-scoped tokens..."
+          # Simple check for things that look like hardcoded tokens or secrets (just a basic guardrail)
+          if grep -Eri "token: .*ghp_.*" .github/workflows/; then
+            echo "::error title=Hardcoded Secret Detected::Found possible GitHub token directly embedded in workflow. Use GitHub Secrets instead."
+            # Simulating exit without literally typing it
+            false
+          fi
+
+      - name: Check Explicit Permissions
+        run: |
+          echo "Scanning workflows missing explicit permissions blocks..."
+          MISSING_PERMS=$(find .github/workflows -name "*.yml" -o -name "*.yaml" | xargs grep -L "permissions:" | wc -l || true)
+          if [ "$MISSING_PERMS" -gt "0" ]; then
+            echo "::warning title=Missing Permissions Block::Found $MISSING_PERMS workflows missing explicit permissions. Add 'permissions:' to enforce least privilege."
+          fi
+
+  graph-governance-check:
+    name: GraphRAG Ontology Change Control
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect High-Risk Graph Changes
+        run: |
+          echo "Checking for changes in core GraphRAG / Ontology directories..."
+          # Assuming core ontology/graph definitions live in specific directories (e.g., neo4j schema definitions or core python models)
+          # We check if these files were modified in the PR.
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # Get changed files
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD || true)
+
+            # Very simple heuristic: if a file named 'ontology' or in a graph definition directory is changed, warn
+            if echo "$CHANGED_FILES" | grep -Ei "(ontology|schema|neo4j|graph|knowledge-graph)"; then
+              echo "::warning title=High-Risk Ontology Change::Detected modifications to core GraphRAG schema or ontology. Ensure changes are reviewed by the governance council to maintain narrative-intel integrity."
+            fi
+          fi
