@@ -9,7 +9,8 @@
     "intelgraph": "./dist/cli.js",
     "ig": "./dist/cli.js",
     "summit": "./dist/summit.js",
-    "igraph-run": "./dist/bin/run.js"
+    "igraph-run": "./dist/bin/run.js",
+    "summit-intel": "./dist/summit.js"
   },
   "scripts": {
     "build": "tsc && chmod +x dist/cli.js dist/summit.js dist/bin/run.js",
