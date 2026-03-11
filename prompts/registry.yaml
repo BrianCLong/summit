@@ -947,3 +947,8 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+
+  jules_workspace_orchestrator:
+    file: prompts/jules_workspace_orchestrator.txt
+    hash: c2a2955b77553c296918d54bb759f67fe6fc3cfc497385254ab716079060376b
+    description: Master prompt for Google Jules to operate as the workspace orchestrator for the Summit repository. Includes lane scheduling, file-surface routing, conflict avoidance, and a pre-authored starter set.
