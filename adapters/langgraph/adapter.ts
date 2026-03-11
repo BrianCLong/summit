@@ -1,4 +1,5 @@
 import { SummitAgentAdapter, Trace, Metrics } from '../../sdk/agent-adapter';
+import { formatEvents, convertMetrics } from '../utils/conversion';
 
 export class LangGraphAdapter implements SummitAgentAdapter {
   private events: any[] = [];
@@ -18,11 +19,11 @@ export class LangGraphAdapter implements SummitAgentAdapter {
     return {
       id: `lg-${Date.now()}`,
       timestamp: Date.now(),
-      events: [...this.events]
+      events: formatEvents([...this.events])
     };
   }
 
   async emitMetrics(): Promise<Metrics> {
-    return { ...this.metrics };
+    return convertMetrics({ ...this.metrics });
   }
 }

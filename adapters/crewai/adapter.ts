@@ -1,7 +1,7 @@
 import { SummitAgentAdapter, Trace, Metrics } from '../../sdk/agent-adapter';
 import { formatEvents, convertMetrics } from '../utils/conversion';
 
-export class AutoGenAdapter implements SummitAgentAdapter {
+export class CrewAIAdapter implements SummitAgentAdapter {
   private events: any[] = [];
   private metrics: Metrics = {
     invocations: 0,
@@ -16,7 +16,7 @@ export class AutoGenAdapter implements SummitAgentAdapter {
 
   async emitTrace(): Promise<Trace> {
     return {
-      id: `ag-${Date.now()}`,
+      id: `ca-${Date.now()}`,
       timestamp: Date.now(),
       events: formatEvents([...this.events])
     };
