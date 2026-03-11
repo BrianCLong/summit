@@ -23,9 +23,11 @@ Every request to the Agent API must be wrapped in the following envelope:
 ## Endpoints
 
 ### `POST /agent/run`
+
 Runs a workflow on a single input object (e.g., an alert JSON).
 
 **Payload (nested in envelope):**
+
 ```json
 {
   "type": "alert_triage",
@@ -38,9 +40,11 @@ Runs a workflow on a single input object (e.g., an alert JSON).
 ```
 
 ### `POST /agent/run-playbook`
+
 Runs a named playbook (e.g., `phishing_triage_v2`) with parameters.
 
 **Payload (nested in envelope):**
+
 ```json
 {
   "playbook": "phishing_triage_v2",
@@ -52,9 +56,11 @@ Runs a named playbook (e.g., `phishing_triage_v2`) with parameters.
 ```
 
 ### `GET /runs/{run_id}`
+
 Fetch status, outputs, and audit trail.
 
 **Response:**
+
 ```json
 {
   "run_id": "run_001",
