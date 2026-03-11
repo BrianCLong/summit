@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f package.json ]; then
-            npm install js-yaml
+            npm install -g js-yaml
           fi
 
       - name: Run Patch Market Scoring
@@ -124,7 +124,7 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f package.json ]; then
-            npm install js-yaml
+            npm install -g js-yaml
           fi
 
       - name: Run Stability Monitoring
@@ -180,7 +180,7 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f package.json ]; then
-            npm install js-yaml
+            npm install -g js-yaml
           fi
 
       - name: Run Evolution Simulation

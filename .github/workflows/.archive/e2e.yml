@@ -42,7 +42,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
 
       - name: Generate persisted queries (required for test)
         run: pnpm run generate:persisted
@@ -157,7 +157,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
       - name: Run E2E tests (layout=${{ matrix.layout }}, sprite=${{ matrix.sprite }})
         env:
           LAYOUT: ${{ matrix.layout }}
@@ -197,7 +197,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
       - name: Run analytics bridge E2E (with trace)
         env:
           E2E_WS_URL: http://localhost:4000

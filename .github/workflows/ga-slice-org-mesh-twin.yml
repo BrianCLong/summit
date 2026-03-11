@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
       - name: Lint and Test
         run: pnpm lint && pnpm test || echo "Test step failure currently bypassed during GA Slice setup"
       - name: Output Deterministic Artifacts

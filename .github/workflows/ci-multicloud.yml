@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Dependencies
-        run: pnpm install
+        run: npm install -g pnpm && pnpm install
 
       - name: Check Provider Failover, Chaos Injection, and Retry Success
         run: NODE_OPTIONS='--experimental-vm-modules' npx jest tests/multicloud/test_failover.ts

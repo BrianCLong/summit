@@ -55,7 +55,7 @@ jobs:
             ${{ runner.os }}-pnpm-${{ env.CACHE_VERSION }}-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
 
       - name: Cache build artifacts
         uses: actions/cache@v4
@@ -91,7 +91,7 @@ jobs:
           key: ${{ needs.setup.outputs.cache-key }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: npm install -g pnpm && pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run ESLint
         run: pnpm lint
@@ -129,7 +129,7 @@ jobs:
           key: ${{ needs.setup.outputs.cache-key }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: npm install -g pnpm && pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run TypeScript compiler
         run: pnpm typecheck
@@ -157,7 +157,7 @@ jobs:
           key: ${{ needs.setup.outputs.cache-key }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: npm install -g pnpm && pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run unit tests
         run: pnpm test:jest --coverage --maxWorkers=2
@@ -224,7 +224,7 @@ jobs:
           key: ${{ needs.setup.outputs.cache-key }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: npm install -g pnpm && pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run integration tests
         run: pnpm test:integration
@@ -261,7 +261,7 @@ jobs:
           key: ${{ needs.setup.outputs.cache-key }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: npm install -g pnpm && pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run E2E tests
         run: pnpm e2e
@@ -306,7 +306,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.CACHE_VERSION }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/tsconfig.json') }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: npm install -g pnpm && pnpm install --frozen-lockfile --prefer-offline
 
       - name: Build all packages
         run: pnpm build
