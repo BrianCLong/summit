@@ -33,7 +33,7 @@
   "peerDependenciesMeta": {
     "@octokit/rest": {
       "optional": true
-    }
+  }
   },
   "keywords": [
     "policy",

@@ -33,7 +33,7 @@
   "peerDependenciesMeta": {
     "@google-cloud/speech": {
       "optional": true
-    },
+  },
     "@aws-sdk/client-transcribe": {
       "optional": true
     },

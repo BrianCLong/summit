@@ -37,6 +37,6 @@
   "peerDependenciesMeta": {
     "react": {
       "optional": true
-    }
+  }
   }
 }
