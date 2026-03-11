@@ -46,7 +46,7 @@ export function Layout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="border-b border-border bg-background">
           <div className="flex h-14 items-center px-6">
             <div className="flex-1">
               <h1 className="text-lg font-semibold">IntelGraph Platform</h1>

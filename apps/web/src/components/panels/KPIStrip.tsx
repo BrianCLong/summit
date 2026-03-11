@@ -130,7 +130,7 @@ export function KPIStrip({
           <Card
             key={metric.id}
             className={cn(
-              'cursor-pointer transition-all hover:shadow-md border-l-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              'cursor-pointer transition-all hover:bg-accent/50 border-l-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
               getStatusColor(metric.status)
             )}
             onClick={() => onSelect?.(metric)}
@@ -150,13 +150,13 @@ export function KPIStrip({
                   <p className="text-sm font-medium text-muted-foreground">
                     {metric.title}
                   </p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-bold mono-data tracking-tight">
                     {formatValue(metric.value, metric.format)}
                   </p>
                 </div>
                 <div
                   className={cn(
-                    'h-8 w-8 rounded-lg flex items-center justify-center',
+                    'h-8 w-8 flex items-center justify-center border',
                     metric.status === 'success' &&
                       'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400',
                     metric.status === 'warning' &&
