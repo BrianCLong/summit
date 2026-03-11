@@ -1,20 +1,27 @@
-# Chronicle Connector
+# Connectors
 
-This connector demonstrates basic ingestion of security log data from Google Chronicle.
+This directory documents connector lanes used by Summit's Switchboard ingestion wedge.
 
-## How to use
+## Demo-ready Connectors
 
-1.  This connector expects log data in a JSON format, representing Chronicle UDM (Unified Data Model) events.
-2.  The `schema_mapping.py` script provides a simplified example of how Chronicle UDM events can be mapped to IntelGraph entities (e.g., `Event`, `IPAddress`, `Device`, `Person`, `Domain`, `File`).
+- **MIT Sloan Startup Signals**: `datasets/wow/mit-sloan-startups-2026.jsonl`
+- **Threat Horizon Intel Summary**: `datasets/wow/intsum-2026-threat-horizon.jsonl`
 
-## Sample Data
+## Typical Flow
 
-See `sample.json` for a basic example of Chronicle UDM events.
+1. Source payload enters connector lane.
+2. Connector maps records to canonical entities/relations.
+3. Debezium emits lineage events.
+4. Semantic chunking enriches graph evidence.
 
-## Schema Mapping
+## Run the Zero-Config Demo
 
-The `schema_mapping.py` file contains the logic for converting Chronicle UDM events into IntelGraph entities. This is a simplified mapping for demonstration purposes and would need to be expanded for full Chronicle integration.
+```bash
+pnpm demo:company
+```
 
-## Testing
+The demo script emits:
 
-Unit tests for this connector can be found in `connectors/__tests__/test_chronicle_connector.py`.
+- HTML report: `artifacts/wow-demo/report.html`
+- Optional PDF report: `artifacts/wow-demo/report.pdf`
+- GraphQL mutation: `artifacts/wow-demo/graphql-run-agent-swarm.graphql`

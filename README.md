@@ -64,6 +64,16 @@ make up         # Start all services via Docker Compose
 
 Refer to [Golden Path Troubleshooting](docs/dev/golden-path-troubleshooting.md) for common issues (like Docker rate limits).
 
+### ⚡ 60-Second Wow Demo
+
+Run the zero-config company workflow (MIT Sloan 2026 dataset + GraphRAG + Maestro swarm):
+
+```bash
+pnpm demo:company
+```
+
+Artifacts are generated in `artifacts/wow-demo/` (HTML report, optional PDF, GraphQL mutation).
+
 ### First Query
 
 ```bash

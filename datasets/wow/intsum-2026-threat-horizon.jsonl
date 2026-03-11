@@ -1,0 +1,3 @@
+{"intelId":"INTSUM-2026-THREAT-HORIZON-001","sector":"supply-chain","risk":"Counterfeit component insertion campaigns expanding across critical infrastructure","confidence":0.81,"source":"local://summit/intsum"}
+{"intelId":"INTSUM-2026-THREAT-HORIZON-002","sector":"policy","risk":"Regulatory export-control fragmentation increases compliance latency","confidence":0.77,"source":"local://summit/intsum"}
+{"intelId":"INTSUM-2026-THREAT-HORIZON-003","sector":"capital-markets","risk":"Narrative manipulation attacks distorting startup diligence signals","confidence":0.84,"source":"local://summit/intsum"}
