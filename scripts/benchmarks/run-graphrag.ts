@@ -22,8 +22,14 @@ interface BenchmarkResult {
 
 async function runBenchmark() {
   const casesPath = path.resolve('evaluation/benchmarks/graphrag/cases.json');
-  const metricsPath = path.resolve('scripts/benchmarks/metrics.json');
-  const reportPath = path.resolve('scripts/benchmarks/report.json');
+  const outputDir = path.resolve('artifacts/benchmarks/graphrag');
+  const metricsPath = path.join(outputDir, 'metrics.json');
+  const reportPath = path.join(outputDir, 'report.json');
+  const stampPath = path.join(outputDir, 'stamp.json');
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
 
   if (!fs.existsSync(casesPath)) {
     console.error('Cases file not found');
@@ -59,24 +65,38 @@ async function runBenchmark() {
 
   const overallScore = aggregateScores(scores);
 
-  const metrics = {
-    total_tasks: casesData.tasks.length,
-    overall_precision: overallScore.precision,
-    overall_recall: overallScore.recall,
+  function sortObjectKeys(obj: any): any {
+    if (typeof obj !== 'object' || obj === null) return obj;
+    if (Array.isArray(obj)) return obj.map(sortObjectKeys);
+    const sorted: any = {};
+    Object.keys(obj).sort().forEach(k => {
+      sorted[k] = sortObjectKeys(obj[k]);
+    });
+    return sorted;
+  }
+
+  const metrics = sortObjectKeys({
     overall_coverage: overallScore.coverage,
     overall_f1: overallScore.f1_score,
-    timestamp: new Date().toISOString()
-  };
+    overall_precision: overallScore.precision,
+    overall_recall: overallScore.recall,
+    total_tasks: casesData.tasks.length
+  });
 
-  const report = {
+  const report = sortObjectKeys({
     metrics,
     results
-  };
+  });
 
-  fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2));
-  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  const stamp = sortObjectKeys({
+    timestamp: new Date().toISOString()
+  });
 
-  console.log('Benchmark complete. Results saved to metrics.json and report.json');
+  fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2) + '\n');
+  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
+  fs.writeFileSync(stampPath, JSON.stringify(stamp, null, 2) + '\n');
+
+  console.log('Benchmark complete. Results saved to metrics.json, report.json, and stamp.json in artifacts/');
   console.log('Metrics:', JSON.stringify(metrics, null, 2));
 }
 

@@ -1,0 +1,54 @@
+name: Hourly Repo Monitoring
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install --frozen-lockfile
+
+      - name: Run CI Health Check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec tsx scripts/monitoring/ci_health.ts
+
+      - name: Run Determinism Drift Check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec tsx scripts/monitoring/determinism_drift.ts
+
+      - name: Run Repo Entropy Check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec tsx scripts/monitoring/repo_entropy.ts
+
+      - name: Run Security Drift Check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec tsx scripts/monitoring/security_drift.ts
+
+      - name: Upload Monitoring Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-artifacts
+          path: artifacts/monitoring/*.json
+          retention-days: 7

@@ -1,0 +1,36 @@
+name: Daily Benchmarks
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  graphrag-benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install --frozen-lockfile
+
+      - name: Run GraphRAG Benchmark
+        run: pnpm exec tsx scripts/benchmarks/run-graphrag.ts
+
+      - name: Upload Benchmark Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: graphrag-benchmarks
+          path: artifacts/benchmarks/graphrag/*.json
+          retention-days: 7
