@@ -7,7 +7,7 @@ import { RegionSkewDetector } from '../../../src/lib/deployment/region-skew-dete
 jest.mock('../../../src/monitoring/metrics.js', () => ({
   regionProbeLatencyMs: { set: jest.fn() },
   regionHealthStatus: { set: jest.fn() },
-  deploymentRollbacksTotal: { inc: jest.fn() }
+  rollbackEventsTotal: { inc: jest.fn() }
 }));
 
 describe('MultiRegionProber', () => {

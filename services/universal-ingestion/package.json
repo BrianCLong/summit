@@ -13,7 +13,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@intelgraph/connector-sdk": "workspace:*",
     "@intelgraph/etl-assistant": "workspace:*",
     "@intelgraph/license-registry": "workspace:*",
     "fastify": "^5.6.1",
@@ -22,7 +21,8 @@
     "zod": "^4.1.12",
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.2",
-    "axios": "^1.13.5"
+    "axios": "^1.13.5",
+    "@summit/connector-sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "20.19.27",

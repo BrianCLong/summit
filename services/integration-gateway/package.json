@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@intelgraph/mandates": "workspace:*",
-    "@intelgraph/connector-sdk": "workspace:*",
     "@intelgraph/integration-twin": "workspace:*",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "@summit/connector-sdk": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.3",
