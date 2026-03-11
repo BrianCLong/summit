@@ -947,3 +947,26 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: summit-aggressive-master-redesign
+    version: v1
+    path: prompts/design/summit-aggressive-master-prompt@v1.md
+    sha256: 46c43f4da980435864a42a5cc7fe41ca135813c4665cd5b78b6a1f523f4bc2dc
+    description: Aggressive master prompt for full Summit UI, IA, design system, website, and demo redesign directives.
+    scope:
+      paths:
+        - prompts/design/summit-aggressive-master-prompt@v1.md
+        - prompts/registry.yaml
+        - docs/roadmap/STATUS.json
+      domains:
+        - prompts
+        - design
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
