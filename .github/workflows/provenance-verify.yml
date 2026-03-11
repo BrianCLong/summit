@@ -47,13 +47,9 @@ jobs:
           npx tsx scripts/compliance/generate_provenance.ts
           mv .evidence/provenance.json provenance.json
 
-      - name: Run GSV Attest-Verify
+      - name: Run SLSA Verifier
         run: |
-          DIGEST=$(sha256sum package.json | cut -d' ' -f1)
-          STRICT_PROVENANCE=true npx tsx packages/graph-sync-validator/src/index.ts attest-verify \
-            --provenance provenance.json \
-            --policy .summit/provenance-policy.json \
-            --artifact "sha256:$DIGEST"
+          ./scripts/verify-provenance.sh package.json provenance.json
 
       - name: Record Evidence
         if: always()

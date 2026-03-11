@@ -77,21 +77,15 @@ jobs:
 
   provenance:
     needs: [build]
-    runs-on: ubuntu-22.04
     permissions:
+      actions: read
       id-token: write
-      attestations: write
-      contents: read
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: summit-artifacts
-          path: dist
-      - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-checksums: dist/checksums.txt
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.build.outputs.hashes }}"
+      upload-assets: true
+      compile-generator: true
 
   # Linked: https://linear.app/summi7/issue/SUM-10197
 

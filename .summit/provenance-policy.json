@@ -1,0 +1,1 @@
+{"version":"1.0","trusted_builders":["https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@refs/tags/v2.0.0"],"trusted_subjects":["*"]}
