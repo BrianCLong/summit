@@ -1,0 +1,55 @@
+{
+  "queries": [
+    {
+      "id": "q1",
+      "query": "What are the latest updates to the GraphRAG algorithm?",
+      "type": "in-distribution",
+      "ground_truth_docs": ["doc_A", "doc_B", "doc_C"],
+      "relevance_scores": {
+        "doc_A": 3,
+        "doc_B": 2,
+        "doc_C": 1
+      },
+      "mock_retrieved_docs": ["doc_A", "doc_X", "doc_B", "doc_Y", "doc_C"]
+    },
+    {
+      "id": "q2",
+      "query": "How do I configure the OTel exporter?",
+      "type": "in-distribution",
+      "ground_truth_docs": ["doc_D"],
+      "relevance_scores": {
+        "doc_D": 3
+      },
+      "mock_retrieved_docs": ["doc_X", "doc_Y", "doc_Z", "doc_D", "doc_W"]
+    },
+    {
+      "id": "q3",
+      "query": "What is the capital of France?",
+      "type": "out-of-distribution",
+      "ground_truth_docs": [],
+      "relevance_scores": {},
+      "mock_retrieved_docs": ["doc_A", "doc_B", "doc_C", "doc_D", "doc_E"]
+    },
+    {
+      "id": "q4",
+      "query": "Explain quantum computing in simple terms.",
+      "type": "out-of-distribution",
+      "ground_truth_docs": ["doc_QC1"],
+      "relevance_scores": {
+        "doc_QC1": 2
+      },
+      "mock_retrieved_docs": ["doc_X", "doc_Y", "doc_Z", "doc_W", "doc_V"]
+    },
+    {
+      "id": "q5",
+      "query": "List all active node types in Summit schema.",
+      "type": "in-distribution",
+      "ground_truth_docs": ["doc_S1", "doc_S2"],
+      "relevance_scores": {
+        "doc_S1": 3,
+        "doc_S2": 3
+      },
+      "mock_retrieved_docs": ["doc_S1", "doc_S2", "doc_X", "doc_Y", "doc_Z"]
+    }
+  ]
+}
