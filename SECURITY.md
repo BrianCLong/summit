@@ -9,7 +9,7 @@
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities to **security@summit.ai**.
+Please report security vulnerabilities to **security@summit.ai**. For internal routing and security incident response, please engage the **@intelgraph-security** team.
 
 We will acknowledge receipt within 24 hours and provide a timeline for triage and remediation.
 
