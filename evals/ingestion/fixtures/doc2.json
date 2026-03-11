@@ -1,0 +1,20 @@
+{
+  "id": "doc2",
+  "title": "Security Audit 2024",
+  "author": {
+    "name": "John Smith",
+    "email": "john.smith@example.com"
+  },
+  "content": {
+    "summary": "Annual security audit findings.",
+    "issues": [
+      {"severity": "high", "description": "SQL Injection found in login"},
+      {"severity": "low", "description": "Missing CSP headers"}
+    ]
+  },
+  "secret": "password123",
+  "metadata": {
+    "tags": ["security", "audit"],
+    "status": "draft"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "doc1",
+  "title": "Summit Q3 Report",
+  "author": {
+    "name": "Jane Doe",
+    "email": "jane.doe@example.com"
+  },
+  "content": {
+    "summary": "This is a summary of Q3.",
+    "metrics": [
+      {"name": "revenue", "value": 1000},
+      {"name": "costs", "value": 500}
+    ]
+  },
+  "metadata": {
+    "tags": ["finance", "q3"],
+    "status": "published"
+  }
+}
