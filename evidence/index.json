@@ -1,41 +1,75 @@
 {
-  "version": "1.0",
+  "items": [
+    {
+      "evidence_id": "EVD-TEMPORAL-REASONING-EVAL-001",
+      "files": [
+        "evidence/runs/temporal-reasoning/metrics.json",
+        "evidence/runs/temporal-reasoning/report.json",
+        "evidence/runs/temporal-reasoning/stamp.json"
+      ]
+    }
+  ],
   "mappings": {
     "EVD-nato-cogwar-techfamilies-ai-001": {
-      "report": "EVD-nato-cogwar-techfamilies-ai-001/report.json",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ],
       "metrics": "EVD-nato-cogwar-techfamilies-ai-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-ai-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
-    },
-    "EVD-nato-cogwar-techfamilies-synth-001": {
-      "report": "EVD-nato-cogwar-techfamilies-synth-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-synth-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-synth-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
-    },
-    "EVD-nato-cogwar-techfamilies-iw-001": {
-      "report": "EVD-nato-cogwar-techfamilies-iw-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-iw-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-iw-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
+      "report": "EVD-nato-cogwar-techfamilies-ai-001/report.json",
+      "stamp": "EVD-nato-cogwar-techfamilies-ai-001/stamp.json"
     },
     "EVD-nato-cogwar-techfamilies-gov-001": {
-      "report": "EVD-nato-cogwar-techfamilies-gov-001/report.json",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ],
       "metrics": "EVD-nato-cogwar-techfamilies-gov-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-gov-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
+      "report": "EVD-nato-cogwar-techfamilies-gov-001/report.json",
+      "stamp": "EVD-nato-cogwar-techfamilies-gov-001/stamp.json"
     },
-    "EVD-nato-cogwar-techfamilies-xr-001": {
-      "report": "EVD-nato-cogwar-techfamilies-xr-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-xr-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-xr-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
+    "EVD-nato-cogwar-techfamilies-iw-001": {
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ],
+      "metrics": "EVD-nato-cogwar-techfamilies-iw-001/metrics.json",
+      "report": "EVD-nato-cogwar-techfamilies-iw-001/report.json",
+      "stamp": "EVD-nato-cogwar-techfamilies-iw-001/stamp.json"
     },
     "EVD-nato-cogwar-techfamilies-neuro-001": {
-      "report": "EVD-nato-cogwar-techfamilies-neuro-001/report.json",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ],
       "metrics": "EVD-nato-cogwar-techfamilies-neuro-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-neuro-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
+      "report": "EVD-nato-cogwar-techfamilies-neuro-001/report.json",
+      "stamp": "EVD-nato-cogwar-techfamilies-neuro-001/stamp.json"
+    },
+    "EVD-nato-cogwar-techfamilies-synth-001": {
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ],
+      "metrics": "EVD-nato-cogwar-techfamilies-synth-001/metrics.json",
+      "report": "EVD-nato-cogwar-techfamilies-synth-001/report.json",
+      "stamp": "EVD-nato-cogwar-techfamilies-synth-001/stamp.json"
+    },
+    "EVD-nato-cogwar-techfamilies-xr-001": {
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ],
+      "metrics": "EVD-nato-cogwar-techfamilies-xr-001/metrics.json",
+      "report": "EVD-nato-cogwar-techfamilies-xr-001/report.json",
+      "stamp": "EVD-nato-cogwar-techfamilies-xr-001/stamp.json"
     }
-  }
+  },
+  "version": "1.0"
 }
