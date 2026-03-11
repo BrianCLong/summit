@@ -16,7 +16,7 @@ data:
           "targets": [
             {
               "expr": "rate(http_requests_total{job=\"{{ include \"xai-anomaly.fullname\" . }}\"}[1m])",
-              "legendFormat": "{{status}}"
+              "legendFormat": "{{ "{{status}}" }}"
             }
           ]
         }

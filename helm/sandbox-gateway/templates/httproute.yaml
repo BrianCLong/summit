@@ -1,4 +1,4 @@
-{{- if and .Values.gatewayApi.enabled (not .Values.ingress.enabled) }}
+{{- if and .Values.gatewayApi .Values.gatewayApi.enabled (not .Values.ingress.enabled) }}
 ---
 # HTTPRoute for sandbox-gateway (Gateway API)
 # This replaces the Ingress resource when Gateway API is enabled

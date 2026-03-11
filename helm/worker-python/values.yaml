@@ -7,13 +7,13 @@ replicas: 1
 
 env:
   - name: KAFKA_BROKERS
-    valueFrom: { secretKeyRef: { name: kafka-bootstrap, key: brokers } }
+    valueFrom: { secretKeyRef: { name: kafka-bootstrap, key: brokers }}
   - name: REDIS_URL
-    valueFrom: { secretKeyRef: { name: redis, key: url } }
+    valueFrom: { secretKeyRef: { name: redis, key: url }}
   - name: S3_BUCKET
     value: intelgraph-cache
   - name: VAULT_ADDR
-    valueFrom: { secretKeyRef: { name: vault, key: addr } }
+    valueFrom: { secretKeyRef: { name: vault, key: addr }}
   - name: VAULT_K8S_ROLE
     value: 'worker'
   - name: REGION
