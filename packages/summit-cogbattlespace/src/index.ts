@@ -8,6 +8,7 @@ export * from './pipeline/estimateBeliefs';
 export * from './pipeline/extractNarratives';
 export * from './pipeline/ingestArtifact';
 export * from './pipeline/linkToReality';
+export * from './strategy/resilienceDeltaSimulator';
 export * from './storage';
 export * from './types';
 export * from './writeset/firewall';

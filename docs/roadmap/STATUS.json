@@ -270,6 +270,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
+    },
+    {
+      "id": "cogwar-resilience-delta-simulator",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Implemented deterministic defensive planning engine in packages/summit-cogbattlespace: Resilience Delta Simulator with governance-constrained portfolio search, stable plan IDs, and node:test coverage."
     }
   ],
   "summary": {
