@@ -13,7 +13,7 @@ def run():
             threshold = policy.get("threshold_default", 0.65)
 
     risk_score = 1.0
-    mitigation_block = None
+    mitigation_block = "BLOCKED"
 
     report = {
         "military_use_risk_score": risk_score,
