@@ -17,8 +17,14 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["ES2022", "DOM"],
-    "types": ["node", "jest"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "isolatedModules": true
@@ -26,17 +32,15 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
-    "tests/**",
-    "src/tests/**",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/__tests__/**",
-    "../packages/**/*",
-    "../libs/**/*",
+    "tests*.test.ts",
+    "**__tests__*",
+    "../libs*",
     "health/**",
     "src/ai/models/cv_integration.ts",
     "src/feature-flags/**",
@@ -157,7 +161,6 @@
     "src/predictive/**",
     "src/middleware/feature-flag-context.ts",
     "src/workers/cacheWarmupWorker.ts",
-    "src/dr/**",
-    "src/bootstrap/**"
+    "src/dr/**"
   ]
 }

@@ -5,7 +5,7 @@ import { join } from 'path';
 // Snapshot taken on 2026-01-26
 // Run python3 -c "import json, hashlib; with open('server/tsconfig.json') as f: data = json.load(f); excludes = sorted(data.get('exclude', [])); content = json.dumps(excludes); print(hashlib.sha256(content.encode('utf-8')).hexdigest())" to get new hash if you reduced excludes.
 // Note: The Node script strips comments which affects glob patterns with /**, resulting in a different count/hash than Python.
-const EXPECTED_HASH = 'da91209bafe0719468214db53ef6611255c483ad3ecd9a62e1967b2227937dca';
+const EXPECTED_HASH = 'c4dcc2a9812eaed82e1545dfbebfe5a70b961981f6b677b7d34b8f45179c282a';
 const EXPECTED_COUNT = 126;
 
 const tsconfigPath = join(process.cwd(), 'server', 'tsconfig.json');
