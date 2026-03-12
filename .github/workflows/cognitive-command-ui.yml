@@ -1,0 +1,109 @@
+name: Cognitive Command Center UI
+
+on:
+  pull_request:
+    paths:
+      - 'ui/cognitive-command/**'
+      - 'ui/design-system/cognitive-command/**'
+  push:
+    branches: [main]
+    paths:
+      - 'ui/cognitive-command/**'
+      - 'ui/design-system/cognitive-command/**'
+
+concurrency:
+  group: cognitive-command-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: Type Safety
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tsc --noEmit --project ui/cognitive-command/tsconfig.json
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm eslint ui/cognitive-command/ ui/design-system/cognitive-command/
+
+  schema-validation:
+    name: Schema Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm vitest run ui/cognitive-command/__tests__/schema-validation.test.ts
+
+  unit-tests:
+    name: Unit & Component Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [typecheck, lint]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm vitest run ui/cognitive-command/__tests__/ --coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cognitive-command-coverage
+          path: coverage/
+
+  a11y-checks:
+    name: Accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm vitest run ui/cognitive-command/__tests__/keyboard-navigation.test.tsx
+
+  adapter-contracts:
+    name: Adapter Contract Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm vitest run ui/cognitive-command/__tests__/adapters.test.ts

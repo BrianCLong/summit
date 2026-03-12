@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "summit://schemas/intervention-option",
+  "title": "InterventionOption",
+  "type": "object",
+  "required": ["id", "title", "objective", "target", "mechanism", "confidence", "status", "createdBy", "createdAt"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "title": { "type": "string" },
+    "objective": { "type": "string" },
+    "target": { "type": "string" },
+    "mechanism": { "type": "string" },
+    "constraints": { "type": "array", "items": { "type": "string" } },
+    "forecastEffect": { "type": "array", "items": { "type": "object" } },
+    "downsideRisk": { "type": "array", "items": { "type": "string" } },
+    "confidence": { "type": "string", "enum": ["very_low", "low", "medium", "high", "very_high"] },
+    "evidenceBasis": { "type": "array", "items": { "type": "string" } },
+    "costEstimate": { "$ref": "#/definitions/CostEstimate" },
+    "relevantSimulationIds": { "type": "array", "items": { "type": "string" } },
+    "linkedNarrativeIds": { "type": "array", "items": { "type": "string" } },
+    "linkedEntityIds": { "type": "array", "items": { "type": "string" } },
+    "linkedMissionIds": { "type": "array", "items": { "type": "string" } },
+    "status": { "type": "string", "enum": ["draft", "proposed", "approved", "executing", "completed", "rejected", "withdrawn"] },
+    "createdBy": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "definitions": {
+    "CostEstimate": {
+      "type": "object",
+      "required": ["financial", "personnel", "timeWeeks", "politicalCapital"],
+      "properties": {
+        "financial": { "type": "number" },
+        "personnel": { "type": "number" },
+        "timeWeeks": { "type": "number" },
+        "politicalCapital": { "type": "string", "enum": ["none", "low", "medium", "high", "extreme"] },
+        "opportunityCost": { "type": "string" }
+      }
+    }
+  }
+}

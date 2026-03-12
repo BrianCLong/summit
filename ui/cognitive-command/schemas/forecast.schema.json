@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "summit://schemas/forecast",
+  "title": "Forecast",
+  "type": "object",
+  "required": ["id", "title", "description", "status", "probability", "confidence", "timeHorizon", "createdAt", "createdBy", "source"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "title": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "status": { "type": "string", "enum": ["draft", "active", "expired", "invalidated", "confirmed"] },
+    "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+    "confidence": { "type": "string", "enum": ["very_low", "low", "medium", "high", "very_high"] },
+    "timeHorizon": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "createdBy": { "type": "string" },
+    "indicators": { "type": "array", "items": { "$ref": "#/definitions/LeadingIndicator" } },
+    "branches": { "type": "array", "items": { "$ref": "#/definitions/ForecastBranch" } },
+    "evidenceBasis": { "type": "array", "items": { "type": "string" } },
+    "linkedMissionIds": { "type": "array", "items": { "type": "string" } },
+    "linkedEntityIds": { "type": "array", "items": { "type": "string" } },
+    "source": { "type": "string", "enum": ["cwmi", "vtii", "evolution", "threat_intel", "agent", "analyst"] },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  },
+  "definitions": {
+    "LeadingIndicator": {
+      "type": "object",
+      "required": ["id", "name", "currentValue", "threshold", "direction", "significance"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "currentValue": { "type": "number" },
+        "threshold": { "type": "number" },
+        "direction": { "type": "string", "enum": ["rising", "falling", "stable", "volatile"] },
+        "significance": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ForecastBranch": {
+      "type": "object",
+      "required": ["id", "forecastId", "label", "probability", "confidence", "isBaseline"],
+      "properties": {
+        "id": { "type": "string" },
+        "forecastId": { "type": "string" },
+        "label": { "type": "string" },
+        "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "confidence": { "type": "string", "enum": ["very_low", "low", "medium", "high", "very_high"] },
+        "description": { "type": "string" },
+        "assumptions": { "type": "array", "items": { "type": "string" } },
+        "outcomes": { "type": "array", "items": { "$ref": "#/definitions/BranchOutcome" } },
+        "interventionIds": { "type": "array", "items": { "type": "string" } },
+        "isBaseline": { "type": "boolean" }
+      }
+    },
+    "BranchOutcome": {
+      "type": "object",
+      "required": ["metric", "baselineValue", "projectedValue", "unit", "timeframe"],
+      "properties": {
+        "metric": { "type": "string" },
+        "baselineValue": { "type": "number" },
+        "projectedValue": { "type": "number" },
+        "unit": { "type": "string" },
+        "timeframe": { "type": "string" }
+      }
+    }
+  }
+}

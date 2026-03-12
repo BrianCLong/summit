@@ -34,6 +34,7 @@ This document tracks the classification of all application routes for GA readine
 | `/admin/feature-flags` | `FeatureFlagsPage` | Admin | Configuration |
 | `/help` | `HelpPage` | GA | Support |
 | `/changelog` | `ChangelogPage` | GA | Support |
+| `/cognitive-command/*` | `CognitiveCommandApp` | Operator | Cognitive Command Center |
 | `/demo` | `DemoControlPage` | Demo | Gated by `demoModeEnabled` |
 | `/onboarding` | `OnboardingWizard` | Inactive | Commented out |
 
