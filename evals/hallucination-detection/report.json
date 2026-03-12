@@ -1,0 +1,95 @@
+{
+    "summary": {
+        "total_cases": 5,
+        "hallucination_rate": 0.8,
+        "average_faithfulness": 0.2
+    },
+    "details": [
+        {
+            "question": "When was Peak-1 released and what are its features?",
+            "answer": "Summit released Peak-1 on October 12, 2023. This AI model has 175 billion parameters and was trained on scientific papers and code.",
+            "label": "faithful",
+            "hallucination_types": [],
+            "is_hallucinated": false,
+            "faithfulness_score": 1.0,
+            "issues": []
+        },
+        {
+            "question": "Where is Summit located and who are its leaders?",
+            "answer": "Summit, headquartered in San Francisco and led by CEO Jane Doe, recently opened an office in Berlin, managed by Hans Schmidt.",
+            "label": "hallucinated",
+            "hallucination_types": [
+                "invented_entity"
+            ],
+            "is_hallucinated": true,
+            "faithfulness_score": 0.0,
+            "issues": [
+                {
+                    "type": "invented_entity",
+                    "value": "Berlin"
+                },
+                {
+                    "type": "invented_entity",
+                    "value": "Hans Schmidt"
+                }
+            ]
+        },
+        {
+            "question": "What was the project's timeline and cost?",
+            "answer": "Initiated in February 2021, the project's total budget was $15 million.",
+            "label": "hallucinated",
+            "hallucination_types": [
+                "wrong_date",
+                "wrong_number"
+            ],
+            "is_hallucinated": true,
+            "faithfulness_score": 0.0,
+            "issues": [
+                {
+                    "type": "invented_number",
+                    "value": "$15 million"
+                },
+                {
+                    "type": "invented_number",
+                    "value": "15 million"
+                },
+                {
+                    "type": "invented_entity",
+                    "value": "February"
+                }
+            ]
+        },
+        {
+            "question": "Why did revenue increase?",
+            "answer": "The 20% increase in revenue was caused by the reduction in marketing spend.",
+            "label": "hallucinated",
+            "hallucination_types": [
+                "incorrect_causality"
+            ],
+            "is_hallucinated": true,
+            "faithfulness_score": 0.0,
+            "issues": [
+                {
+                    "type": "incorrect_causality",
+                    "value": "The 20% increase in revenue was caused by the reduction in marketing spend."
+                }
+            ]
+        },
+        {
+            "question": "What does the new policy say about personal devices?",
+            "answer": "Employees are now allowed to use their personal phones for work purposes under the new policy.",
+            "label": "hallucinated",
+            "hallucination_types": [
+                "contradiction"
+            ],
+            "is_hallucinated": true,
+            "faithfulness_score": 0.0,
+            "issues": [
+                {
+                    "type": "contradiction",
+                    "value": "Employees are now allowed to use their personal phones for work purposes under the new policy."
+                }
+            ]
+        }
+    ]
+}

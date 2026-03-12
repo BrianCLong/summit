@@ -1,6 +1,15 @@
 {
   "version": "1.0",
-  "mappings": {
+  "item_slug": "ci-baseline",
+  "entries": [
+    {
+      "evidence_id": "EVD-SUMMIT-CI-001",
+      "report": "report.json",
+      "metrics": "metrics.json",
+      "stamp": "stamp.json"
+    }
+  ],
+  "items": {
     "EVD-nato-cogwar-techfamilies-ai-001": {
       "report": "EVD-nato-cogwar-techfamilies-ai-001/report.json",
       "metrics": "EVD-nato-cogwar-techfamilies-ai-001/metrics.json",

@@ -1,4 +1,5 @@
 {
-  "timestamp": 1800000000.0,
-  "version": "1.0"
+  "evidence_id": "EVD-SUMMIT-CI-001",
+  "created_utc": "2026-03-12T19:26:50Z",
+  "git_commit": "64c5ccb26c0d98e7018b78370ece4ba375761912"
 }

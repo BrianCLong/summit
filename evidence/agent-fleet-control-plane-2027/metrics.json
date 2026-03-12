@@ -1,6 +1,6 @@
 {
-  "item_slug": "agent-fleet-control-plane-2027",
-  "baseline_date": "2026-03-07",
+  "item_slug": "agent-fleet-control-plane-vnext",
+  "baseline_v": "vnext",
   "routing_accuracy": 0,
   "approval_false_positive_rate": 0,
   "mean_plan_latency_ms": 0,
