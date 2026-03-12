@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Command } from 'cmdk'
 import { Search, FileText, User, AlertTriangle, Zap } from 'lucide-react'
 import { useSearch } from '@/contexts/SearchContext'
@@ -8,6 +8,8 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { useDemoMode } from '@/components/common/DemoIndicator'
 import { useDebounce } from '@/hooks/useDebounce'
 
+// Performance Optimization: Moved these functions outside the component to prevent
+// recreation on every render since they are static and pure functions.
 interface SearchResult {
   id: string
   type: 'entity' | 'investigation' | 'alert' | 'case' | 'command'
@@ -18,6 +20,40 @@ interface SearchResult {
   badge?: string
 }
 
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case 'entity':
+      return User
+    case 'investigation':
+      return Search
+    case 'alert':
+      return AlertTriangle
+    case 'case':
+      return FileText
+    case 'command':
+      return Zap
+    default:
+      return Search
+  }
+}
+
+const getTypeBadgeVariant = (type: string) => {
+  switch (type) {
+    case 'entity':
+      return 'secondary'
+    case 'investigation':
+      return 'default'
+    case 'alert':
+      return 'destructive'
+    case 'case':
+      return 'outline'
+    case 'command':
+      return 'intel'
+    default:
+      return 'secondary'
+  }
+}
+
 export function GlobalSearch() {
   const { isOpen, query, setQuery, closeSearch } = useSearch()
   const [results, setResults] = useState<SearchResult[]>([])
@@ -26,12 +62,14 @@ export function GlobalSearch() {
   const isDemoMode = useDemoMode()
   const debouncedQuery = useDebounce(query, 300)
 
+  // Performance Optimization: Wrapped with useCallback to maintain reference equality
+  // and avoid triggering unnecessary re-renders in children/effects that depend on it
   // Mock search function
-  const searchFunction = async (query: string): Promise<SearchResult[]> => {
-    if (!query.trim()) {
+  const searchFunction = useCallback(async (searchQuery: string): Promise<SearchResult[]> => {
+    if (!searchQuery.trim()) {
       return []
     }
-    if (!query || !query.trim()) return []
+    if (!searchQuery || !searchQuery.trim()) return []
 
     if (!isDemoMode) {
       return []
@@ -112,10 +150,10 @@ export function GlobalSearch() {
     // Filter results based on query
     return mockResults.filter(
       result =>
-        result.title.toLowerCase().includes(query.toLowerCase()) ||
-        result.description?.toLowerCase().includes(query.toLowerCase())
+        result.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        result.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }
+  }, [isDemoMode])
 
   useEffect(() => {
     // If query is cleared, clear results immediately without waiting for debounce
@@ -147,48 +185,69 @@ export function GlobalSearch() {
     return () => {
       active = false
     }
-  }, [debouncedQuery, isDemoMode])
+  }, [debouncedQuery, isDemoMode, searchFunction])
 
-  const handleSelect = (result: SearchResult) => {
+  // Performance Optimization: Wrapped with useCallback to ensure stable reference
+  const handleSelect = useCallback((result: SearchResult) => {
     if (result.href) {
       navigate(result.href)
       closeSearch()
     }
-  }
+  }, [navigate, closeSearch])
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'entity':
-        return User
-      case 'investigation':
-        return Search
-      case 'alert':
-        return AlertTriangle
-      case 'case':
-        return FileText
-      case 'command':
-        return Zap
-      default:
-        return Search
-    }
-  }
+  // Performance Optimization: Memoizing the mapped components to prevent recalculating
+  // the entire grouped layout of results on every render if results/handleSelect haven't changed.
+  const groupedResults = useMemo(() => {
+    if (results.length === 0) return null
 
-  const getTypeBadgeVariant = (type: string) => {
-    switch (type) {
-      case 'entity':
-        return 'secondary'
-      case 'investigation':
-        return 'default'
-      case 'alert':
-        return 'destructive'
-      case 'case':
-        return 'outline'
-      case 'command':
-        return 'intel'
-      default:
-        return 'secondary'
-    }
-  }
+    return ['command', 'entity', 'investigation', 'alert', 'case'].map(type => {
+      const typeResults = results.filter(r => r.type === type)
+      if (typeResults.length === 0) {
+        return null
+      }
+
+      return (
+        <Command.Group
+          key={type}
+          heading={type.charAt(0).toUpperCase() + type.slice(1)}
+        >
+          {typeResults.map(result => {
+            const Icon = result.icon || getTypeIcon(result.type)
+            return (
+              <Command.Item
+                key={result.id}
+                value={result.id}
+                onSelect={() => handleSelect(result)}
+                className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-md"
+              >
+                <Icon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">
+                    {result.title}
+                  </div>
+                  {result.description && (
+                    <div className="text-xs text-muted-foreground truncate">
+                      {result.description}
+                    </div>
+                  )}
+                </div>
+                {result.badge && (
+                  <Badge
+                    variant={
+                      getTypeBadgeVariant(result.type) as any
+                    }
+                    className="text-xs"
+                  >
+                    {result.badge}
+                  </Badge>
+                )}
+              </Command.Item>
+            )
+          })}
+        </Command.Group>
+      )
+    })
+  }, [results, handleSelect])
 
   if (!isOpen) {
     return null
@@ -243,56 +302,7 @@ export function GlobalSearch() {
 
             {results.length > 0 && (
               <>
-                {/* Group results by type */}
-                {['command', 'entity', 'investigation', 'alert', 'case'].map(
-                  type => {
-                    const typeResults = results.filter(r => r.type === type)
-                    if (typeResults.length === 0) {
-                      return null
-                    }
-
-                    return (
-                      <Command.Group
-                        key={type}
-                        heading={type.charAt(0).toUpperCase() + type.slice(1)}
-                      >
-                        {typeResults.map(result => {
-                          const Icon = result.icon || getTypeIcon(result.type)
-                          return (
-                            <Command.Item
-                              key={result.id}
-                              value={result.id}
-                              onSelect={() => handleSelect(result)}
-                              className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-md"
-                            >
-                              <Icon className="h-4 w-4 text-muted-foreground" />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium truncate">
-                                  {result.title}
-                                </div>
-                                {result.description && (
-                                  <div className="text-xs text-muted-foreground truncate">
-                                    {result.description}
-                                  </div>
-                                )}
-                              </div>
-                              {result.badge && (
-                                <Badge
-                                  variant={
-                                    getTypeBadgeVariant(result.type) as any
-                                  }
-                                  className="text-xs"
-                                >
-                                  {result.badge}
-                                </Badge>
-                              )}
-                            </Command.Item>
-                          )
-                        })}
-                      </Command.Group>
-                    )
-                  }
-                )}
+                {groupedResults}
               </>
             )}
           </Command.List>
