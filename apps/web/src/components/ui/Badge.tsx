@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { CheckCircle2, AlertTriangle, AlertCircle, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
@@ -45,16 +46,36 @@ export interface BadgeProps
     VariantProps<typeof badgeVariants> {
   'data-ai-suggestion'?: boolean
   icon?: React.ReactNode
+  accessibleStatus?: boolean
+}
+
+const statusIcons: Record<string, React.ReactNode> = {
+  success: <CheckCircle2 className="h-3 w-3" />,
+  'threat-low': <CheckCircle2 className="h-3 w-3" />,
+  warning: <AlertTriangle className="h-3 w-3" />,
+  'threat-medium': <AlertTriangle className="h-3 w-3" />,
+  'threat-high': <AlertTriangle className="h-3 w-3" />,
+  error: <AlertCircle className="h-3 w-3" />,
+  'threat-critical': <AlertCircle className="h-3 w-3" />,
+  destructive: <AlertCircle className="h-3 w-3" />,
+  info: <Info className="h-3 w-3" />,
 }
 
 function Badge({
   className,
   variant,
   icon,
+  accessibleStatus = false,
   children,
   'data-ai-suggestion': isAiSuggestion,
   ...props
 }: BadgeProps) {
+  const statusIcon =
+    accessibleStatus && variant && statusIcons[variant]
+      ? statusIcons[variant]
+      : null
+  const finalIcon = icon || statusIcon
+
   return (
     <span
       className={cn(
@@ -64,7 +85,7 @@ function Badge({
       )}
       {...props}
     >
-      {icon && <span className="mr-1.5 flex items-center">{icon}</span>}
+      {finalIcon && <span className="mr-1.5 flex items-center">{finalIcon}</span>}
       {children}
     </span>
   )
