@@ -1,0 +1,36 @@
+{
+  "build_entrypoints": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "turbo.json",
+    "Makefile"
+  ],
+  "components": [
+    {
+      "build": "docker",
+      "dockerfile": "server/Dockerfile",
+      "name": "intelgraph-server",
+      "path": "server"
+    },
+    {
+      "build": "docker",
+      "dockerfile": "client/Dockerfile",
+      "name": "intelgraph-client",
+      "path": "client"
+    },
+    {
+      "build": "docker",
+      "dockerfile": "apps/web/Dockerfile",
+      "name": "summit-web",
+      "path": "apps/web"
+    },
+    {
+      "build": "docker",
+      "dockerfile": "apps/gateway/Dockerfile",
+      "name": "summit-gateway",
+      "path": "apps/gateway"
+    }
+  ],
+  "manifest_schema": "summit.release.manifest.v1",
+  "release_version": "v1-ga"
+}

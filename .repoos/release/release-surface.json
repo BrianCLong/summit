@@ -1,0 +1,330 @@
+{
+  "binaries": [
+    "scripts/release/verify-release.mjs"
+  ],
+  "build_entrypoints": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "turbo.json",
+    "Makefile"
+  ],
+  "containers": [
+    {
+      "dockerfile": "apps/gateway/Dockerfile",
+      "name": "apps-gateway"
+    },
+    {
+      "dockerfile": "apps/intelgraph-api/Dockerfile",
+      "name": "apps-intelgraph-api"
+    },
+    {
+      "dockerfile": "apps/mobile-interface/Dockerfile",
+      "name": "apps-mobile-interface"
+    },
+    {
+      "dockerfile": "apps/search-engine/Dockerfile",
+      "name": "apps-search-engine"
+    },
+    {
+      "dockerfile": "apps/slo-exporter/Dockerfile",
+      "name": "apps-slo-exporter"
+    },
+    {
+      "dockerfile": "apps/ui/Dockerfile",
+      "name": "apps-ui"
+    },
+    {
+      "dockerfile": "apps/web/Dockerfile",
+      "name": "apps-web"
+    },
+    {
+      "dockerfile": "client/Dockerfile",
+      "name": "client"
+    },
+    {
+      "dockerfile": "server/Dockerfile",
+      "name": "server"
+    },
+    {
+      "dockerfile": "services/admin-api/Dockerfile",
+      "name": "services-admin-api"
+    },
+    {
+      "dockerfile": "services/agent-runtime/Dockerfile",
+      "name": "services-agent-runtime"
+    },
+    {
+      "dockerfile": "services/agentic-mesh-evaluation/Dockerfile",
+      "name": "services-agentic-mesh-evaluation"
+    },
+    {
+      "dockerfile": "services/ai-nlq/Dockerfile",
+      "name": "services-ai-nlq"
+    },
+    {
+      "dockerfile": "services/ai-sandbox/Dockerfile",
+      "name": "services-ai-sandbox"
+    },
+    {
+      "dockerfile": "services/ai-service-platform/Dockerfile",
+      "name": "services-ai-service-platform"
+    },
+    {
+      "dockerfile": "services/api-gateway/Dockerfile",
+      "name": "services-api-gateway"
+    },
+    {
+      "dockerfile": "services/audit-blackbox-service/Dockerfile",
+      "name": "services-audit-blackbox-service"
+    },
+    {
+      "dockerfile": "services/authz-gateway/Dockerfile",
+      "name": "services-authz-gateway"
+    },
+    {
+      "dockerfile": "services/build-hub/Dockerfile",
+      "name": "services-build-hub"
+    },
+    {
+      "dockerfile": "services/citizen-service/Dockerfile",
+      "name": "services-citizen-service"
+    },
+    {
+      "dockerfile": "services/client/Dockerfile",
+      "name": "services-client"
+    },
+    {
+      "dockerfile": "services/conductor/Dockerfile",
+      "name": "services-conductor"
+    },
+    {
+      "dockerfile": "services/copilot/Dockerfile",
+      "name": "services-copilot"
+    },
+    {
+      "dockerfile": "services/data-discovery-fusion/Dockerfile",
+      "name": "services-data-discovery-fusion"
+    },
+    {
+      "dockerfile": "services/data-factory-service/Dockerfile",
+      "name": "services-data-factory-service"
+    },
+    {
+      "dockerfile": "services/deepfake-detection-service/Dockerfile",
+      "name": "services-deepfake-detection-service"
+    },
+    {
+      "dockerfile": "services/dev-gateway/Dockerfile",
+      "name": "services-dev-gateway"
+    },
+    {
+      "dockerfile": "services/digital-twin/Dockerfile",
+      "name": "services-digital-twin"
+    },
+    {
+      "dockerfile": "services/docling-svc/Dockerfile",
+      "name": "services-docling-svc"
+    },
+    {
+      "dockerfile": "services/docs-api/Dockerfile",
+      "name": "services-docs-api"
+    },
+    {
+      "dockerfile": "services/edge-gateway/Dockerfile",
+      "name": "services-edge-gateway"
+    },
+    {
+      "dockerfile": "services/edge-orchestrator/Dockerfile",
+      "name": "services-edge-orchestrator"
+    },
+    {
+      "dockerfile": "services/er-service/Dockerfile",
+      "name": "services-er-service"
+    },
+    {
+      "dockerfile": "services/feed-processor/Dockerfile",
+      "name": "services-feed-processor"
+    },
+    {
+      "dockerfile": "services/finance-normalizer-service/Dockerfile",
+      "name": "services-finance-normalizer-service"
+    },
+    {
+      "dockerfile": "services/golden-sample/Dockerfile",
+      "name": "services-golden-sample"
+    },
+    {
+      "dockerfile": "services/gpu-graph-analytics/Dockerfile",
+      "name": "services-gpu-graph-analytics"
+    },
+    {
+      "dockerfile": "services/graph-xai/Dockerfile",
+      "name": "services-graph-xai"
+    },
+    {
+      "dockerfile": "services/graphrag/Dockerfile",
+      "name": "services-graphrag"
+    },
+    {
+      "dockerfile": "services/hello-service/Dockerfile",
+      "name": "services-hello-service"
+    },
+    {
+      "dockerfile": "services/ingest/Dockerfile",
+      "name": "services-ingest"
+    },
+    {
+      "dockerfile": "services/innovation-sandbox/Dockerfile",
+      "name": "services-innovation-sandbox"
+    },
+    {
+      "dockerfile": "services/insight-ai/Dockerfile",
+      "name": "services-insight-ai"
+    },
+    {
+      "dockerfile": "services/knowledge-service/Dockerfile",
+      "name": "services-knowledge-service"
+    },
+    {
+      "dockerfile": "services/lsc-service/Dockerfile",
+      "name": "services-lsc-service"
+    },
+    {
+      "dockerfile": "services/maestro-orchestrator/Dockerfile",
+      "name": "services-maestro-orchestrator"
+    },
+    {
+      "dockerfile": "services/marketplace/Dockerfile",
+      "name": "services-marketplace"
+    },
+    {
+      "dockerfile": "services/media-pipeline-service/Dockerfile",
+      "name": "services-media-pipeline-service"
+    },
+    {
+      "dockerfile": "services/ml-serving/Dockerfile",
+      "name": "services-ml-serving"
+    },
+    {
+      "dockerfile": "services/ml-training/Dockerfile",
+      "name": "services-ml-training"
+    },
+    {
+      "dockerfile": "services/model-training/Dockerfile",
+      "name": "services-model-training"
+    },
+    {
+      "dockerfile": "services/pca-verifier/Dockerfile",
+      "name": "services-pca-verifier"
+    },
+    {
+      "dockerfile": "services/personal-agent-api/Dockerfile",
+      "name": "services-personal-agent-api"
+    },
+    {
+      "dockerfile": "services/policy-compiler/Dockerfile",
+      "name": "services-policy-compiler"
+    },
+    {
+      "dockerfile": "services/postgres-pitr/Dockerfile",
+      "name": "services-postgres-pitr"
+    },
+    {
+      "dockerfile": "services/predictd/Dockerfile",
+      "name": "services-predictd"
+    },
+    {
+      "dockerfile": "services/prediction-service/Dockerfile",
+      "name": "services-prediction-service"
+    },
+    {
+      "dockerfile": "services/prov-ledger/Dockerfile",
+      "name": "services-prov-ledger"
+    },
+    {
+      "dockerfile": "services/queue-manager/Dockerfile",
+      "name": "services-queue-manager"
+    },
+    {
+      "dockerfile": "services/rag/Dockerfile",
+      "name": "services-rag"
+    },
+    {
+      "dockerfile": "services/realtime/Dockerfile",
+      "name": "services-realtime"
+    },
+    {
+      "dockerfile": "services/reporting/Dockerfile",
+      "name": "services-reporting"
+    },
+    {
+      "dockerfile": "services/runbooks/Dockerfile",
+      "name": "services-runbooks"
+    },
+    {
+      "dockerfile": "services/sandbox-gateway/Dockerfile",
+      "name": "services-sandbox-gateway"
+    },
+    {
+      "dockerfile": "services/sandbox/Dockerfile",
+      "name": "services-sandbox"
+    },
+    {
+      "dockerfile": "services/search-indexer/Dockerfile",
+      "name": "services-search-indexer"
+    },
+    {
+      "dockerfile": "services/secure-elections/Dockerfile",
+      "name": "services-secure-elections"
+    },
+    {
+      "dockerfile": "services/server/Dockerfile",
+      "name": "services-server"
+    },
+    {
+      "dockerfile": "services/strategic-foresight/Dockerfile",
+      "name": "services-strategic-foresight"
+    },
+    {
+      "dockerfile": "services/streaming-ingest/Dockerfile",
+      "name": "services-streaming-ingest"
+    },
+    {
+      "dockerfile": "services/switchboard-api/Dockerfile",
+      "name": "services-switchboard-api"
+    },
+    {
+      "dockerfile": "services/talent-magnet/Dockerfile",
+      "name": "services-talent-magnet"
+    },
+    {
+      "dockerfile": "services/vision-api/Dockerfile",
+      "name": "services-vision-api"
+    },
+    {
+      "dockerfile": "services/websocket-server/Dockerfile",
+      "name": "services-websocket-server"
+    },
+    {
+      "dockerfile": "services/zk-deconfliction/Dockerfile",
+      "name": "services-zk-deconfliction"
+    },
+    {
+      "dockerfile": "services/zk-tx/Dockerfile",
+      "name": "services-zk-tx"
+    }
+  ],
+  "deploy_components": [
+    "deploy",
+    "helm",
+    "k8s",
+    "terraform"
+  ],
+  "services": [
+    "server",
+    "client",
+    "apps/web",
+    "apps/gateway",
+    "services/conductor"
+  ]
+}
