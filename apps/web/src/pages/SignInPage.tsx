@@ -78,8 +78,8 @@ export default function SignInPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -87,35 +87,35 @@ export default function SignInPage() {
   return (
     <main
       role="main"
-      aria-label="Sign in"
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-4"
+      aria-label="Operational Access"
+      className="min-h-screen flex items-center justify-center bg-background p-4 font-sans"
     >
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-lg">
+      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-300">
+        <div className="text-center mb-12">
+          <div className="h-14 w-14 bg-primary rounded-sm flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <span className="text-primary-foreground font-black text-xl tracking-tighter">
               IG
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white">IntelGraph</h1>
-          <p className="text-blue-200 mt-2">AI-Powered Intelligence Platform</p>
+          <h1 className="text-sm font-black uppercase tracking-[0.4em] text-foreground">Summit Intelligence</h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-2">Operational Access Terminal</p>
         </div>
 
-        <Card className="glass-morphism border-blue-500/20">
-          <CardHeader>
-            <CardTitle className="text-white">Sign In</CardTitle>
-            <CardDescription className="text-blue-200">
-              Enter your credentials to access the platform
+        <Card className="rounded-sm border-border bg-card shadow-2xl overflow-hidden">
+          <CardHeader className="border-b border-border bg-background/50 p-6">
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em]">Credential Verification</CardTitle>
+            <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+              Enter clearance identifiers to initiate session
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
+          <CardContent className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-white mb-1"
+                  className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                 >
-                  Email
+                  Operator Identifier (Email)
                 </label>
                 <input
                   id="email"
@@ -123,26 +123,27 @@ export default function SignInPage() {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    // Clear field-specific error when user starts typing
                     setEmailFieldError('');
                   }}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your email"
+                  className="w-full h-11 px-4 bg-background border border-border rounded-none text-xs font-bold uppercase tracking-wider placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                  placeholder="ID_SECURE_INPUT"
                   required
                   aria-describedby="email-error"
                   aria-invalid={!!emailFieldError}
                 />
-                <div id="email-error" className="min-h-[20px] mt-1 text-sm text-red-300">
-                  {emailFieldError && <span>{emailFieldError}</span>}
-                </div>
+                {emailFieldError && (
+                  <div id="email-error" className="text-[9px] font-black uppercase tracking-tighter text-destructive mt-1">
+                    {emailFieldError}
+                  </div>
+                )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-white mb-1"
+                  className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                 >
-                  Password
+                  Access Key (Password)
                 </label>
                 <div className="relative">
                   <input
@@ -151,11 +152,10 @@ export default function SignInPage() {
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      // Clear field-specific error when user starts typing
                       setPasswordFieldError('');
                     }}
-                    className="w-full px-3 py-2 pr-10 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your password"
+                    className="w-full h-11 px-4 pr-12 bg-background border border-border rounded-none text-xs font-bold tracking-wider placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                    placeholder="••••••••"
                     required
                     minLength={8}
                     aria-describedby="password-error"
@@ -164,56 +164,69 @@ export default function SignInPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/70 hover:text-white"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-muted-foreground hover:text-primary transition-colors"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-3 w-3" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3 w-3" />
                     )}
                   </button>
                 </div>
-                <div id="password-error" className="min-h-[20px] mt-1 text-sm text-red-300">
-                  {passwordFieldError && <span>{passwordFieldError}</span>}
-                </div>
-                <p className="text-xs text-blue-200 mt-1">Must be at least 8 characters long</p>
+                {passwordFieldError && (
+                  <div id="password-error" className="text-[9px] font-black uppercase tracking-tighter text-destructive mt-1">
+                    {passwordFieldError}
+                  </div>
+                )}
               </div>
 
               {error && (
-                <div className="text-red-300 text-sm bg-red-500/10 border border-red-500/20 rounded-md p-3">
-                  {error}
+                <div className="text-destructive text-[10px] font-black uppercase tracking-widest bg-destructive/10 border border-destructive/20 p-4 rounded-sm animate-in shake-1">
+                  Access Denied: {error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full h-12 text-[10px] font-black uppercase tracking-[0.3em] transition-all"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Signing In...
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary-foreground mr-3"></div>
+                    Verifying...
                   </>
                 ) : (
                   <>
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Sign In
+                    <LogIn className="h-3 w-3 mr-3" />
+                    Initialize Session
                   </>
                 )}
               </Button>
             </form>
 
-            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-md">
-              <p className="text-sm text-blue-200 mb-2">Demo Credentials:</p>
-              <div className="text-xs text-blue-300 space-y-1">
-                <div>Email: sarah.chen@intelgraph.com</div>
-                <div>Password: password</div>
+            <div className="mt-10 p-4 border border-dashed border-border bg-muted/20">
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-3 border-b border-border/50 pb-2">Guest clearance artifacts:</p>
+              <div className="text-[10px] mono-data font-bold space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">ID:</span>
+                  <span>sarah.chen@intelgraph.com</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">KEY:</span>
+                  <span>password</span>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        <div className="mt-8 text-center">
+           <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground opacity-50">
+             Substrate Connection: Secure // Node: US-EAST-01
+           </p>
+        </div>
       </div>
     </main>
   )

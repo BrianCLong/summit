@@ -353,14 +353,9 @@ export function GraphCanvas({
       .attr('r', d => 15 + d.entity.confidence * 10)
       .attr('fill', d => getEntityColor(d.entity.type))
       .attr('stroke', d =>
-        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
+        selectedEntityId === d.entity.id ? '#fafafa' : '#262626'
       )
-      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 3 : 2))
-      .style('filter', d =>
-        selectedEntityId === d.entity.id
-          ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))'
-          : 'none'
-      )
+      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 4 : 1))
 
     // Node icons (using text for simplicity)
     node
@@ -462,14 +457,10 @@ export function GraphCanvas({
   ])
 
   return (
-    <div className={cn('relative w-full h-full', className)}>
+    <div className={cn('relative w-full h-full bg-background', className)}>
       <svg
         ref={svgRef}
-        className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800"
-        style={{
-          background:
-            'radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%)',
-        }}
+        className="w-full h-full"
       />
 
       {/* Tooltip Overlay */}
@@ -488,7 +479,7 @@ export function GraphCanvas({
 
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
-        <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
+        <div className="bg-background/90 backdrop-blur-sm border rounded-sm p-2 shadow-2xl">
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info
@@ -548,7 +539,7 @@ export function GraphCanvas({
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm border rounded-lg p-3 shadow-sm">
+      <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm border rounded-sm p-3 shadow-2xl">
         <div className="text-xs font-medium text-muted-foreground mb-2">
           Entity Types
         </div>
@@ -556,7 +547,7 @@ export function GraphCanvas({
           {Array.from(new Set(entities.map(e => e.type))).map(type => (
             <div key={type} className="flex items-center gap-2">
               <div
-                className="w-3 h-3 rounded-full border"
+                className="w-3 h-3 border"
                 style={{
                   backgroundColor: (() => {
                     const colors: Record<string, string> = {

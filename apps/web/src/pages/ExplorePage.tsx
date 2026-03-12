@@ -444,12 +444,12 @@ export default function ExplorePage(): React.ReactElement {
           )}
           {/* Legend for Policy Overlay */}
           {policyOverlay !== 'none' && (
-              <div className="absolute bottom-4 right-4 bg-background/90 p-4 rounded shadow border z-10">
+              <div className="absolute bottom-4 right-4 bg-background border border-border p-4 rounded-sm shadow-2xl z-10">
                   <h4 className="font-semibold mb-2 capitalize">{policyOverlay} Policy</h4>
                   <div className="space-y-1 text-sm">
-                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span> Compliant</div>
-                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span> Review</div>
-                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span> Violation</div>
+                      <div className="flex items-center"><span className="w-3 h-3 border bg-green-500 mr-2"></span> Compliant</div>
+                      <div className="flex items-center"><span className="w-3 h-3 border bg-yellow-500 mr-2"></span> Review</div>
+                      <div className="flex items-center"><span className="w-3 h-3 border bg-red-500 mr-2"></span> Violation</div>
                   </div>
               </div>
           )}

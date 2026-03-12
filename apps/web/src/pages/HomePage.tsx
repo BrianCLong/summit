@@ -198,7 +198,7 @@ export default function HomePage() {
             return (
               <Card
                 key={action.title}
-                className="cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                className="cursor-pointer hover:bg-accent/50 transition-colors border-l-4 focus:outline-none focus:ring-1 focus:ring-primary focus:ring-offset-1"
                 onClick={() => navigate(action.href)}
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -213,7 +213,7 @@ export default function HomePage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`p-2 rounded-lg ${action.color} text-white`}
+                      className={`p-2 border border-border ${action.color} text-white`}
                     >
                       <Icon className="h-5 w-5" />
                     </div>
@@ -263,7 +263,7 @@ export default function HomePage() {
                     role="button"
                     tabIndex={0}
                     aria-label={`View investigation: ${investigation.title}`}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 border-b border-border last:border-0 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                     onClick={() =>
                       navigate(`/explore?investigation=${investigation.id}`)
                     }
@@ -345,7 +345,7 @@ export default function HomePage() {
                     role="button"
                     tabIndex={0}
                     aria-label={`View alert: ${alert.title}`}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 border-b border-border last:border-0 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                     onClick={() => navigate(`/alerts/${alert.id}`)}
                     onKeyDown={e =>
                       handleItemKeyDown(e, `/alerts/${alert.id}`)
@@ -415,7 +415,7 @@ export default function HomePage() {
                     role="button"
                     tabIndex={0}
                     aria-label={`View case: ${case_.title}`}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 border-b border-border last:border-0 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                     onClick={() => navigate(`/cases/${case_.id}`)}
                     onKeyDown={e =>
                       handleItemKeyDown(e, `/cases/${case_.id}`)

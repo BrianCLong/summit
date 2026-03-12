@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.ai/schemas/evidence/entropy-report/v1.0.0",
+  "title": "Frontier Entropy Report",
+  "description": "Deterministic evidence artifact for entropy monitoring and prediction",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "sourceCommit",
+    "entropy",
+    "velocity",
+    "assessment"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version for this evidence artifact"
+    },
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^entropy-[0-9a-f]{8}$",
+      "description": "Unique identifier for this evidence artifact (e.g., entropy-a1cc776c)"
+    },
+    "sourceCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "description": "Full git commit SHA that generated this report"
+    },
+    "sourceBranch": {
+      "type": "string",
+      "description": "Branch name where analysis was performed"
+    },
+    "entropy": {
+      "type": "object",
+      "required": ["current", "velocity", "acceleration", "assessment"],
+      "properties": {
+        "current": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Current Shannon entropy value"
+        },
+        "velocity": {
+          "type": ["number", "null"],
+          "description": "Current entropy velocity (d(Entropy)/dt)"
+        },
+        "acceleration": {
+          "type": "boolean",
+          "description": "Whether acceleration is detected (3+ consecutive increases)"
+        },
+        "assessment": {
+          "enum": ["stable", "watch", "warning", "critical"],
+          "description": "Velocity-based assessment level"
+        }
+      }
+    },
+    "velocity": {
+      "type": "object",
+      "required": ["current", "average", "confidence"],
+      "properties": {
+        "current": {
+          "type": ["number", "null"],
+          "description": "Current velocity measurement"
+        },
+        "average": {
+          "type": ["number", "null"],
+          "description": "Average velocity over history window"
+        },
+        "confidence": {
+          "enum": ["low", "medium", "high"],
+          "description": "Prediction confidence level based on velocity variance"
+        }
+      }
+    },
+    "prediction": {
+      "type": ["object", "null"],
+      "description": "Instability prediction (null if insufficient data)",
+      "properties": {
+        "status": {
+          "enum": ["approaching", "unstable", "stable"],
+          "description": "Prediction status"
+        },
+        "secondsToInstability": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Estimated seconds until instability threshold"
+        },
+        "timeBand": {
+          "enum": ["<1h", "<24h", "1-3d", ">3d", "stable", "unstable"],
+          "description": "Categorized time band for instability prediction"
+        },
+        "confidence": {
+          "enum": ["low", "medium", "high"],
+          "description": "Prediction confidence level"
+        }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "required": ["level", "recommendation", "controlActions"],
+      "properties": {
+        "level": {
+          "enum": ["stable", "watch", "warning", "critical"],
+          "description": "Assessment level (matches entropy.assessment)"
+        },
+        "recommendation": {
+          "type": "string",
+          "description": "Human-readable recommendation based on assessment"
+        },
+        "controlActions": {
+          "type": "array",
+          "description": "Control actions to execute (populated by actuator)",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "description": "Velocity thresholds used for assessment",
+      "required": ["stable", "watch", "warning"],
+      "properties": {
+        "stable": {
+          "type": "number",
+          "minimum": 0
+        },
+        "watch": {
+          "type": "number",
+          "minimum": 0
+        },
+        "warning": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "history": {
+      "type": "object",
+      "description": "History tracking metadata",
+      "properties": {
+        "samples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of entropy samples in history"
+        },
+        "velocitySamples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of velocity samples in history"
+        },
+        "maxSize": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum history window size"
+        }
+      }
+    }
+  }
+}

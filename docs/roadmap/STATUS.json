@@ -270,11 +270,17 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
+    },
+    {
+      "id": "ga-gateway-orchestration-hardening",
+      "status": "completed",
+      "owner": "antigravity",
+      "notes": "Consolidated Apollo Gateway logic, fixed docker-compose service structure, aligned subgraphs, and verified web proxy for GA readiness."
     }
   ],
   "summary": {
-    "total_initiatives": 32,
-    "completed": 8,
+    "total_initiatives": 33,
+    "completed": 9,
     "in_progress": 24,
     "at_risk": 0
   }

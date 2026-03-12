@@ -1,0 +1,199 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "entropy-threshold-policy-v1-guarded",
+  "description": "Frontier entropy threshold policy - DEFAULT SAFE MODE. Actuation disabled by default. All hard controls require explicit feature flag activation.",
+
+  "_comments": {
+    "safety_model": "This policy ships in OBSERVE-ONLY mode by default.",
+    "rationale": "Entropy prediction F1=0.000 (POOR) - below governance threshold of >=0.75. Actuation GATED until recalibration.",
+    "activation": "See .env.example for feature flags required to enable actuation.",
+    "governance": "Platform Architecture Board approval required before enabling hard controls."
+  },
+
+  "thresholds": {
+    "stable": {
+      "maxVelocity": 0.001,
+      "actions": [],
+      "alertLevel": "none"
+    },
+    "watch": {
+      "maxVelocity": 0.005,
+      "actions": [
+        {
+          "type": "notify",
+          "target": "monitoring-channel",
+          "message": "Entropy velocity elevated to WATCH level"
+        }
+      ],
+      "alertLevel": "info"
+    },
+    "warning": {
+      "maxVelocity": 0.01,
+      "actions": [
+        {
+          "type": "notify",
+          "target": "on-call",
+          "message": "Entropy velocity elevated to WARNING level - consider convergence"
+        },
+        {
+          "type": "flag_for_review",
+          "target": "resurrection-candidates",
+          "priority": "high"
+        }
+      ],
+      "alertLevel": "warning",
+      "_disabled_actions": [
+        {
+          "_comment": "REQUIRES: ENTROPY_HARD_CONTROLS_ENABLED=true",
+          "type": "throttle_frontier",
+          "maxConcurrentBranches": 10,
+          "reason": "Entropy velocity WARNING - reducing frontier expansion"
+        }
+      ]
+    },
+    "critical": {
+      "maxVelocity": null,
+      "actions": [
+        {
+          "type": "notify",
+          "target": "platform-team",
+          "message": "CRITICAL: Entropy velocity critical - immediate intervention required"
+        },
+        {
+          "type": "flag_for_review",
+          "target": "emergency-convergence",
+          "priority": "critical"
+        }
+      ],
+      "alertLevel": "critical",
+      "_disabled_actions": [
+        {
+          "_comment": "REQUIRES: ENTROPY_PAGING_ENABLED=true",
+          "type": "page_oncall",
+          "target": "platform-team",
+          "message": "CRITICAL: Entropy velocity critical - immediate intervention required"
+        },
+        {
+          "_comment": "REQUIRES: ENTROPY_HARD_CONTROLS_ENABLED=true + manual approval",
+          "type": "initiate_convergence",
+          "mode": "emergency",
+          "target": "all-frontiers",
+          "reason": "Critical entropy velocity detected"
+        },
+        {
+          "_comment": "REQUIRES: Manual approval (always) + ENTROPY_HARD_CONTROLS_ENABLED=true",
+          "type": "freeze_frontier",
+          "duration": "24h",
+          "allowedOperations": ["emergency-fixes"],
+          "reason": "Emergency convergence protocol activated"
+        },
+        {
+          "_comment": "REQUIRES: ENTROPY_HARD_CONTROLS_ENABLED=true",
+          "type": "create_incident",
+          "severity": "critical",
+          "title": "Frontier Entropy Critical Threshold Breach",
+          "assignTo": "platform-lead"
+        }
+      ]
+    }
+  },
+
+  "prediction": {
+    "timeBands": {
+      "<1h": {
+        "actions": [
+          {
+            "type": "notify",
+            "target": "platform-team",
+            "message": "Instability predicted within 1 hour (LOW CONFIDENCE - entropy F1=0.000)"
+          }
+        ],
+        "_disabled_actions": [
+          {
+            "_comment": "REQUIRES: ENTROPY_PAGING_ENABLED=true",
+            "type": "page_oncall",
+            "target": "platform-team",
+            "message": "Instability predicted within 1 hour"
+          }
+        ]
+      },
+      "<24h": {
+        "actions": [
+          {
+            "type": "notify",
+            "target": "on-call",
+            "message": "Instability predicted within 24 hours (LOW CONFIDENCE - entropy F1=0.000)"
+          }
+        ]
+      },
+      "1-3d": {
+        "actions": [
+          {
+            "type": "flag_for_review",
+            "target": "frontier-planning",
+            "priority": "medium"
+          }
+        ]
+      },
+      ">3d": {
+        "actions": []
+      },
+      "stable": {
+        "actions": []
+      }
+    },
+    "confidenceThresholds": {
+      "high": {
+        "trustFactor": 1.0,
+        "description": "High confidence predictions are trusted"
+      },
+      "medium": {
+        "trustFactor": 0.7,
+        "description": "Medium confidence predictions trigger review"
+      },
+      "low": {
+        "trustFactor": 0.3,
+        "description": "Low confidence predictions suppressed or flagged"
+      }
+    }
+  },
+
+  "actuation": {
+    "enabled": false,
+    "dryRun": true,
+    "_comments": {
+      "enabled": "Master kill-switch. Set to true ONLY after Platform Architecture Board approval.",
+      "dryRun": "Safety net. Set to false ONLY in staging/production after successful dry-run validation.",
+      "feature_flags": "Individual action categories require additional feature flags (see .env.example)"
+    },
+    "hooks": [
+      {
+        "event": "velocity_threshold_breach",
+        "handler": "notify_and_actuate"
+      },
+      {
+        "event": "acceleration_detected",
+        "handler": "escalate_monitoring"
+      },
+      {
+        "event": "prediction_instability",
+        "handler": "preemptive_convergence"
+      }
+    ]
+  },
+
+  "governance": {
+    "auditLog": true,
+    "evidenceRetention": "90d",
+    "requireApproval": {
+      "freeze_frontier": true,
+      "initiate_convergence": false,
+      "create_incident": false
+    },
+    "_comments": {
+      "requireApproval": "Manual approval is enforced at execution time even if action is policy-enabled. freeze_frontier ALWAYS requires approval.",
+      "calibration_gate": "Entropy actuation is GATED until calibration achieves F1 >= 0.75 (current: F1=0.000)",
+      "board_approval": "Platform Architecture Board approval required before setting actuation.enabled=true"
+    }
+  }
+}
