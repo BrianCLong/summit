@@ -1,0 +1,54 @@
+{
+  "evidence_artifacts": [
+    {
+      "id": "artifact-001",
+      "category": "network",
+      "risk_score": 0.95,
+      "signals": ["beacon", "malware"],
+      "attributes": {"bytes": 100000, "duration": 10.5},
+      "provenance": ["source-a"]
+    },
+    {
+      "id": "artifact-002",
+      "category": "endpoint",
+      "risk_score": 0.3,
+      "signals": ["login", "success"],
+      "attributes": {"bytes": 500, "duration": 0.1},
+      "provenance": ["source-b"]
+    },
+    {
+      "id": "artifact-003",
+      "category": "network",
+      "risk_score": 0.5,
+      "signals": ["beacon", "dns"],
+      "attributes": {"bytes": 1200, "duration": 0.5},
+      "provenance": ["source-a"]
+    }
+  ],
+  "fusion_entities": [
+    {
+      "id": "ent-osint-001",
+      "domain": "osint",
+      "entity_type": "actor",
+      "attributes": {"alias": "shadow_walker", "email": "shadow@example.com"},
+      "confidence": 0.7,
+      "sources": ["osint-feed-1"]
+    },
+    {
+      "id": "ent-finintel-001",
+      "domain": "finintel",
+      "entity_type": "wallet",
+      "attributes": {"wallet": "bc1q...", "email": "shadow@example.com"},
+      "confidence": 0.6,
+      "sources": ["blockchain-ledger"]
+    },
+    {
+      "id": "ent-cyber-001",
+      "domain": "cyber",
+      "entity_type": "infrastructure",
+      "attributes": {"ip": "192.168.1.100", "alias": "shadow_walker"},
+      "confidence": 0.8,
+      "sources": ["netflow-logs"]
+    }
+  ]
+}
