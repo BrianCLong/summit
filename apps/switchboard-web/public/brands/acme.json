@@ -1,0 +1,10 @@
+{
+  "name": "Acme",
+  "productName": "Acme Control Plane",
+  "colors": {
+    "primary": "#e11d48",
+    "secondary": "#be123c",
+    "accent": "#fb7185",
+    "background": "#0f172a"
+  }
+}

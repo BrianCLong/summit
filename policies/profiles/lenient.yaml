@@ -1,0 +1,3 @@
+name: "Lenient"
+policies:
+  - "auth.mfa.required: false"

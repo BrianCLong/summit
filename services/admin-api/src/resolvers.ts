@@ -450,9 +450,63 @@ export const resolvers = {
       // Placeholder - would integrate with actual SLO tracking
       return [];
     },
+
+    async tenants(_parent: any, _args: any, _ctx: Context) {
+      const res = await fetch('http://tenant-admin:3000/tenants');
+      return res.json();
+    },
+
+    async tenant(_parent: any, args: { id: string }, _ctx: Context) {
+      const res = await fetch(`http://tenant-admin:3000/tenants/${args.id}`);
+      return res.json();
+    },
   },
 
   Mutation: {
+    async createTenant(_parent: any, args: any, _ctx: Context) {
+      const res = await fetch('http://tenant-admin:3000/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(args)
+      });
+      const data = await res.json();
+      return data.tenant;
+    },
+
+    async suspendTenant(_parent: any, args: { id: string }, _ctx: Context) {
+      const res = await fetch(`http://tenant-admin:3000/tenants/${args.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'SUSPENDED' })
+      });
+      const data = await res.json();
+      return data.tenant;
+    },
+
+    async resumeTenant(_parent: any, args: { id: string }, _ctx: Context) {
+      const res = await fetch(`http://tenant-admin:3000/tenants/${args.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'ACTIVE' })
+      });
+      const data = await res.json();
+      return data.tenant;
+    },
+
+    async deleteTenant(_parent: any, args: { id: string }, _ctx: Context) {
+      const res = await fetch(`http://tenant-admin:3000/tenants/${args.id}`, {
+        method: 'DELETE'
+      });
+      return res.json();
+    },
+
+    async approveDeleteTenant(_parent: any, args: { id: string }, _ctx: Context) {
+      const res = await fetch(`http://tenant-admin:3000/tenants/${args.id}/approve-delete`, {
+        method: 'POST'
+      });
+      return res.json();
+    },
+
     async setTenantBudget(
       _parent: any,
       args: { tenantId: string; period: string; limit: number },

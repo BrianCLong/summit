@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdaptersPage } from './features/adapters/AdaptersPage';
 import { ApprovalsPage } from './features/approvals/ApprovalsPage';
+import { ThemeProvider, useTheme } from './features/theme/ThemeContext';
 
-function App() {
+function AppContent() {
   const [activeTab, setActiveTab] = useState<'adapters' | 'approvals'>('adapters');
+  const { brand, loadBrand } = useTheme();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const brandName = params.get('brand');
+    if (brandName) {
+      loadBrand(brandName);
+    }
+  }, []);
 
   return (
     <div className="app-shell">
       <header className="app-header">
         <div className="header-content">
           <div className="header-text">
-            <p className="eyebrow">Switchboard</p>
+            <p className="eyebrow">{brand.productName}</p>
             <h1>{activeTab === 'adapters' ? 'Adapters' : 'Task Inbox'}</h1>
             <p className="lede">
               {activeTab === 'adapters'
@@ -39,6 +49,11 @@ function App() {
       </main>
 
       <style>{`
+        .app-shell {
+          background-color: var(--color-background);
+          color: #fff;
+          min-height: 100vh;
+        }
         .header-content {
           display: flex;
           justify-content: space-between;
@@ -64,7 +79,7 @@ function App() {
         }
         .nav-link.active {
           background: rgba(255, 255, 255, 0.1);
-          border-color: #0078ff;
+          border-color: var(--color-primary);
           color: #fff;
         }
         .nav-link:hover:not(.active) {
@@ -73,6 +88,14 @@ function App() {
         }
       `}</style>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

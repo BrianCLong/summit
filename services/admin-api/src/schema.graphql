@@ -298,9 +298,44 @@ type Query {
     service: String
     sloName: String
   ): [SLOAdherence!]!
+
+  """List all tenants"""
+  tenants: [Tenant!]!
+
+  """Get tenant details"""
+  tenant(id: ID!): Tenant
+}
+
+type Tenant {
+  id: ID!
+  name: String!
+  status: String!
+  brandPack: String!
+  policyProfile: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Mutation {
+  """Create a new tenant"""
+  createTenant(
+    name: String!
+    brandPack: String
+    policyProfile: String
+  ): Tenant!
+
+  """Suspend a tenant"""
+  suspendTenant(id: ID!): Tenant!
+
+  """Resume a tenant"""
+  resumeTenant(id: ID!): Tenant!
+
+  """Request tenant deletion"""
+  deleteTenant(id: ID!): JSON!
+
+  """Approve tenant deletion"""
+  approveDeleteTenant(id: ID!): JSON!
+
   """Create or update tenant budget"""
   setTenantBudget(
     tenantId: String!

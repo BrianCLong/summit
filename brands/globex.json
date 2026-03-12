@@ -1,0 +1,10 @@
+{
+  "name": "Globex",
+  "productName": "Globex Command Center",
+  "colors": {
+    "primary": "#16a34a",
+    "secondary": "#15803d",
+    "accent": "#4ade80",
+    "background": "#111827"
+  }
+}
