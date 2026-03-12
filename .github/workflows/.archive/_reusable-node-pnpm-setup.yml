@@ -79,4 +79,4 @@ jobs:
 
       - name: Install dependencies
         if: ${{ inputs.install-deps }}
-        run: pnpm install --no-frozen-lockfile --prefer-offline
+        run: corepack enable && pnpm install --no-frozen-lockfile --prefer-offline

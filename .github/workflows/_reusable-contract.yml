@@ -36,7 +36,7 @@ jobs:
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Check GraphQL schema drift
         run: pnpm run graphql:schema:check

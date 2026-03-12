@@ -89,7 +89,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       # 1. Antigravity Governance Check
       - name: Antigravity Compliance

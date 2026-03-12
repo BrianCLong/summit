@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 18
       - name: Install dependencies
-        run: pnpm install
+        run: corepack enable && pnpm install
       - name: Test core AEL
         run: pnpm test
       # TODO: add pnpm test:ael

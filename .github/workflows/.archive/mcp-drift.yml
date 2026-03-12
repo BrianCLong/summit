@@ -20,7 +20,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
       - name: Run Drift Detector
         run: npx tsx scripts/monitoring/createos-drift.ts
       - name: Upload Drift Report

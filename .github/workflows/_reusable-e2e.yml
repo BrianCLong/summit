@@ -55,7 +55,7 @@ jobs:
         continue-on-error: true
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Bootstrap repo (make bootstrap)
         run: make bootstrap

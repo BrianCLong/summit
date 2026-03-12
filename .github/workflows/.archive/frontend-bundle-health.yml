@@ -51,7 +51,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --ignore-scripts
+        run: corepack enable && pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Build web app with bundle analysis
         working-directory: apps/web

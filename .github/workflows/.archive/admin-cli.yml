@@ -51,7 +51,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Type check
         run: pnpm typecheck
@@ -80,7 +80,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run tests
         run: pnpm test -- --coverage --passWithNoTests
@@ -110,7 +110,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Build
         run: pnpm build
@@ -153,7 +153,7 @@ jobs:
           path: tools/admin-cli/dist/
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run integration tests
         run: |
@@ -181,7 +181,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Audit dependencies
         run: pnpm audit --audit-level=high || true
@@ -217,7 +217,7 @@ jobs:
           path: tools/admin-cli/dist/
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Publish
         run: pnpm publish --access public --no-git-checks

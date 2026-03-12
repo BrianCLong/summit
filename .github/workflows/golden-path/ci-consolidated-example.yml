@@ -63,7 +63,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
   
   # Matrix-driven test execution - replaces 5 separate workflows
   test:

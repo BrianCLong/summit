@@ -19,7 +19,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: pnpm install
+        run: corepack enable && pnpm install
 
       - name: Build Events Producer
         run: pnpm --filter @intelgraph/events-producer build

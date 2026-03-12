@@ -26,7 +26,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: corepack enable && pnpm install
 
       - name: Build Application
         run: pnpm build

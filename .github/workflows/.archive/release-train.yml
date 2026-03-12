@@ -212,7 +212,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Create release branch
         id: branch
@@ -517,7 +517,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install script dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run Evidence Packager
         env:
@@ -571,7 +571,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Download release notes
         uses: actions/download-artifact@v4

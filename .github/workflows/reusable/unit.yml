@@ -29,7 +29,7 @@ jobs:
       - name: Configure pnpm store
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
       - name: Lint
         run: pnpm -w run lint
       - name: Typecheck
@@ -93,7 +93,7 @@ jobs:
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run unit tests
         run: pnpm run test:jest

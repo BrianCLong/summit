@@ -40,7 +40,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
       - name: Generate SBOM
         run: pnpm generate:sbom
       - name: Upload SBOM
@@ -63,7 +63,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
       - name: Generate Provenance
         run: pnpm generate:provenance
       - name: Upload Provenance

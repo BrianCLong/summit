@@ -26,7 +26,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --ignore-scripts
+        run: corepack enable && pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Run GA gate
         run: pnpm exec tsx scripts/run-ga-gate.ts

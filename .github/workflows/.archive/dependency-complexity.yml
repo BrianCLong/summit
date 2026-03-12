@@ -27,7 +27,7 @@ jobs:
           node-version: 20
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
       - name: Generate dependency graph
         run: node --loader ts-node/esm scripts/analyze-dependencies.ts
       - name: Enforce complexity threshold

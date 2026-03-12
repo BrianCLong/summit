@@ -26,7 +26,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Validate Release Policy
         run: pnpm lint:release-policy
@@ -48,7 +48,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Lint Reason Codes
         run: node scripts/release/lint-reason-codes.mjs
@@ -73,7 +73,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Validate LongRunJob Specs (dry-run)
         run: node scripts/ci/validate-longrun-job.mjs

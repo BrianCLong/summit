@@ -128,7 +128,7 @@ jobs:
       - name: Install dependencies
         if: inputs.install-deps
         working-directory: ${{ inputs.working-directory }}
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Setup Python (optional)
         if: inputs.python-version != ''

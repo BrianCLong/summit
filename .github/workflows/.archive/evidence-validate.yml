@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      - run: pnpm install --no-frozen-lockfile
+      - run: corepack enable && pnpm install --no-frozen-lockfile
       - name: Validate Fixtures (Pass)
         run: node tools/evidence/validate.mjs
         env:

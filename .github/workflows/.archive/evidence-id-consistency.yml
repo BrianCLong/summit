@@ -40,7 +40,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run Evidence ID Consistency Check
         run: pnpm run ci:evidence-id-consistency -- --sha=${{ github.sha }}

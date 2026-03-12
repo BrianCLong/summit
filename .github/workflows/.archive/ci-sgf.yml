@@ -36,7 +36,7 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
       - name: Build SGF
         run: |
           rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot

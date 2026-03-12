@@ -49,7 +49,7 @@ jobs:
           node-version: "20"
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run GA Verification
         run: pnpm ga:verify

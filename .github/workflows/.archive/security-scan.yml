@@ -32,7 +32,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run pnpm audit
         # Blocking on high severity vulnerabilities
@@ -110,7 +110,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run security ESLint
         run: pnpm exec eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0
@@ -135,7 +135,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master

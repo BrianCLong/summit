@@ -33,7 +33,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts --frozen-lockfile
+        run: corepack enable && pnpm install --ignore-scripts --frozen-lockfile
 
       - name: Run Tests
         run: pnpm --filter @intelgraph/extortion test

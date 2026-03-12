@@ -34,7 +34,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --prefer-offline
+        run: corepack enable && pnpm install --no-frozen-lockfile --prefer-offline
 
       - name: Build Storybook (web)
         run: pnpm --filter @intelgraph/web build-storybook

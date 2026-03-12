@@ -10,6 +10,6 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: corepack enable && pnpm install --frozen-lockfile
       - run: pnpm test:selfflow
       - run: pnpm eval:selfflow

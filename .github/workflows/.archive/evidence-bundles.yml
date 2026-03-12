@@ -31,7 +31,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --ignore-scripts
+        run: corepack enable && pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Compute timestamp
         id: meta

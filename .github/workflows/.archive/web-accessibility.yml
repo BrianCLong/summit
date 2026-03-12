@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: apps/web
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Accessibility lint
         working-directory: apps/web

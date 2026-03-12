@@ -35,7 +35,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Build schema validation tools
         run: |
@@ -280,7 +280,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Test sample queries
         run: |

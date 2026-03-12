@@ -64,7 +64,7 @@ jobs:
           node-version: "18"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Generate SBOM
         run: npm run generate:sbom
@@ -97,7 +97,7 @@ jobs:
           node-version: "18"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Build
         run: pnpm build
@@ -152,7 +152,7 @@ jobs:
           node-version: "18"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       - name: Deploy Preview Environment
         id: deploy

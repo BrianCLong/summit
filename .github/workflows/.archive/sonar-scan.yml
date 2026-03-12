@@ -36,7 +36,7 @@ jobs:
           version: latest
 
       - name: Install dependencies (root)
-        run: pnpm install --no-frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
 
       # Running tests to generate coverage report
       - name: Run Tests with Coverage
