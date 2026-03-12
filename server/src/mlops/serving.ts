@@ -98,13 +98,13 @@ export class ModelServingService {
 
   private async mockExecution(name: string, version: string, inputs: Record<string, any>): Promise<any> {
     // Simulate latency
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 20));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     if (name.includes('sentiment')) {
-        return { score: Math.random(), label: Math.random() > 0.5 ? 'positive' : 'negative' };
+        return { score: 0.75, label: 'positive' };
     }
     if (name.includes('fraud')) {
-        return { isFraud: Math.random() < 0.01, confidence: Math.random() };
+        return { isFraud: false, confidence: 0.95 };
     }
 
     return { result: 'mock_prediction', inputs_received: Object.keys(inputs).length };
