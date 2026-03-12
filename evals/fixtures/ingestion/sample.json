@@ -1,0 +1,15 @@
+{
+  "id": "doc_123",
+  "title": "Confidential Report",
+  "metadata": {
+    "author": "Alice Smith",
+    "date": "2023-10-01"
+  },
+  "content": {
+    "summary": "This is a summary.",
+    "details": "These are the details.",
+    "password": "supersecretpassword",
+    "ssn": "000-00-0000"
+  },
+  "tags": ["urgent", "review"]
+}
