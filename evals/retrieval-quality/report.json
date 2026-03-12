@@ -1,0 +1,99 @@
+{
+  "queries": [
+    {
+      "id": "q1",
+      "query": "What are the latest updates to the GraphRAG algorithm?",
+      "type": "in-distribution",
+      "metrics": {
+        "precision@3": 0.6666666666666666,
+        "recall@3": 0.6666666666666666,
+        "ndcg@3": 0.8400079830158563,
+        "hit_rate@3": 1,
+        "crowding_out@3": 0,
+        "precision@5": 0.6,
+        "recall@5": 1.0,
+        "ndcg@5": 0.9212478445981336,
+        "hit_rate@5": 1,
+        "crowding_out@5": 0,
+        "mrr": 1.0
+      }
+    },
+    {
+      "id": "q2",
+      "query": "How do I configure the OTel exporter?",
+      "type": "in-distribution",
+      "metrics": {
+        "precision@3": 0.0,
+        "recall@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit_rate@3": 0,
+        "crowding_out@3": 3,
+        "precision@5": 0.2,
+        "recall@5": 1.0,
+        "ndcg@5": 0.4306765580733931,
+        "hit_rate@5": 1,
+        "crowding_out@5": 3,
+        "mrr": 0.25
+      }
+    },
+    {
+      "id": "q3",
+      "query": "What is the capital of France?",
+      "type": "out-of-distribution",
+      "metrics": {
+        "precision@3": 0.0,
+        "recall@3": 1.0,
+        "ndcg@3": 1.0,
+        "hit_rate@3": 0,
+        "crowding_out@3": 0,
+        "precision@5": 0.0,
+        "recall@5": 1.0,
+        "ndcg@5": 1.0,
+        "hit_rate@5": 0,
+        "crowding_out@5": 0,
+        "mrr": 0.0
+      }
+    },
+    {
+      "id": "q4",
+      "query": "Explain quantum computing in simple terms.",
+      "type": "out-of-distribution",
+      "metrics": {
+        "precision@3": 0.0,
+        "recall@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit_rate@3": 0,
+        "crowding_out@3": 3,
+        "precision@5": 0.0,
+        "recall@5": 0.0,
+        "ndcg@5": 0.0,
+        "hit_rate@5": 0,
+        "crowding_out@5": 5,
+        "mrr": 0.0
+      }
+    },
+    {
+      "id": "q5",
+      "query": "List all active node types in Summit schema.",
+      "type": "in-distribution",
+      "metrics": {
+        "precision@3": 0.6666666666666666,
+        "recall@3": 1.0,
+        "ndcg@3": 1.0,
+        "hit_rate@3": 1,
+        "crowding_out@3": 0,
+        "precision@5": 0.4,
+        "recall@5": 1.0,
+        "ndcg@5": 1.0,
+        "hit_rate@5": 1,
+        "crowding_out@5": 0,
+        "mrr": 1.0
+      }
+    }
+  ],
+  "aggregate_metrics": {
+    "avg_in_distribution_mrr": 0.75,
+    "avg_out_distribution_mrr": 0.0,
+    "ood_degradation": 0.75
+  }
+}
