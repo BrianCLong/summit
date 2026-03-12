@@ -1,0 +1,1 @@
+author.email: jane.doe@example.com. author.name: Jane Doe. content.metrics[0].name: revenue. content.metrics[0].value: 1000. content.metrics[1].name: costs. content.metrics[1].value: 500. content.summary: This is a summary of Q3.. id: doc1. metadata.status: published. metadata.tags[0]: finance. metadata.tags[1]: q3. title: Summit Q3 Report.
