@@ -11,6 +11,7 @@ This guide outlines best practices for using the Summit API Gateway effectively 
 Follow REST conventions for predictable, intuitive APIs:
 
 **Resource Naming:**
+
 ```
 Good:
   GET /api/v1/investigations
@@ -26,6 +27,7 @@ Avoid:
 ```
 
 **Use HTTP Methods Correctly:**
+
 - `GET` - Retrieve resources (idempotent)
 - `POST` - Create new resources
 - `PUT` - Update entire resource (idempotent)
@@ -42,12 +44,14 @@ Always version your APIs:
 ```
 
 **Version in URL** (Recommended):
+
 ```
 GET /api/v1/investigations
 GET /api/v2/investigations
 ```
 
 **Version in Header** (Alternative):
+
 ```
 GET /api/investigations
 Accept-Version: v1
@@ -101,19 +105,20 @@ GET /api/v1/investigations?fields=id,title,status,createdAt
 
 ```javascript
 // Good
-const response = await fetch('/api/v1/investigations', {
+const response = await fetch("/api/v1/investigations", {
   headers: {
-    'Authorization': `Bearer ${accessToken}`
-  }
+    Authorization: `Bearer ${accessToken}`,
+  },
 });
 
 // Bad - No authentication
-const response = await fetch('/api/v1/investigations');
+const response = await fetch("/api/v1/investigations");
 ```
 
 ### 2. Use HTTPS
 
 **Production:**
+
 ```
 https://api.summit.gov  ✓
 http://api.summit.gov   ✗
@@ -126,13 +131,13 @@ Always validate and sanitize input:
 ```typescript
 // Input validation
 const schema = {
-  title: { type: 'string', minLength: 1, maxLength: 200 },
-  priority: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
-  assignedTo: { type: 'string', format: 'uuid' },
+  title: { type: "string", minLength: 1, maxLength: 200 },
+  priority: { type: "string", enum: ["low", "medium", "high", "critical"] },
+  assignedTo: { type: "string", format: "uuid" },
 };
 
 // Sanitize HTML
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 const clean = DOMPurify.sanitize(userInput);
 ```
 
@@ -142,10 +147,10 @@ Respect rate limits:
 
 ```javascript
 // Check rate limit headers
-const remaining = response.headers.get('RateLimit-Remaining');
-const resetTime = response.headers.get('RateLimit-Reset');
+const remaining = response.headers.get("RateLimit-Remaining");
+const resetTime = response.headers.get("RateLimit-Reset");
 
-if (remaining === '0') {
+if (remaining === "0") {
   const wait = new Date(resetTime) - new Date();
   await sleep(wait);
 }
@@ -181,10 +186,10 @@ Last-Modified: Wed, 15 Nov 2023 12:45:26 GMT
 
 ```javascript
 // Check ETag
-const response = await fetch('/api/v1/investigations/123', {
+const response = await fetch("/api/v1/investigations/123", {
   headers: {
-    'If-None-Match': storedETag
-  }
+    "If-None-Match": storedETag,
+  },
 });
 
 if (response.status === 304) {
@@ -198,10 +203,10 @@ if (response.status === 304) {
 Enable compression for large responses:
 
 ```javascript
-const response = await fetch('/api/v1/investigations', {
+const response = await fetch("/api/v1/investigations", {
   headers: {
-    'Accept-Encoding': 'gzip, deflate, br'
-  }
+    "Accept-Encoding": "gzip, deflate, br",
+  },
 });
 ```
 
@@ -317,10 +322,10 @@ Include request IDs for tracking:
 ```javascript
 const requestId = crypto.randomUUID();
 
-const response = await fetch('/api/v1/investigations', {
+const response = await fetch("/api/v1/investigations", {
   headers: {
-    'X-Request-ID': requestId
-  }
+    "X-Request-ID": requestId,
+  },
 });
 
 console.log(`Request ${requestId}: ${response.status}`);
@@ -329,9 +334,9 @@ console.log(`Request ${requestId}: ${response.status}`);
 ### 2. Structured Logging
 
 ```javascript
-logger.info('API request', {
-  method: 'POST',
-  path: '/api/v1/investigations',
+logger.info("API request", {
+  method: "POST",
+  path: "/api/v1/investigations",
   requestId,
   userId: user.id,
   duration: 150,
@@ -342,6 +347,7 @@ logger.info('API request', {
 ### 3. Metrics Collection
 
 Track key metrics:
+
 - Request rate
 - Error rate
 - Latency (p50, p95, p99)
@@ -387,10 +393,12 @@ Provide clear migration guides:
 ## Migrating from v1 to v2
 
 ### Breaking Changes
+
 1. `status` field renamed to `state`
 2. Date format changed to ISO 8601
 
 ### Migration Steps
+
 1. Update status field references
 2. Update date parsing logic
 3. Test with v2 sandbox
@@ -404,39 +412,40 @@ Provide clear migration guides:
 Test against sandbox before production:
 
 ```javascript
-const baseURL = process.env.NODE_ENV === 'production'
-  ? 'https://api.summit.gov'
-  : 'https://api-sandbox.summit.gov';
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? "https://api.summit.gov"
+    : "https://api-sandbox.summit.gov";
 ```
 
 ### 2. Integration Tests
 
 ```typescript
-describe('Investigation API', () => {
-  it('should create investigation', async () => {
-    const response = await client.post('/api/v1/investigations', {
-      title: 'Test Investigation',
-      priority: 'high',
+describe("Investigation API", () => {
+  it("should create investigation", async () => {
+    const response = await client.post("/api/v1/investigations", {
+      title: "Test Investigation",
+      priority: "high",
     });
 
     expect(response.status).toBe(201);
-    expect(response.data).toHaveProperty('id');
-    expect(response.data.title).toBe('Test Investigation');
+    expect(response.data).toHaveProperty("id");
+    expect(response.data.title).toBe("Test Investigation");
   });
 
-  it('should handle rate limiting', async () => {
+  it("should handle rate limiting", async () => {
     // Make requests up to limit
     for (let i = 0; i < 100; i++) {
-      await client.get('/api/v1/investigations');
+      await client.get("/api/v1/investigations");
     }
 
     // Next request should be rate limited
     try {
-      await client.get('/api/v1/investigations');
-      fail('Should have been rate limited');
+      await client.get("/api/v1/investigations");
+      fail("Should have been rate limited");
     } catch (error) {
       expect(error.response.status).toBe(429);
-      expect(error.response.headers).toHaveProperty('retry-after');
+      expect(error.response.headers).toHaveProperty("retry-after");
     }
   });
 });
@@ -470,16 +479,16 @@ class SummitAPI {
 
   constructor(config: { apiKey: string; baseURL?: string }) {
     this.apiKey = config.apiKey;
-    this.baseURL = config.baseURL || 'https://api.summit.gov';
+    this.baseURL = config.baseURL || "https://api.summit.gov";
   }
 
   private async request(method: string, path: string, data?: any) {
     const response = await fetch(`${this.baseURL}${path}`, {
       method,
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'summit-sdk/1.0.0',
+        Authorization: `Bearer ${this.apiKey}`,
+        "Content-Type": "application/json",
+        "User-Agent": "summit-sdk/1.0.0",
       },
       body: data ? JSON.stringify(data) : undefined,
     });
@@ -492,7 +501,7 @@ class SummitAPI {
   }
 
   async getInvestigation(id: string) {
-    return this.request('GET', `/api/v1/investigations/${id}`);
+    return this.request("GET", `/api/v1/investigations/${id}`);
   }
 }
 ```
@@ -518,19 +527,19 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvestigationList'
+                $ref: "#/components/schemas/InvestigationList"
 ```
 
 ### 2. Code Examples
 
 Include code examples in documentation:
 
-```markdown
+````markdown
 ## Create Investigation
 
 ```bash
@@ -542,6 +551,7 @@ curl -X POST https://api.summit.gov/api/v1/investigations \
     "priority": "high"
   }'
 ```
+````
 
 ### 3. Interactive Documentation
 
@@ -565,6 +575,7 @@ Respect data classification levels:
 ### 2. Audit Logging
 
 All API calls are logged for compliance:
+
 - User/service identification
 - Timestamp
 - Action performed
@@ -575,6 +586,7 @@ All API calls are logged for compliance:
 ### 3. Data Retention
 
 Understand data retention policies:
+
 - Logs: 7 years
 - Audit trails: Permanent
 - Temporary data: 90 days
@@ -598,6 +610,7 @@ Understand data retention policies:
 - [ ] Follow data classification rules
 
 For questions or support:
+
 - Portal: https://api.summit.gov/portal
 - Email: api-support@summit.gov
 - Documentation: https://docs.summit.gov/api
