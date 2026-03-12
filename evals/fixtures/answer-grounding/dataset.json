@@ -1,0 +1,90 @@
+{
+  "test_cases": [
+    {
+      "id": "case_1_fully_grounded",
+      "answer": "The user service depends on the authentication service. The user service is deployed in the prod environment.",
+      "graph": {
+        "nodes": [
+          {
+            "id": "n1",
+            "type": "service",
+            "name": "user service",
+            "environment": "prod",
+            "authority": ["team-auth"],
+            "lifecycle": "active"
+          },
+          {
+            "id": "n2",
+            "type": "service",
+            "name": "authentication service",
+            "environment": "prod",
+            "authority": ["team-auth"],
+            "lifecycle": "active"
+          }
+        ],
+        "edges": [
+          {
+            "id": "e1",
+            "type": "depends_on",
+            "from": "n1",
+            "to": "n2",
+            "authority": ["team-auth"],
+            "provenance_required": true
+          }
+        ],
+        "provenance": {
+          "source": "manual",
+          "timestamp": "2024-01-01T00:00:00Z",
+          "actor": "admin",
+          "evidence": ["e1"]
+        }
+      }
+    },
+    {
+      "id": "case_2_fabrication",
+      "answer": "The reporting service reads from the cache database. The cache database is located in the dev environment.",
+      "graph": {
+        "nodes": [
+          {
+            "id": "n1",
+            "type": "service",
+            "name": "reporting service",
+            "environment": "prod",
+            "authority": ["team-reporting"],
+            "lifecycle": "active"
+          }
+        ],
+        "edges": [],
+        "provenance": {
+          "source": "manual",
+          "timestamp": "2024-01-01T00:00:00Z",
+          "actor": "admin",
+          "evidence": ["e1"]
+        }
+      }
+    },
+    {
+      "id": "case_3_contradiction",
+      "answer": "The payment service is deployed in the staging environment.",
+      "graph": {
+        "nodes": [
+          {
+            "id": "n1",
+            "type": "service",
+            "name": "payment service",
+            "environment": "prod",
+            "authority": ["team-billing"],
+            "lifecycle": "active"
+          }
+        ],
+        "edges": [],
+        "provenance": {
+          "source": "manual",
+          "timestamp": "2024-01-01T00:00:00Z",
+          "actor": "admin",
+          "evidence": ["e1"]
+        }
+      }
+    }
+  ]
+}
