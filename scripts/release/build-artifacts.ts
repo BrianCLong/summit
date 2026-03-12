@@ -28,6 +28,10 @@ const collectArtifacts = (workspaces: any[], outDir: string): string[] => {
   for (const workspace of workspaces) {
     const distPath = path.join(workspace.path, 'dist');
     if (fs.existsSync(distPath)) {
+      // Skip if distPath is the outDir or a parent/child of outDir
+      if (path.resolve(distPath).startsWith(path.resolve(outDir))) {
+        continue;
+      }
       const packageOutDir = path.join(outDir, workspace.name);
       fs.mkdirSync(packageOutDir, { recursive: true });
       const files = fs.readdirSync(distPath);
@@ -86,7 +90,8 @@ const main = () => {
 
   let checksums = '';
   for (const artifact of artifacts) {
-    const content = options.dryRun ? 'dry-run' : fs.readFileSync(artifact);
+    const isDir = !options.dryRun && fs.statSync(artifact).isDirectory();
+    const content = options.dryRun ? 'dry-run' : (isDir ? 'dir' : fs.readFileSync(artifact));
     const sha256 = crypto.createHash('sha256').update(content).digest('hex');
     const relativePath = path.relative(outDir, artifact);
     manifest.artifacts[relativePath] = { sha256 };
