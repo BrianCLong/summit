@@ -1,9 +1,13 @@
 name: Release GA
 
+# SUPERSEDED: The canonical GA release pipeline is release-ga-pipeline.yml.
+# That workflow handles tag push events with full lineage, publish-guard,
+# provenance signing, and two-person approval.
+#
+# This workflow is retained for manual/emergency dispatch only.
+# Do NOT trigger this on push tags - that would race with release-ga-pipeline.yml.
+
 on:
-  push:
-    tags:
-      - "v*.*.*"
   workflow_dispatch:
     inputs:
       tag:

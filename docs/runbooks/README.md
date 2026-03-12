@@ -1,6 +1,20 @@
 # Operational Runbooks
 
-Automated index of available runbooks.
+## Start Here
+
+- **[OPERATOR_START_HERE.md](OPERATOR_START_HERE.md)** — Canonical entrypoint for operators and reviewers
+
+## Deploy / Release / Rollback
+
+- **[POST_DEPLOY_VALIDATION.md](POST_DEPLOY_VALIDATION.md)** — Post-deploy validation flow and telemetry signals
+- **[ROLLBACK.md](ROLLBACK.md)** — Canary rollback runbook
+- **[rollback-procedure.md](rollback-procedure.md)** — Fast rollback procedure
+- **[DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md)** — Full deployment runbook
+- **[RELEASE_GA.md](RELEASE_GA.md)** — GA release runbook
+- **[GA_RUNBOOK.md](GA_RUNBOOK.md)** — GA operational runbook
+- **[GA_ESCALATION_MATRIX.md](GA_ESCALATION_MATRIX.md)** — Escalation matrix
+
+## All Runbooks
 
 - [502-storm-response.md](502-storm-response.md)
 - [AGENTIC_OPS.md](AGENTIC_OPS.md)
