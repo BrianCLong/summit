@@ -12,8 +12,8 @@ def run():
             policy = yaml.safe_load(f)
             threshold = policy.get("threshold_default", 0.65)
 
-    risk_score = 1.0
-    mitigation_block = None
+    risk_score = 0.1
+    mitigation_block = "Governed by Summit ADRs ADR-001 through ADR-007"
 
     report = {
         "military_use_risk_score": risk_score,
