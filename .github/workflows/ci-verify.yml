@@ -1,0 +1,50 @@
+name: CI Verify INFOWAR
+
+on:
+  pull_request:
+    paths:
+      - 'src/graphrag/evidence/**'
+      - 'src/connectors/**'
+      - 'docs/operations/**'
+      - 'docs/architecture/**'
+      - 'evidence/**'
+
+jobs:
+  verify-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Validate Evidence Schemas
+        run: npx tsx .github/scripts/validate-evidence.ts evidence
+
+  verify-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Run Evidence & Connector Tests
+        run: NODE_OPTIONS=--experimental-vm-modules pnpm jest tests/graphrag/evidence/evidence.spec.ts tests/connectors/rss.spec.ts tests/connectors/csv_infowar.spec.ts
+
+  verify-never-log:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Run Never-Log Scan
+        run: npx tsx .github/scripts/never-log-scan.ts evidence

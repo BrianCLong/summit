@@ -1,0 +1,11 @@
+# Info Warfare Situational Picture GA Acceptance Checks
+
+milestone: infowar-sitrep-ga
+description: Initial rollout of the monthly SITREP and narrative graph ontology.
+
+acceptance_criteria:
+  - schema_validation: "JSON schemas for evidence and SITREPs must pass validation."
+  - evidence_bundle_generated: "E2E tests must produce a valid evidence bundle containing required files (report.json, metrics.json, stamp.json, index.json)."
+  - policy_gates_passed: "Policy gates for confidence levels and evidence referencing must pass."
+  - never_log_scan: "No PII or raw identifiers in logs or analytical outputs."
+  - doc_completeness: "SITREP template, narrative graph architecture, and guardrails docs are present and reviewed."

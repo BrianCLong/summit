@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Index",
+  "type": "object",
+  "required": ["version", "item_slug", "entries"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "enum": ["1.0"]
+    },
+    "item_slug": {
+      "type": "string",
+      "enum": ["INFOWAR"]
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "files"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVD-INFOWAR-[A-Z]+-[0-9]{3}$"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
