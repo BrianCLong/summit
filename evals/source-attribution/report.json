@@ -1,0 +1,49 @@
+{
+  "metrics": {
+    "attribution_precision": 0.8,
+    "source_verification_rate": 0.5,
+    "total_test_cases": 4
+  },
+  "test_case_results": [
+    {
+      "id": "tc1_accurate_citation",
+      "correct_citations": 1,
+      "total_citations": 1,
+      "points_to_correct_docs": true,
+      "passage_contains_claim": true,
+      "factors_reliability": true,
+      "acknowledges_conflicts": false,
+      "distinguishes_primary_secondary": true
+    },
+    {
+      "id": "tc2_hallucinated_citation",
+      "correct_citations": 0,
+      "total_citations": 1,
+      "points_to_correct_docs": false,
+      "passage_contains_claim": false,
+      "factors_reliability": false,
+      "acknowledges_conflicts": false,
+      "distinguishes_primary_secondary": false
+    },
+    {
+      "id": "tc3_conflicting_sources",
+      "correct_citations": 2,
+      "total_citations": 2,
+      "points_to_correct_docs": true,
+      "passage_contains_claim": true,
+      "factors_reliability": true,
+      "acknowledges_conflicts": true,
+      "distinguishes_primary_secondary": true
+    },
+    {
+      "id": "tc4_passage_does_not_contain_claim",
+      "correct_citations": 1,
+      "total_citations": 1,
+      "points_to_correct_docs": true,
+      "passage_contains_claim": false,
+      "factors_reliability": false,
+      "acknowledges_conflicts": false,
+      "distinguishes_primary_secondary": false
+    }
+  ]
+}
