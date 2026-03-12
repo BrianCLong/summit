@@ -1,33 +1,62 @@
 # Rollback Runbook
 
 ## Overview
-This runbook describes the procedure for rolling back a release, specifically focusing on the canary rollback scenario.
 
-## Triggers
-- Canary SLO violation (Error Rate > 1% or Latency p95 > 1s).
+This runbook defines the production rollback sequence for release changes. Use this together with `docs/runbooks/release-rc-readiness.md` for pre-cut rehearsal and evidence requirements.
+
+## Rollback Triggers
+
+- Canary SLO violation (error rate > 1% or latency p95 > 1s).
 - Synthetic probe failure in canary environment.
-- Manual determination of critical defect.
+- Critical defect confirmed by release captain or incident commander.
 
 ## Immediate Actions
-1. **Stop the Line**: Pause any ongoing pipelines.
-2. **Revert Traffic**: Switch 100% traffic back to the stable baseline.
-   ```bash
-   # Example command (adjust for actual ingress controller)
-   kubectl patch virtualservice summit-api -n production --type='json' -p='[{"op": "replace", "path": "/spec/http/0/route/0/weight", "value": 100}, {"op": "replace", "path": "/spec/http/0/route/1/weight", "value": 0}]'
-   ```
-3. **Verify Health**: Check `/health` endpoint of stable version.
-   ```bash
-   curl -I https://api.summit.intelgraph.io/health
-   ```
 
-## Post-Rollback
-1. Capture logs from failed canary pods.
-2. Generate incident report using `scripts/incident-report.ts`.
-3. Mark the release version as bad in the registry.
+1. Stop active promotion pipeline.
+2. Shift traffic to stable version.
+3. Validate stable service health.
+4. Capture rollback evidence and incident references.
 
-## Automation
-The auto-rollback mechanism is triggered by Prometheus alerts:
-- `CanaryHighErrorRate`
-- `CanaryHighLatency`
+## Execution Steps
 
-Check `runbooks/maestro-rollback.md` for orchestrator-specific details.
+1) Pause promotion and identify stable target revision.
+
+2) Perform rollback:
+
+```bash
+bash scripts/rollback_deployment.sh <release> <namespace>
+```
+
+3) If canary controls are in use, execute canary rollback playbook:
+
+```bash
+bash scripts/release/canary-rollback-playbook.sh --help
+```
+
+4) Validate rollback:
+
+```bash
+bash scripts/validate-rollback.sh --verify-service-health --confirm-customer-access --detailed
+```
+
+## Post-Rollback Evidence (required)
+
+- rollback command transcript
+- validation output from `scripts/validate-rollback.sh`
+- proof that stable revision is serving production traffic
+- incident timeline entry referencing rollback start and completion
+
+## Exit Criteria
+
+Rollback is complete only when all criteria are met:
+
+- traffic fully restored to stable revision
+- health checks are green for 15 minutes
+- critical-path smoke checks pass
+- incident commander confirms customer impact is mitigated
+
+## Follow-through
+
+- Open or update incident report with root-cause hypothesis.
+- Mark bad release version as blocked from promotion.
+- Schedule remediation and re-release validation.

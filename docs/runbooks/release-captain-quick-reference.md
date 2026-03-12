@@ -121,6 +121,14 @@
 - **Deployments**: `/deployments`
 - **Issues**: `/issues?q=label:release-captain`
 
+
+## Release Candidate Control Surface
+
+- Canonical readiness gates: `docs/runbooks/release-rc-readiness.md`
+- Go/no-go gate checklist: `docs/runbooks/go-no-go-checklist.md`
+- Rollback execution and validation: `docs/runbooks/ROLLBACK.md` and `scripts/validate-rollback.sh`
+- Post-deploy smoke validation: `make smoke`
+
 ## Contact Information
 
 | Issue Type  | Contact        | Response Time |
