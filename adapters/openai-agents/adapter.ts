@@ -1,4 +1,5 @@
 import { SummitAgentAdapter, Trace, Metrics } from '../../sdk/agent-adapter';
+import { convertToTrace, convertToMetrics } from '../conversion';
 
 export class OpenAIAgentsAdapter implements SummitAgentAdapter {
   private events: any[] = [];
@@ -14,14 +15,10 @@ export class OpenAIAgentsAdapter implements SummitAgentAdapter {
   }
 
   async emitTrace(): Promise<Trace> {
-    return {
-      id: `oa-${Date.now()}`,
-      timestamp: Date.now(),
-      events: [...this.events]
-    };
+    return convertToTrace(`oa-${Date.now()}`, this.events);
   }
 
   async emitMetrics(): Promise<Metrics> {
-    return { ...this.metrics };
+    return convertToMetrics(this.metrics.invocations, this.metrics.tokens, this.metrics.latencyMs);
   }
 }
