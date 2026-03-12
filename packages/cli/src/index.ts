@@ -20,6 +20,7 @@ import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
 import { agentsCommands } from './commands/agents.js';
 import { doctor } from './commands/doctor.js';
+import { personasCommands } from './commands/personas.js';
 import { orchCommands } from './commands/orch.js';
 import { replayCommand } from './commands/replay.js';
 import { loadConfig, getConfig } from './config.js';
@@ -48,6 +49,7 @@ program
   .addCommand(configCommands.init);
 
 program.addCommand(doctor);
+program.addCommand(personasCommands);
 
 // Policy commands
 program
