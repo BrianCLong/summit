@@ -1,0 +1,6 @@
+{
+  "id": "adv-multilingual-001",
+  "type": "multilingual",
+  "baseline": "The unauthorized_access_sim was successful.",
+  "adversarial": "El simulacro de acceso no autorizado (unauthorized_access_sim) fue exitoso."
+}
