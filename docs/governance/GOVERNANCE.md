@@ -1,91 +1,50 @@
-Owner: Governance
-Last-Reviewed: 2026-03-11
-Evidence-IDs: EVD-GOV-001
+Owner: Governance Team
+Last-Reviewed: 2026-03-12
+Evidence-IDs: GA-EVIDENCE-GOVERNANCE-SPEC
 Status: active
 
-# Summit Governance & Contribution Specification
+# Summit Governance Specification
 
-Welcome to the Summit governance and contribution specifications. This document outlines the governance model, contribution guidelines, PR review processes, branching strategies, code ownership, and decision-making frameworks that ensure the security, reliability, and velocity of the Summit platform.
+This document serves as the canonical governance specification for the Summit repository. It defines how contributors and maintainers collaborate to ensure system integrity, security, and velocity.
 
-## 1. Golden Main Definitions
-
-The `main` branch is the **Golden Main**—the definitive, auditable, and constantly deployable state of the repository.
-
-- **Deployable-First**: The `main` branch must always be deployable. Direct commits to `main` are strictly prohibited.
-- **Evidence-Backed**: Every change entering `main` must carry deterministic evidence validating the change.
-- **Continuous Compliance**: `main` must constantly satisfy all security, performance, and governance checks defined in `docs/SUMMIT_READINESS_ASSERTION.md`.
+## 1. Golden Main Principle
+The `main` branch is the "Golden Main". It must remain in a stable, deployable state at all times.
+- Direct commits to `main` are strictly prohibited.
+- All changes must be integrated via Pull Requests (PRs).
+- Failed CI runs must never be merged into `main`. Force-merging is a violation of governance policy.
 
 ## 2. Contribution Guidelines
-
-We welcome contributions from human engineers and specialized AI agents. All contributors must follow these strict guidelines:
-
-- **Atomic PRs**: One conceptual change per Pull Request.
-- **Conventional Commits**: Commit messages must adhere to the Conventional Commits standard (e.g., `feat: ...`, `fix: ...`, `docs: ...`).
-- **Secret Hygiene**: Zero tolerance for secrets in code or history. Use credential helpers and `.env` files exclusively.
-- **Issue Tracking**: Branch names must follow `type/scope/description` (e.g., `feat/ingest/add-rss-connector`).
-
-### Co-Authoring & AI Agent Contributions
-
-- AI agents are treated as contributors and must adhere strictly to `AGENTS.md`.
-- Changes generated with AI assistance must include `Co-authored-by` trailers in commit messages.
-- AI contributors like "Jules" operate within specific, bounded surfaces.
+Contributors should refer to the [CONTRIBUTING.md](../../CONTRIBUTING.md) file for setup and local development instructions.
+- Create feature branches originating from the latest `main`.
+- Branch naming convention: `feature/<description>`, `bugfix/<description>`, or `docs/<description>`.
+- Use descriptive commit messages following the Conventional Commits specification.
 
 ## 3. Pull Request Review Process
+- All PRs require at least one approving review from an authorized code owner.
+- PR descriptions must articulate:
+  - **Commander's Intent:** What gap is closed or capability added?
+  - **Abuse Analysis:** How is the change secured against misuse?
+- Reviews must prioritize security boundaries, deterministic evidence output, and operational resilience.
+- Do not approve PRs with unresolved discussions or failing checks.
 
-Every PR must be reviewed and pass strict Continuous Integration (CI) gates before merging.
-
-### Required CI Checks
-- **Fast Lane**: Linting and Unit tests (`pnpm test`) — blocking.
-- **Golden Path**: Full stack integration and smoke tests (`make smoke`) — blocking.
-- **Security**: SAST, DAST, and Secret Scanning — blocking.
-- **Governance Integrity**: `pnpm ci:docs-governance` and other governance assertions — blocking.
-
-### Review and Merge Rules
-- **Peer Review**: At least one approved review from an authorized Code Owner is required.
-- **Evidence Bundle**: A complete evidence bundle proving the change's validity must be attached to the PR.
-- **Commander's Intent**: PR descriptions must detail the security or functional gap closed.
-
-## 4. Branching Strategy
-
-Our branching model minimizes drift and protects the Golden Main.
-
-- `main`: The heavily protected, always-deployable Golden Main.
-- `feat/`, `fix/`, `docs/`: Short-lived work branches. Must be frequently rebased onto `main`.
-- `release/vX.Y`: Stabilization branches for upcoming deployments. Only cherry-picked fixes are permitted.
-- `hotfix/<issue>`: Emergency branches cut directly from `main` and cherry-picked into active releases.
+## 4. Required CI Checks
+Before a PR can be merged, the following mandatory gates must pass:
+1. **Agent Policy Check (ACP):** Validates deterministic execution constraints.
+2. **Evidence Schema Check:** Ensures evidence artifacts conform to registered schemas.
+3. **S-AOS Enforcement:** Verifies system homeostasis and continuity laws.
+4. **Security & PII Scans:** Validates that no credentials or PII leak into logs or artifacts.
 
 ## 5. Release Cadence
+- Merges to `main` trigger automated builds.
+- Releases are tagged sequentially following Semantic Versioning (SemVer) principles.
+- High-severity security patches are expedited outside the standard release cadence, maintaining mandatory CI gates.
 
-Summit operates on a structured, predictable release train:
+## 6. Code Ownership
+- Specific subdirectories and functional domains are protected by strict code ownership rules.
+- Review the `CODEOWNERS` file in the repository root for domain-specific maintainers.
+- Architectural Decision Records (ADRs) are maintained in `docs/adr/`. Superseded decisions must be updated rather than deleted.
 
-- **Release Cadence**: Weekly staging cut every Tuesday at 18:00 UTC.
-- **Production Deployments**: Every other Thursday after a mandatory 48-hour soak period and a green merge train.
-- **Release Captain**: The automated Release Captain ("Jules") manages merge trains, tagging, and orchestrates release freezes during active incidents.
-
-## 6. Code Ownership and Accountability
-
-Summit uses a distributed, declarative ownership model driven by `CODEOWNERS` and directory-level RACI policies.
-
-- **Platform Engineering**: Accountable for CI/CD, infrastructure, and core gates.
-- **Security Council**: Consulted on all architectural changes and accountable for security assertions.
-- **Governance**: Accountable for policy-as-code and documentation integrity.
-
-### Governance Approvals
-Major architectural or risk-altering changes are routed to the "Council of Solvers" (a set of specialized AI agents and core maintainers) for final approval.
-
-## 7. Decision-Making & Reconciliation Policies
-
-Decisions in the Summit ecosystem favor **Provenance over Prediction**.
-
-- **Architectural Changes**: Require an Architecture Decision Record (ADR) in `docs/adr/`. When decisions evolve, ADRs are marked "Superseded," not deleted.
-- **Reconciliation**: If a conflict or stalled recovery occurs, decisions are escalated to the designated Tab Allocation Matrix lane owner.
-- **Archival Discipline**: Deprecated features or stale investigations must be formally archived, never silently deleted, preserving institutional memory and compliance auditability.
-
-## 8. Incident Response and Exceptions
-
-During incidents, the standard governance model adapts:
-- Release Captain freezes all non-essential merge trains.
-- Exceptions to governance rules must be logged strictly in `docs/governance/EXCEPTION_REGISTER.md` with cryptographic/immutable evidence.
-
----
-*For canonical rules regarding Summit governance, refer to this document and its associated specifications in `docs/governance/`.*
+## 7. Decision-Making & Conflict Resolution
+- Technical disputes are resolved through consensus within the PR review phase.
+- If consensus cannot be reached, the issue is escalated to the core maintainers.
+- Changes impacting security boundaries or governance rules require explicit authorization from the Governance Team.

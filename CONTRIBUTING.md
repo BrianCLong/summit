@@ -149,10 +149,9 @@ source ~/.bashrc
 
 ## ⚖️ Governance
 
-All contributions, decision-making, code ownership, PR review processes, and release strategies are governed by our official specifications. Please refer to:
+For detailed rules on how maintainers and contributors collaborate, including the PR review process, branching strategies, and mandatory CI gates, you must read the canonical [Summit Governance Specification](docs/governance/GOVERNANCE.md).
 
-- **[Canonical Governance Specification](docs/governance/GOVERNANCE.md)**: The single source of truth for Golden Main rules, branching strategies, and accountability.
-- **[Code of Conduct](CODE_OF_CONDUCT.md)**: Adhere to our community standards.
-- **[License](CONTRIBUTOR_LICENSE_AGREEMENT.md)**: Contributions are accepted under the terms of our CLA.
+- **Code of Conduct**: Please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
+- **License**: Contributions are accepted under the terms in [`CONTRIBUTOR_LICENSE_AGREEMENT.md`](CONTRIBUTOR_LICENSE_AGREEMENT.md).
 
 Thank you for building with us!
