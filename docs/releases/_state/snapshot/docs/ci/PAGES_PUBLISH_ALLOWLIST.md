@@ -39,6 +39,7 @@ These files MAY be published to GitHub Pages:
 | `error_budget.json`                 | Error budget metrics (counts-only)                  | Public      |
 | `error_budget.html`                 | Error budget panel (HTML)                           | Public      |
 | `error_budget.md`                   | Error budget panel (Markdown)                       | Public      |
+| `governance_changes.json`           | Governance hash changes (counts-only)               | Public      |
 
 ### Notes on Allowed Content
 
@@ -103,6 +104,13 @@ These files MAY be published to GitHub Pages:
   - Tier status banner
   - Exhaustion alerts (when applicable)
   - All counts-only, no sensitive content
+
+- **`governance_changes.json`** contains:
+  - Governance hash change events (timestamps and run IDs only)
+  - Change counts for 7-day and 30-day windows
+  - Current governance hash (short form, 12 chars)
+  - No policy content or configuration details
+  - Safe for publication as counts-only data
 
 ---
 
