@@ -1,0 +1,44 @@
+{
+  "rules": [
+    {
+      "name": "High Error Rate",
+      "metric": "error_rate",
+      "threshold": 0.05,
+      "operator": ">",
+      "severity": "critical",
+      "runbook_url": "https://runbooks.intelgraph.io/graphql-high-error-rate.md"
+    },
+    {
+      "name": "Latency Spike",
+      "metric": "latency_ms",
+      "threshold": 200,
+      "operator": ">",
+      "severity": "warning",
+      "runbook_url": "https://runbooks.intelgraph.io/gateway-latency.md"
+    },
+    {
+      "name": "Ingestion Backlog High",
+      "metric": "ingestion_backlog",
+      "threshold": 500,
+      "operator": ">",
+      "severity": "warning",
+      "runbook_url": "https://runbooks.intelgraph.io/ingestion-stuck.md"
+    },
+    {
+      "name": "Database Connection Failure",
+      "metric": "db_connected",
+      "threshold": 1,
+      "operator": "<",
+      "severity": "critical",
+      "runbook_url": "https://runbooks.intelgraph.io/database-failure-recovery.md"
+    },
+    {
+      "name": "Low Memory Available",
+      "metric": "memory_available_mb",
+      "threshold": 512,
+      "operator": "<",
+      "severity": "warning",
+      "runbook_url": "https://runbooks.intelgraph.io/performance-troubleshooting.md"
+    }
+  ]
+}
