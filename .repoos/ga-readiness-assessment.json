@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-03-12T00:00:00Z",
+  "top_risk_category": "Governance control gaps",
+  "top_risk_description": "CI lacked a mandatory gate that blocks unresolved merge conflict markers in non-documentation changes, allowing malformed workflow and governance files to enter required-check pipelines.",
+  "risk_score": 88,
+  "recommended_action": "Add a pull_request conflict marker gate to CI that fails when changed non-doc files contain merge conflict markers.",
+  "expected_risk_reduction": "High: prevents malformed YAML/policy/script merges from bypassing baseline CI quality checks."
+}
