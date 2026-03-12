@@ -1,0 +1,55 @@
+[
+  {
+    "id": "CL-001",
+    "description": "English query against Spanish-language source documents",
+    "query": "What is the capital of Spain?",
+    "query_language": "en",
+    "expected_answer": "Madrid",
+    "sources": [
+      {"id": "s1", "language": "es", "text": "Madrid es la capital y ciudad más poblada de España."}
+    ]
+  },
+  {
+    "id": "CL-002",
+    "description": "Mixed-language source corpora",
+    "query": "Who is the CEO?",
+    "query_language": "en",
+    "expected_answer": "Jane Doe",
+    "sources": [
+      {"id": "s2", "language": "en", "text": "The company announced leadership changes yesterday."},
+      {"id": "s3", "language": "es", "text": "La directora ejecutiva Jane Doe anunció los resultados financieros."},
+      {"id": "s4", "language": "fr", "text": "Jane Doe a été nommée PDG le mois dernier."}
+    ]
+  },
+  {
+    "id": "CL-003",
+    "description": "Entity names with non-ASCII characters",
+    "query": "What is the population of México?",
+    "query_language": "en",
+    "expected_answer": "126 million",
+    "sources": [
+      {"id": "s5", "language": "es", "text": "México tiene una población de aproximadamente 126 millones de habitantes."}
+    ]
+  },
+  {
+    "id": "CL-004",
+    "description": "Translated entity matching",
+    "query": "Who invented the telephone?",
+    "query_language": "en",
+    "expected_answer": "Alexander Graham Bell",
+    "sources": [
+      {"id": "s6", "language": "es", "text": "El teléfono fue inventado por Alexander Graham Bell."},
+      {"id": "s7", "language": "fr", "text": "Le téléphone a été inventé par Alexander Graham Bell."}
+    ]
+  },
+  {
+    "id": "CL-005",
+    "description": "Answer quality when source material and query are in different languages",
+    "query": "¿Cuál es la capital de Francia?",
+    "query_language": "es",
+    "expected_answer": "Paris",
+    "sources": [
+      {"id": "s8", "language": "en", "text": "Paris is the capital and most populous city of France."}
+    ]
+  }
+]
