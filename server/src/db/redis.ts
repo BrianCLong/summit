@@ -202,3 +202,47 @@ export async function closeRedisClient(): Promise<void> {
   }
   clients.clear();
 }
+
+export type RedisHealth = {
+  healthy: boolean;
+  version?: string;
+  mode?: string;
+  lastError?: string;
+  circuitState?: string;
+};
+
+export async function getRedisHealth(): Promise<RedisHealth> {
+  const client = getRedisClient();
+  if (!client) {
+    return { healthy: false, lastError: 'Redis client not initialized' };
+  }
+
+  try {
+    const isMock = (client as any).get.toString().includes('Mock Redis');
+    if (isMock) {
+      return { 
+        healthy: false, 
+        lastError: 'Redis is in mock mode',
+        mode: 'mock'
+      };
+    }
+
+    const start = Date.now();
+    await client.ping();
+    const latency = Date.now() - start;
+
+    const info = await client.info('server');
+    const versionMatch = info.match(/redis_version:([0-9.]+)/);
+    
+    return {
+      healthy: true,
+      version: versionMatch ? versionMatch[1] : 'unknown',
+      mode: (client as any).constructor.name === 'Cluster' ? 'cluster' : 'standalone'
+    };
+  } catch (error: any) {
+    return {
+      healthy: false,
+      lastError: error.message
+    };
+  }
+}

@@ -1,0 +1,157 @@
+[
+  {
+    "actionId": "action-20260311-103015-001",
+    "timestamp": "2026-03-11T10:30:15.000Z",
+    "evidenceId": "entropy-2026-03-11-example",
+    "type": "notify",
+    "status": "executed",
+    "trigger": "automated",
+    "details": {
+      "channel": "#engineering-auth",
+      "message": "Potential merge conflict detected in authentication module",
+      "predictionId": "pred-001",
+      "probability": 0.75,
+      "confidence": 0.60
+    },
+    "approval": {
+      "required": false,
+      "obtained": null,
+      "approver": null,
+      "approvalTimestamp": null
+    },
+    "result": {
+      "success": true,
+      "error": null,
+      "executionTime": "125ms",
+      "slackMessageId": "1234567890.123456"
+    },
+    "signedAt": "2026-03-11T10:30:15.123Z",
+    "signature": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2"
+  },
+  {
+    "actionId": "action-20260311-103045-002",
+    "timestamp": "2026-03-11T10:30:45.000Z",
+    "evidenceId": "entropy-2026-03-11-example",
+    "type": "flag_for_review",
+    "status": "executed",
+    "trigger": "automated",
+    "details": {
+      "target": "@security-team",
+      "message": "Security-sensitive changes require review",
+      "predictionId": "pred-002",
+      "probability": 0.45,
+      "confidence": 0.55,
+      "issueUrl": "https://github.com/example/summit/issues/123"
+    },
+    "approval": {
+      "required": false,
+      "obtained": null,
+      "approver": null,
+      "approvalTimestamp": null
+    },
+    "result": {
+      "success": true,
+      "error": null,
+      "executionTime": "342ms",
+      "githubIssueId": 123
+    },
+    "signedAt": "2026-03-11T10:30:45.234Z",
+    "signature": "f2e1d0c9b8a7z6y5x4w3v2u1t0s9r8q7p6o5n4m3l2k1j0i9h8g7f6e5d4c3b2a1"
+  },
+  {
+    "actionId": "action-20260311-104520-003",
+    "timestamp": "2026-03-11T10:45:20.000Z",
+    "evidenceId": "resurrection-2026-03-11-example",
+    "type": "page_oncall",
+    "status": "pending_approval",
+    "trigger": "automated",
+    "details": {
+      "target": "@security-oncall",
+      "message": "Critical security fix abandoned: SQL injection patch (commit: e4f5g6h)",
+      "lane": "A",
+      "priority": "URGENT",
+      "commitHash": "e4f5g6h",
+      "daysAbandoned": 24,
+      "securityImpact": "critical"
+    },
+    "approval": {
+      "required": true,
+      "obtained": "approved",
+      "approver": "security-lead@example.com",
+      "approvalTimestamp": "2026-03-11T10:47:15.000Z",
+      "approvalChannel": "slack",
+      "approvalMessageId": "1234567890.234567"
+    },
+    "result": {
+      "success": null,
+      "error": null,
+      "executionTime": null,
+      "note": "Awaiting approval before execution"
+    },
+    "signedAt": "2026-03-11T10:45:20.456Z",
+    "signature": "c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4"
+  },
+  {
+    "actionId": "action-20260311-104730-004",
+    "timestamp": "2026-03-11T10:47:30.000Z",
+    "evidenceId": "resurrection-2026-03-11-example",
+    "type": "page_oncall",
+    "status": "executed",
+    "trigger": "approval_received",
+    "details": {
+      "target": "@security-oncall",
+      "message": "Critical security fix abandoned: SQL injection patch (commit: e4f5g6h)",
+      "originalActionId": "action-20260311-104520-003",
+      "pagerDutyIncidentId": "INCIDENT-789"
+    },
+    "approval": {
+      "required": true,
+      "obtained": "approved",
+      "approver": "security-lead@example.com",
+      "approvalTimestamp": "2026-03-11T10:47:15.000Z",
+      "approvalChannel": "slack",
+      "approvalMessageId": "1234567890.234567"
+    },
+    "result": {
+      "success": true,
+      "error": null,
+      "executionTime": "1.2s",
+      "pagerDutyIncidentId": "INCIDENT-789",
+      "notificationSent": true
+    },
+    "signedAt": "2026-03-11T10:47:30.789Z",
+    "signature": "h4g3f2e1d0c9b8a7z6y5x4w3v2u1t0s9r8q7p6o5n4m3l2k1j0i9h8g7f6e5d4c3"
+  },
+  {
+    "actionId": "action-20260311-110000-005",
+    "timestamp": "2026-03-11T11:00:00.000Z",
+    "evidenceId": "entropy-2026-03-11-validation",
+    "type": "freeze_frontier",
+    "status": "denied",
+    "trigger": "automated",
+    "details": {
+      "target": "feature/user-authentication",
+      "reason": "Critical entropy detected - preventing merge to main",
+      "entropyScore": 0.95,
+      "confidence": 0.80,
+      "estimatedImpact": "HIGH"
+    },
+    "approval": {
+      "required": true,
+      "obtained": "denied",
+      "approver": "engineering-lead@example.com",
+      "approvalTimestamp": "2026-03-11T11:02:30.000Z",
+      "approvalChannel": "slack",
+      "approvalMessageId": "1234567890.345678",
+      "denialReason": "Need to investigate entropy signals first before freezing"
+    },
+    "result": {
+      "success": false,
+      "error": "Action denied by approver",
+      "executionTime": "0ms",
+      "note": "Action blocked - no changes made to frontier"
+    },
+    "signedAt": "2026-03-11T11:00:00.123Z",
+    "signature": "i5j6k7l8m9n0o1p2q3r4s5t6u7v8w9x0y1z2a3b4c5d6e7f8g9h0i1j2k3l4m5n6"
+  }
+]

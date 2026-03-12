@@ -1,0 +1,112 @@
+{
+  "reportId": "entropy-2026-03-11-example",
+  "timestamp": "2026-03-11T10:30:00.000Z",
+  "version": "1.0",
+  "evidenceType": "entropy-analysis",
+  "scope": {
+    "frontierBranch": "feature/user-authentication",
+    "commitRange": "main..feature/user-authentication",
+    "totalCommits": 15,
+    "analysisDepth": "full"
+  },
+  "metrics": {
+    "entropyScore": 0.42,
+    "confidenceScore": 0.65,
+    "riskLevel": "MEDIUM",
+    "predictionAccuracy": {
+      "f1Score": 0.000,
+      "precision": 0.000,
+      "recall": 0.000,
+      "note": "Model uncalibrated - predictions not reliable"
+    }
+  },
+  "predictions": [
+    {
+      "predictionId": "pred-001",
+      "type": "merge_conflict",
+      "probability": 0.75,
+      "confidence": 0.60,
+      "recommendedAction": "notify",
+      "reasoning": "15 commits touching authentication module with 3 parallel branches"
+    },
+    {
+      "predictionId": "pred-002",
+      "type": "test_failure",
+      "probability": 0.45,
+      "confidence": 0.55,
+      "recommendedAction": "flag_for_review",
+      "reasoning": "New dependencies added without corresponding test updates"
+    },
+    {
+      "predictionId": "pred-003",
+      "type": "performance_degradation",
+      "probability": 0.30,
+      "confidence": 0.40,
+      "recommendedAction": "none",
+      "reasoning": "Database query changes detected but within acceptable threshold"
+    }
+  ],
+  "signals": {
+    "codeComplexity": {
+      "cyclomaticComplexity": 12,
+      "linesChanged": 450,
+      "filesChanged": 8,
+      "newFiles": 3,
+      "deletedFiles": 0
+    },
+    "collaborationPatterns": {
+      "uniqueAuthors": 2,
+      "parallelBranches": 3,
+      "mergeFrequency": "high",
+      "communicationDensity": "medium"
+    },
+    "historicalPatterns": {
+      "similarChangesCount": 5,
+      "historicalFailureRate": 0.20,
+      "avgTimeToMerge": "4.5 days",
+      "revertFrequency": 0.10
+    }
+  },
+  "recommendations": [
+    {
+      "actionType": "notify",
+      "priority": "HIGH",
+      "target": "#engineering-auth",
+      "message": "Potential merge conflict detected in authentication module",
+      "rationale": "3 parallel branches modifying same files",
+      "requiresApproval": false
+    },
+    {
+      "actionType": "flag_for_review",
+      "priority": "MEDIUM",
+      "target": "@security-team",
+      "message": "Security-sensitive changes require review",
+      "rationale": "Authentication module changes with new dependencies",
+      "requiresApproval": false
+    }
+  ],
+  "calibrationStatus": {
+    "isCalibrated": false,
+    "lastCalibrationDate": null,
+    "currentF1Score": 0.000,
+    "targetF1Score": 0.75,
+    "status": "POOR",
+    "blocksActuation": true,
+    "message": "Model uncalibrated - all predictions are informational only"
+  },
+  "safetyChecks": {
+    "featureFlagsVerified": true,
+    "approvalWorkflowActive": true,
+    "dryRunMode": true,
+    "actuationEnabled": false,
+    "emergencyStopAvailable": true
+  },
+  "metadata": {
+    "generatedBy": "entropy-monitor-v1.0",
+    "analysisMode": "automated",
+    "environment": "staging",
+    "executionTime": "2.3s",
+    "schemaVersion": "1.0",
+    "auditTrailId": "audit-20260311-103000"
+  }
+}

@@ -279,3 +279,37 @@ export function transformNeo4jIntegers(obj: any): any {
   }
   return newObj || obj;
 }
+
+export type Neo4jHealth = {
+  healthy: boolean;
+  version?: string;
+  edition?: string;
+  lastError?: string;
+};
+
+export async function checkNeo4jHealth(): Promise<Neo4jHealth> {
+  const driver = realDriver;
+  if (!driver || isMockMode) {
+    return { healthy: false, lastError: 'Neo4j driver not initialized or in mock mode' };
+  }
+
+  try {
+    const session = driver.session();
+    try {
+      const result = await session.run('CALL dbms.components() YIELD name, versions, edition RETURN versions[0] AS version, edition');
+      const record = result.records[0];
+      return {
+        healthy: true,
+        version: record?.get('version') || 'unknown',
+        edition: record?.get('edition') || 'unknown',
+      };
+    } finally {
+      await session.close();
+    }
+  } catch (error: any) {
+    return {
+      healthy: false,
+      lastError: error.message,
+    };
+  }
+}

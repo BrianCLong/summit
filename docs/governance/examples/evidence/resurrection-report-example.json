@@ -1,0 +1,250 @@
+{
+  "reportId": "resurrection-2026-03-11-example",
+  "timestamp": "2026-03-11T10:45:00.000Z",
+  "version": "1.0",
+  "evidenceType": "resurrection-analysis",
+  "scope": {
+    "repositoryUrl": "https://github.com/example/summit",
+    "branchAnalyzed": "main",
+    "commitRange": "HEAD~100..HEAD",
+    "totalCommits": 100,
+    "lookbackDays": 30
+  },
+  "metrics": {
+    "totalCommitsAnalyzed": 100,
+    "abandonedBranchesFound": 8,
+    "resurrectionCandidates": 5,
+    "avgAbandonmentAge": "45 days",
+    "calibrationAccuracy": 0.625,
+    "calibrationStatus": "ACCEPTABLE"
+  },
+  "triageResults": {
+    "laneA": {
+      "count": 2,
+      "description": "Critical work abandoned mid-flight",
+      "priority": "URGENT",
+      "commits": [
+        {
+          "commitHash": "a1b2c3d",
+          "author": "engineer@example.com",
+          "message": "feat(api): add user deletion endpoint",
+          "abandonedDate": "2026-02-10T14:20:00.000Z",
+          "daysAbandoned": 29,
+          "confidence": 0.85,
+          "signals": {
+            "partialFeature": true,
+            "hasTests": false,
+            "documentationUpdated": false,
+            "securityImpact": "high",
+            "businessValue": "high"
+          }
+        },
+        {
+          "commitHash": "e4f5g6h",
+          "author": "engineer2@example.com",
+          "message": "fix(security): patch SQL injection vulnerability",
+          "abandonedDate": "2026-02-15T09:15:00.000Z",
+          "daysAbandoned": 24,
+          "confidence": 0.90,
+          "signals": {
+            "partialFeature": false,
+            "hasTests": true,
+            "documentationUpdated": true,
+            "securityImpact": "critical",
+            "businessValue": "critical"
+          }
+        }
+      ]
+    },
+    "laneB": {
+      "count": 1,
+      "description": "High-value work stalled",
+      "priority": "HIGH",
+      "commits": [
+        {
+          "commitHash": "i7j8k9l",
+          "author": "engineer3@example.com",
+          "message": "feat(analytics): add user behavior tracking",
+          "abandonedDate": "2026-01-20T16:30:00.000Z",
+          "daysAbandoned": 50,
+          "confidence": 0.70,
+          "signals": {
+            "partialFeature": true,
+            "hasTests": true,
+            "documentationUpdated": false,
+            "securityImpact": "medium",
+            "businessValue": "high"
+          }
+        }
+      ]
+    },
+    "laneC": {
+      "count": 2,
+      "description": "Potentially valuable but uncertain",
+      "priority": "MEDIUM",
+      "commits": [
+        {
+          "commitHash": "m1n2o3p",
+          "author": "engineer4@example.com",
+          "message": "refactor(database): optimize query performance",
+          "abandonedDate": "2026-02-01T11:00:00.000Z",
+          "daysAbandoned": 38,
+          "confidence": 0.55,
+          "signals": {
+            "partialFeature": false,
+            "hasTests": true,
+            "documentationUpdated": false,
+            "securityImpact": "low",
+            "businessValue": "medium"
+          }
+        },
+        {
+          "commitHash": "q4r5s6t",
+          "author": "engineer5@example.com",
+          "message": "chore(deps): update dependencies",
+          "abandonedDate": "2026-01-25T13:45:00.000Z",
+          "daysAbandoned": 45,
+          "confidence": 0.60,
+          "signals": {
+            "partialFeature": false,
+            "hasTests": false,
+            "documentationUpdated": false,
+            "securityImpact": "low",
+            "businessValue": "medium"
+          }
+        }
+      ]
+    },
+    "laneD": {
+      "count": 3,
+      "description": "Low priority or superseded",
+      "priority": "LOW",
+      "commits": [
+        {
+          "commitHash": "u7v8w9x",
+          "author": "engineer6@example.com",
+          "message": "docs(readme): update installation instructions",
+          "abandonedDate": "2026-01-15T10:00:00.000Z",
+          "daysAbandoned": 55,
+          "confidence": 0.40,
+          "signals": {
+            "partialFeature": false,
+            "hasTests": false,
+            "documentationUpdated": true,
+            "securityImpact": "none",
+            "businessValue": "low"
+          }
+        },
+        {
+          "commitHash": "y1z2a3b",
+          "author": "engineer7@example.com",
+          "message": "style(ui): update button colors",
+          "abandonedDate": "2026-01-10T15:20:00.000Z",
+          "daysAbandoned": 60,
+          "confidence": 0.35,
+          "signals": {
+            "partialFeature": false,
+            "hasTests": false,
+            "documentationUpdated": false,
+            "securityImpact": "none",
+            "businessValue": "low"
+          }
+        },
+        {
+          "commitHash": "c4d5e6f",
+          "author": "engineer8@example.com",
+          "message": "test(unit): add missing test cases",
+          "abandonedDate": "2026-01-05T09:30:00.000Z",
+          "daysAbandoned": 65,
+          "confidence": 0.30,
+          "signals": {
+            "partialFeature": false,
+            "hasTests": true,
+            "documentationUpdated": false,
+            "securityImpact": "none",
+            "businessValue": "low"
+          }
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    {
+      "lane": "A",
+      "actionType": "page_oncall",
+      "priority": "URGENT",
+      "target": "@security-oncall",
+      "message": "Critical security fix abandoned: SQL injection patch (commit: e4f5g6h)",
+      "rationale": "High security impact + 24 days abandoned + has tests",
+      "estimatedEffort": "2 hours to review and merge",
+      "requiresApproval": true
+    },
+    {
+      "lane": "A",
+      "actionType": "create_incident",
+      "priority": "URGENT",
+      "target": "#engineering-api",
+      "message": "Partial user deletion feature abandoned mid-flight (commit: a1b2c3d)",
+      "rationale": "Critical feature incomplete + security implications",
+      "estimatedEffort": "1 day to complete or revert",
+      "requiresApproval": true
+    },
+    {
+      "lane": "B",
+      "actionType": "flag_for_review",
+      "priority": "HIGH",
+      "target": "@product-team",
+      "message": "User behavior tracking feature 50% complete (commit: i7j8k9l)",
+      "rationale": "High business value + substantial progress made",
+      "estimatedEffort": "3 days to complete",
+      "requiresApproval": false
+    },
+    {
+      "lane": "C",
+      "actionType": "notify",
+      "priority": "MEDIUM",
+      "target": "#engineering-general",
+      "message": "2 medium-priority abandoned commits ready for review",
+      "rationale": "Potential value but requires investigation",
+      "estimatedEffort": "1-2 days to evaluate",
+      "requiresApproval": false
+    }
+  ],
+  "calibrationMetrics": {
+    "isCalibrated": true,
+    "lastCalibrationDate": "2026-03-01T00:00:00.000Z",
+    "calibrationAccuracy": 0.625,
+    "targetAccuracy": 0.75,
+    "status": "ACCEPTABLE",
+    "datasetSize": 200,
+    "confusionMatrix": {
+      "truePositives": 75,
+      "falsePositives": 25,
+      "trueNegatives": 50,
+      "falseNegatives": 50
+    },
+    "message": "Model calibrated but below target threshold - use with caution"
+  },
+  "safetyChecks": {
+    "featureFlagsVerified": true,
+    "approvalWorkflowActive": true,
+    "dryRunMode": true,
+    "actuationEnabled": false,
+    "emergencyStopAvailable": true,
+    "humanReviewRequired": true
+  },
+  "metadata": {
+    "generatedBy": "resurrection-engine-v1.0",
+    "analysisMode": "automated",
+    "environment": "production",
+    "executionTime": "5.7s",
+    "schemaVersion": "1.0",
+    "auditTrailId": "audit-20260311-104500",
+    "dataSourcesUsed": [
+      "git-log",
+      "github-api",
+      "linear-api",
+      "team-calendar"
+    ]
+  }
+}

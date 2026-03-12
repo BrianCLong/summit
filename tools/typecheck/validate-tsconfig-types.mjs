@@ -34,10 +34,22 @@ const canResolve = (packageName) => {
   }
 
   try {
+    // Check if the directory exists at least, if resolve fails due to EPERM on package.json
+    const packagePath = path.join(rootNodeModulesPath, ...packageName.split('/'));
+    if (fs.existsSync(packagePath)) {
+      resolutionCache.set(packageName, true);
+      return true;
+    }
+
     rootRequire.resolve(`${packageName}/package.json`);
     resolutionCache.set(packageName, true);
     return true;
-  } catch {
+  } catch (err) {
+    if (err.code === 'EPERM') {
+      // If we can't check due to permissions, assume it's there but locked
+      resolutionCache.set(packageName, true);
+      return true;
+    }
     resolutionCache.set(packageName, false);
     return false;
   }

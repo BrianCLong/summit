@@ -9,7 +9,7 @@ export class AppendOnlyAuditLog {
     mkdirSync(process.cwd(), { recursive: true });
   }
 
-  write(event: Record<string, unknown>): void {
+  record(event: Record<string, unknown>): void {
     const entry = { ...event, at: new Date().toISOString() };
     appendFileSync(this.file, `${JSON.stringify(entry)}\n`);
   }

@@ -12,6 +12,7 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
+    "typeRoots": ["../../node_modules/@types"],
     "types": ["node", "express", "jest", "pg", "uuid", "body-parser", "supertest"],
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },

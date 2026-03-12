@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Feature Flags Setup for Summit Server
  *

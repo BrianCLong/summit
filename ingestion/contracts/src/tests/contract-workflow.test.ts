@@ -4,7 +4,7 @@ import {
   CertificationWorkflow,
   CertificateAuthority,
   ContractSpecification,
-  QuarantineRegistry,
+  QuarantineService,
   diffContracts
 } from '../index.js';
 import { ContractSpec } from '../types.js';
@@ -38,8 +38,8 @@ test('detects contract drift across versions', () => {
   assert.equal(diffs[0].change, 'added');
 });
 
-test('quarantine to recertification loop', () => {
-  const registry = new QuarantineRegistry();
+test('quarantine to recertification loop', async () => {
+  const registry = new QuarantineService();
   const ca = new CertificateAuthority();
   const workflow = new CertificationWorkflow(ca);
 
@@ -53,19 +53,19 @@ test('quarantine to recertification loop', () => {
     fields: []
   };
 
-  const record = registry.quarantine(spec.id, spec.version, 'no schema defined');
+  const record = registry.place(spec.id, 'no schema defined', {});
   assert.ok(record);
   assert.equal(registry.active().length, 1);
 
   spec.fields.push({ name: 'event_id', type: 'string', nullable: false });
-  const { cert } = workflow.certify(spec);
+  const { cert } = await workflow.certify(spec);
   assert.ok(cert.signature);
   const resolved = registry.resolve(spec.id, spec.version, 'schema provided and certified');
   assert.ok(resolved?.releasedAt);
   assert.equal(registry.active().length, 0);
 });
 
-test('production ingest blocked without certification', () => {
+test('production ingest blocked without certification', async () => {
   const ca = new CertificateAuthority();
   const workflow = new CertificationWorkflow(ca);
 
@@ -80,7 +80,7 @@ test('production ingest blocked without certification', () => {
   };
 
   assert.throws(() => workflow.enforceProductionGate(spec));
-  workflow.certify(spec);
+  await workflow.certify(spec);
   assert.doesNotThrow(() => workflow.enforceProductionGate(spec));
 });
 

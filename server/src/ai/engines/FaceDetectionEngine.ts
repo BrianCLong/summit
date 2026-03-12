@@ -3,7 +3,8 @@ import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = (pino as any)({ name: 'FaceDetectionEngine' });
+import sharedLogger from '../../shared/logging/index.js';
+const logger = sharedLogger.child({ name: 'FaceDetectionEngine' });
 
 export interface FaceDetection {
   boundingBox: {
@@ -104,8 +105,9 @@ export class FaceDetectionEngine {
 
       this.isInitialized = true;
       logger.info('Face Detection Engine initialized successfully');
-    } catch (error: any) {
-      logger.error('Failed to initialize Face Detection Engine:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to initialize Face Detection Engine:', errorMessage);
       throw error;
     }
   }
@@ -208,8 +210,9 @@ export class FaceDetectionEngine {
         `Face detection completed: ${qualifiedDetections.length} faces detected`,
       );
       return qualifiedDetections;
-    } catch (error: any) {
-      logger.error('Face detection failed:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Face detection failed:', errorMessage);
       throw error;
     }
   }
@@ -297,15 +300,15 @@ export class FaceDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code !== 0) {
           reject(
             new Error(
@@ -372,15 +375,15 @@ export class FaceDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code !== 0) {
           reject(new Error(`Video face detection failed: ${errorOutput}`));
           return;
@@ -428,7 +431,7 @@ export class FaceDetectionEngine {
    */
   private async runLandmarkExtraction(
     imagePath: string,
-    boundingBox: any,
+    boundingBox: { x: number; y: number; width: number; height: number },
   ): Promise<FaceLandmarks> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(
@@ -448,15 +451,15 @@ export class FaceDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -480,7 +483,7 @@ export class FaceDetectionEngine {
    */
   private async extractFaceFeatures(
     imagePath: string,
-    boundingBox: any,
+    boundingBox: { x: number; y: number; width: number; height: number },
   ): Promise<number[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(
@@ -500,15 +503,15 @@ export class FaceDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -532,7 +535,7 @@ export class FaceDetectionEngine {
    */
   private async analyzeEmotions(
     imagePath: string,
-    boundingBox: any,
+    boundingBox: { x: number; y: number; width: number; height: number },
   ): Promise<EmotionScores> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(
@@ -552,15 +555,15 @@ export class FaceDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -586,7 +589,7 @@ export class FaceDetectionEngine {
    */
   private async estimateAge(
     imagePath: string,
-    boundingBox: any,
+    boundingBox: { x: number; y: number; width: number; height: number },
   ): Promise<number> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(
@@ -606,15 +609,15 @@ export class FaceDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -638,7 +641,7 @@ export class FaceDetectionEngine {
    */
   private async estimateGender(
     imagePath: string,
-    boundingBox: any,
+    boundingBox: { x: number; y: number; width: number; height: number },
   ): Promise<string> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(
@@ -658,15 +661,15 @@ export class FaceDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -688,7 +691,7 @@ export class FaceDetectionEngine {
   /**
    * Parse face detection results
    */
-  private parseFaceDetectionResults(results: any): FaceDetection[] {
+  private parseFaceDetectionResults(results: { faces?: any[] }): FaceDetection[] {
     const detections: FaceDetection[] = [];
 
     for (const face of results.faces || []) {
@@ -944,7 +947,7 @@ export class FaceDetectionEngine {
   /**
    * Get default landmarks based on bounding box
    */
-  private getDefaultLandmarks(boundingBox: any): FaceLandmarks {
+  private getDefaultLandmarks(boundingBox: { x: number; y: number; width: number; height: number }): FaceLandmarks {
     const centerX = boundingBox.x + boundingBox.width / 2;
     const centerY = boundingBox.y + boundingBox.height / 2;
 
@@ -1019,7 +1022,7 @@ export class FaceDetectionEngine {
         'import mtcnn, facenet_pytorch, cv2; print("Dependencies OK")',
       ]);
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           resolve();
         } else {

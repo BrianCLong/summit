@@ -433,9 +433,10 @@ export function costGuardMiddleware() {
       req.estimatedCost = costCheck.estimatedCost;
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error(
-        { error, tenantId, operation },
+        { error: errorMessage, tenantId, operation },
         'Cost guard middleware error',
       );
       next(); // Allow request to proceed on error
@@ -463,8 +464,9 @@ export function costRecordingMiddleware() {
 
         try {
           await costGuard.recordActualCost(context);
-        } catch (error: any) {
-          logger.error({ error, context }, 'Failed to record cost');
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error({ error: errorMessage, context }, 'Failed to record cost');
         }
       }
     });

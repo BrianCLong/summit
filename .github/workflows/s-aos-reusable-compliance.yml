@@ -1,0 +1,296 @@
+name: S-AOS Compliance (Reusable)
+
+# Reusable workflow for S-AOS compliance checks
+# Can be called from other repositories or workflows
+#
+# Usage in calling workflow:
+# jobs:
+#   compliance:
+#     uses: ./.github/workflows/s-aos-reusable-compliance.yml
+#     with:
+#       node-version: '20'
+#       skip-audit-check: false
+#     secrets:
+#       audit-secret: ${{ secrets.AUDIT_LOG_SECRET }}
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        type: string
+        default: '20'
+      skip-evidence-check:
+        description: 'Skip evidence artifacts validation'
+        required: false
+        type: boolean
+        default: false
+      skip-schema-validation:
+        description: 'Skip JSON schema validation'
+        required: false
+        type: boolean
+        default: false
+      skip-audit-check:
+        description: 'Skip audit trail verification'
+        required: false
+        type: boolean
+        default: false
+      skip-commit-check:
+        description: 'Skip commit message validation'
+        required: false
+        type: boolean
+        default: false
+      working-directory:
+        description: 'Working directory for checks'
+        required: false
+        type: string
+        default: '.'
+    secrets:
+      audit-secret:
+        description: 'AUDIT_LOG_SECRET for signature verification'
+        required: false
+    outputs:
+      compliance-score:
+        description: 'Overall compliance score (0-100)'
+        value: ${{ jobs.compliance.outputs.score }}
+      passed:
+        description: 'Whether all checks passed'
+        value: ${{ jobs.compliance.outputs.passed }}
+
+jobs:
+  compliance:
+    name: S-AOS Compliance Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      score: ${{ steps.calculate-score.outputs.score }}
+      passed: ${{ steps.final-status.outputs.passed }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for commit analysis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Check Evidence Artifacts
+        id: evidence
+        if: ${{ !inputs.skip-evidence-check }}
+        run: |
+          echo "Checking evidence artifacts..."
+
+          MISSING=0
+          if [ ! -f "artifacts/repoos/frontier-entropy/report.json" ]; then
+            echo "⚠️ Entropy report not found (may not be required for this PR)"
+            echo "status=warning" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Entropy report found"
+            echo "status=pass" >> $GITHUB_OUTPUT
+          fi
+        working-directory: ${{ inputs.working-directory }}
+        continue-on-error: true
+
+      - name: Validate JSON Schemas
+        id: schema
+        if: ${{ !inputs.skip-schema-validation }}
+        run: |
+          echo "Installing ajv-cli..."
+          npm install -g ajv-cli ajv-formats
+
+          SCHEMA_ERRORS=0
+
+          # Validate entropy report if exists
+          if [ -f "artifacts/repoos/frontier-entropy/report.json" ]; then
+            echo "Validating entropy report..."
+            if ajv validate -s schemas/evidence/entropy-report.schema.json \
+                           -d artifacts/repoos/frontier-entropy/report.json; then
+              echo "✅ Entropy report schema valid"
+            else
+              echo "❌ Entropy report schema invalid"
+              ((SCHEMA_ERRORS++))
+            fi
+          fi
+
+          # Validate resurrection report if exists
+          if [ -f "artifacts/history-quick/report.json" ]; then
+            echo "Validating resurrection report..."
+            if ajv validate -s schemas/evidence/resurrection-report.schema.json \
+                           -d artifacts/history-quick/report.json; then
+              echo "✅ Resurrection report schema valid"
+            else
+              echo "❌ Resurrection report schema invalid"
+              ((SCHEMA_ERRORS++))
+            fi
+          fi
+
+          echo "schema_errors=$SCHEMA_ERRORS" >> $GITHUB_OUTPUT
+
+          if [ $SCHEMA_ERRORS -gt 0 ]; then
+            echo "status=fail" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "status=pass" >> $GITHUB_OUTPUT
+          fi
+        working-directory: ${{ inputs.working-directory }}
+        continue-on-error: true
+
+      - name: Verify Audit Trail
+        id: audit
+        if: ${{ !inputs.skip-audit-check && secrets.audit-secret != '' }}
+        run: |
+          echo "Verifying audit trail..."
+
+          if [ ! -f "artifacts/repoos/entropy-actions/audit.json" ]; then
+            echo "⚠️ No audit trail found (not required for all PRs)"
+            echo "status=warning" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if node services/repoos/immutable-audit-logger.mjs verify; then
+            echo "✅ Audit trail signatures verified"
+            echo "status=pass" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Audit trail signature verification failed"
+            echo "status=fail" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+        working-directory: ${{ inputs.working-directory }}
+        env:
+          AUDIT_LOG_SECRET: ${{ secrets.audit-secret }}
+        continue-on-error: true
+
+      - name: Check Commit Messages
+        id: commits
+        if: ${{ !inputs.skip-commit-check && github.event_name == 'pull_request' }}
+        run: |
+          echo "Checking commit messages..."
+
+          VIOLATIONS=0
+          git log --format="%H|%s|%b" origin/${{ github.base_ref }}..${{ github.sha }} > commits.txt
+
+          while IFS='|' read -r hash subject body; do
+            # Check for type(scope): format
+            if ! echo "$subject" | grep -qE '^(feat|fix|docs|chore|refactor|test|perf|ci|build|style)\([^)]+\):'; then
+              echo "❌ Commit $hash: Invalid format"
+              echo "   Subject: $subject"
+              ((VIOLATIONS++))
+            fi
+          done < commits.txt
+
+          echo "violations=$VIOLATIONS" >> $GITHUB_OUTPUT
+
+          if [ $VIOLATIONS -gt 0 ]; then
+            echo "status=fail" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "status=pass" >> $GITHUB_OUTPUT
+          fi
+        working-directory: ${{ inputs.working-directory }}
+        continue-on-error: true
+
+      - name: Calculate Compliance Score
+        id: calculate-score
+        if: always()
+        run: |
+          SCORE=100
+
+          # Deduct points for failures
+          if [ "${{ steps.evidence.outputs.status }}" == "fail" ]; then
+            SCORE=$((SCORE - 20))
+          elif [ "${{ steps.evidence.outputs.status }}" == "warning" ]; then
+            SCORE=$((SCORE - 5))
+          fi
+
+          if [ "${{ steps.schema.outputs.status }}" == "fail" ]; then
+            SCORE=$((SCORE - 25))
+          fi
+
+          if [ "${{ steps.audit.outputs.status }}" == "fail" ]; then
+            SCORE=$((SCORE - 30))
+          elif [ "${{ steps.audit.outputs.status }}" == "warning" ]; then
+            SCORE=$((SCORE - 5))
+          fi
+
+          if [ "${{ steps.commits.outputs.status }}" == "fail" ]; then
+            SCORE=$((SCORE - 25))
+          fi
+
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "Compliance Score: $SCORE/100"
+
+      - name: Generate Compliance Report
+        if: always()
+        run: |
+          cat > compliance-report.md << 'EOF'
+          # S-AOS Compliance Report
+
+          **Score**: ${{ steps.calculate-score.outputs.score }}/100
+
+          ## Check Results
+
+          | Check | Status | Details |
+          |-------|--------|---------|
+          | Evidence Artifacts | ${{ steps.evidence.outputs.status == 'pass' && '✅ Pass' || steps.evidence.outputs.status == 'warning' && '⚠️ Warning' || steps.evidence.outputs.status == 'fail' && '❌ Fail' || '⏭️ Skipped' }} | Evidence validation |
+          | Schema Validation | ${{ steps.schema.outputs.status == 'pass' && '✅ Pass' || steps.schema.outputs.status == 'fail' && '❌ Fail' || '⏭️ Skipped' }} | JSON schema compliance |
+          | Audit Trail | ${{ steps.audit.outputs.status == 'pass' && '✅ Pass' || steps.audit.outputs.status == 'warning' && '⚠️ Warning' || steps.audit.outputs.status == 'fail' && '❌ Fail' || '⏭️ Skipped' }} | Signature verification |
+          | Commit Messages | ${{ steps.commits.outputs.status == 'pass' && '✅ Pass' || steps.commits.outputs.status == 'fail' && '❌ Fail' || '⏭️ Skipped' }} | Message format |
+
+          ## Recommendations
+
+          ${{ steps.schema.outputs.status == 'fail' && '- ❌ Fix schema validation errors' || '' }}
+          ${{ steps.audit.outputs.status == 'fail' && '- ❌ Fix audit trail integrity issues' || '' }}
+          ${{ steps.commits.outputs.status == 'fail' && '- ❌ Fix commit message format' || '' }}
+
+          ## Resources
+
+          - [S-AOS Compliance Scorecard](docs/governance/S-AOS_COMPLIANCE_SCORECARD.md)
+          - [Good vs Bad Examples](docs/governance/S-AOS_EXAMPLES_GOOD_VS_BAD.md)
+          - [Commit Template](.gitmessage)
+          EOF
+
+          cat compliance-report.md
+
+      - name: Upload Compliance Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s-aos-compliance-report
+          path: compliance-report.md
+          retention-days: 30
+
+      - name: Final Status
+        id: final-status
+        if: always()
+        run: |
+          PASSED=true
+
+          if [ "${{ steps.schema.outputs.status }}" == "fail" ] || \
+             [ "${{ steps.audit.outputs.status }}" == "fail" ] || \
+             [ "${{ steps.commits.outputs.status }}" == "fail" ]; then
+            PASSED=false
+          fi
+
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+
+          if [ "$PASSED" == "true" ]; then
+            echo "✅ S-AOS compliance checks passed"
+            exit 0
+          else
+            echo "❌ S-AOS compliance checks failed"
+            exit 1
+          fi

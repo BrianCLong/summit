@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",
@@ -7,13 +8,9 @@
     "outDir": "./dist",
     "rootDir": ".",
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "resolveJsonModule": true
+    "composite": true,
+    "typeRoots": ["../../node_modules/@types"],
+    "types": ["node", "jest"]
   },
   "include": [
     "cosign/**/*.ts",

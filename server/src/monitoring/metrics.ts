@@ -601,7 +601,7 @@ export const breakerState = createGauge({
   labelNames: ['service'],
 });
 
-export const intelgraphJobQueueDepth = createGauge({
+export const summitJobQueueDepth = createGauge({
   registers: [],
   name: 'intelgraph_job_queue_depth',
   help: 'Current depth of the job queue',
@@ -680,7 +680,7 @@ try {
   register.registerMetric(maestroChangeFailureRate);
   register.registerMetric(maestroMttrHours);
   register.registerMetric(breakerState);
-  register.registerMetric(intelgraphJobQueueDepth);
+  register.registerMetric(summitJobQueueDepth);
 } catch (e) { }
 
 // Narrative Simulation Metrics
@@ -1109,8 +1109,15 @@ export const maestroSynthesisOperations = createCounter({
   help: 'Data synthesis operations',
 });
 
+export const summitHealthChecksTotal = createCounter({
+  name: 'summit_health_checks_total',
+  help: 'Total health check requests',
+  labelNames: ['status'],
+});
+
 // Register new metrics
 try {
+  register.registerMetric(summitHealthChecksTotal);
   register.registerMetric(maestroOrchestrationRequests);
   register.registerMetric(maestroOrchestrationDuration);
   register.registerMetric(maestroOrchestrationErrors);
@@ -1149,7 +1156,7 @@ export const metrics = {
   aiRequestTotal,
   resolverLatencyMs,
   breakerState,
-  intelgraphJobQueueDepth,
+  summitJobQueueDepth,
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
   neighborhoodCacheHitRatio,

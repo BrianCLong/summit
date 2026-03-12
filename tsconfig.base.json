@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "Bundler",
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "declaration": true,
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -41,7 +42,53 @@
       ],
       "@summit/mcp": [
         "packages/mcp/src/index.ts"
-      ]
+      ],
+      "@intelgraph/feature-flags/*": [
+        "packages/feature-flags/src/*"
+      ],
+      "@intelgraph/feature-flags": [
+        "packages/feature-flags/src/index.ts"
+      ],
+      "@intelgraph/context-shell/*": [
+        "packages/context-shell/src/*"
+      ],
+      "@intelgraph/context-shell": [
+        "packages/context-shell/src/index.ts"
+      ],
+      "@intelgraph/maestro-core/*": [
+        "packages/maestro-core/src/*"
+      ],
+      "@intelgraph/maestro-core": [
+        "packages/maestro-core/src/index.ts"
+      ],
+      "@intelgraph/observability/*": [
+        "packages/observability/src/*"
+      ],
+      "@intelgraph/observability": [
+        "packages/observability/src/index.ts"
+      ],
+      "@intelgraph/outreach/*": [
+        "packages/outreach/src/*"
+      ],
+      "@intelgraph/outreach": [
+        "packages/outreach/src/index.ts"
+      ],
+      "@intelgraph/provenance/*": [
+        "packages/provenance/src/*"
+      ],
+      "@intelgraph/provenance": [
+        "packages/provenance/src/index.ts"
+      ],
+      "@intelgraph/api-framework": ["packages/api-framework/src/index.ts"],
+      "@intelgraph/prov-ledger-core": ["packages/prov-ledger/src/index.ts"],
+      "@intelgraph/query-language": ["packages/query-language/src/index.ts"],
+      "@intelgraph/rest-api": ["packages/rest-api/src/index.ts"],
+      "@intelgraph/streaming-api": ["packages/streaming-api/src/index.ts"],
+      "@intelgraph/summit-coggeo": ["packages/summit-coggeo/src/index.ts"],
+      "@intelgraph/summit-core": ["packages/summit-core/src/index.ts"],
+      "@intelgraph/summit-cultural": ["packages/summit-cultural/src/index.ts"],
+      "@intelgraph/summit-praxeology": ["packages/summit-praxeology/src/index.ts"],
+      "@intelgraph/summit-schemas": ["packages/summit-schemas/src/index.ts"]
     }
   }
 }

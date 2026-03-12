@@ -8,13 +8,10 @@ import { ensureAuthenticated } from '../middleware/auth.js';
 import { z } from 'zod';
 import logger from '../utils/logger.js';
 import config from '../config/index.js';
-import cookieParser from 'cookie-parser'; // Assuming cookie-parser is available or similar middleware
 
 const router = Router();
 const ssoService = new SSOService();
 
-<<<<<<< HEAD
-=======
 /**
  * Helper to ensure a parameter is a single string.
  * Prevents HTTP Parameter Pollution (HPP) where an attacker might provide multiple
@@ -27,7 +24,6 @@ function toSingleString(val: any): string | undefined {
   return typeof val === 'string' ? val : undefined;
 }
 
->>>>>>> origin/main
 // Validation schemas
 const ssoConfigSchema = z.object({
   type: z.enum(['oidc', 'saml']),
@@ -60,21 +56,17 @@ const ssoConfigSchema = z.object({
  * @access Private (Admin of Tenant or System Admin)
  */
 router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const id = toSingleString(req.params.id);
+  if (!id) return res.status(400).json({ error: 'Tenant ID required' });
 
   // Strict Access Control:
-  // Must be logged in (ensureAuthenticated handles this)
-  // Must be ADMIN role
-  // Must be associated with the tenant ID (or be a system-wide admin if that concept exists, here we stick to tenant admin)
-
-  if ((req.user as any)!.role !== 'ADMIN') {
+  const user = req.user as any;
+  if (user?.role !== 'ADMIN') {
     return res.status(403).json({ error: 'Unauthorized: Admin role required' });
   }
 
   // Check if user belongs to this tenant
-  if ((req.user as any)!.tenantId !== id) {
-    // In a real system, we might check if user is a "Super Admin" across tenants.
-    // For now, strict tenant isolation.
+  if (user?.tenantId !== id) {
     return res.status(403).json({ error: 'Unauthorized: Access restricted to tenant members' });
   }
 
@@ -89,7 +81,7 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
     sso: validated
   };
 
-  // Direct update via pool (since TenantService updateSettings doesn't cover config)
+  // Direct update via pool
   const { getPostgresPool } = await import('../config/database.js');
   const pool = getPostgresPool();
   await pool.query('UPDATE tenants SET config = $1 WHERE id = $2', [newConfig, id]);
@@ -104,7 +96,8 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
  * @access Public
  */
 router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+  const tenantId = toSingleString(req.params.tenantId);
+  if (!tenantId) return res.status(400).json({ error: 'Tenant ID required' });
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   try {
@@ -131,24 +124,17 @@ router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async 
  * @access Public
  */
 router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+  const tenantId = toSingleString(req.params.tenantId);
+  if (!tenantId) return res.status(400).json({ error: 'Tenant ID required' });
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   // CSRF / State Validation
   const stateCookie = req.cookies['sso_state'];
-<<<<<<< HEAD
-  const stateParam = req.body.RelayState || req.body.state || (req.query.state as string) || (req.query.RelayState as string);
-=======
   const stateParam =
     toSingleString(req.body.RelayState) ||
     toSingleString(req.body.state) ||
     toSingleString(req.query.state) ||
     toSingleString(req.query.RelayState);
->>>>>>> origin/main
-
-  // In SAML, RelayState is passed back. In OIDC, state is passed back.
-  // Note: Some IdPs might not preserve RelayState perfectly in all flows (e.g. IdP initiated),
-  // but for SP-initiated (which /login is), it is required for security.
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
     logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);
@@ -176,6 +162,10 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
       sameSite: 'lax'
     });
 
+    const relayState = toSingleString(req.query.RelayState || req.body.RelayState);
+    if (relayState) {
+      return res.redirect(relayState);
+    }
     return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`);
 
   } catch (e: any) {
@@ -184,17 +174,14 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
   }
 }));
 
-// Handle GET callback (OIDC implicit/code flow sometimes uses GET)
+// Handle GET callback
 router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+  const tenantId = toSingleString(req.params.tenantId);
+  if (!tenantId) return res.status(400).json({ error: 'Tenant ID required' });
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   const stateCookie = req.cookies['sso_state'];
-<<<<<<< HEAD
-  const stateParam = (req.query.state as string) || (req.query.RelayState as string);
-=======
   const stateParam = toSingleString(req.query.state) || toSingleString(req.query.RelayState);
->>>>>>> origin/main
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
     logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);
@@ -220,6 +207,10 @@ router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(asy
       sameSite: 'lax'
     });
 
+    const relayState = toSingleString(req.query.RelayState || req.body.RelayState);
+    if (relayState) {
+      return res.redirect(relayState);
+    }
     return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`);
   } catch (e: any) {
     logger.error('SSO Callback Error', e);

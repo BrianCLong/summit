@@ -1,0 +1,187 @@
+#!/bin/bash
+
+##
+# S-AOS Commit Message Validation Hook
+#
+# This git hook validates commit messages against S-AOS format requirements.
+# It runs automatically when you commit and blocks commits that don't comply.
+#
+# Install: cp scripts/hooks/commit-msg .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
+# Bypass: git commit --no-verify (not recommended)
+##
+
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Get commit message file
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Skip validation for merge commits, revert commits, and initial commits
+if echo "$COMMIT_MSG" | grep -qE "^Merge|^Revert|^Initial commit"; then
+  echo -e "${BLUE}ℹ️  Skipping validation for special commit type${NC}"
+  exit 0
+fi
+
+# Skip validation if message is empty (user cancelled)
+if [ -z "$COMMIT_MSG" ]; then
+  exit 0
+fi
+
+# Validation counters
+ERRORS=0
+WARNINGS=0
+
+echo -e "${BLUE}━━━ S-AOS Commit Message Validation ━━━${NC}\n"
+
+# ============================================================================
+# REQUIRED: Check type(scope): subject format
+# ============================================================================
+
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -n 1)
+
+if ! echo "$FIRST_LINE" | grep -qE '^(feat|fix|docs|chore|refactor|test|perf|ci|build|style)\([^)]+\): .+'; then
+  echo -e "${RED}✗ INVALID FORMAT${NC}"
+  echo "  First line must follow: type(scope): subject"
+  echo ""
+  echo "  Valid types: feat, fix, docs, chore, refactor, test, perf, ci, build, style"
+  echo "  Example: feat(auth): add OAuth2 login support"
+  echo ""
+  echo "  Current first line:"
+  echo "  > $FIRST_LINE"
+  echo ""
+  ((ERRORS++))
+else
+  echo -e "${GREEN}✓ Format: type(scope): subject${NC}"
+fi
+
+# ============================================================================
+# REQUIRED: Check for subject line length (max 72 chars)
+# ============================================================================
+
+SUBJECT_LENGTH=${#FIRST_LINE}
+if [ $SUBJECT_LENGTH -gt 72 ]; then
+  echo -e "${RED}✗ SUBJECT TOO LONG${NC}"
+  echo "  Subject line must be ≤ 72 characters"
+  echo "  Current length: $SUBJECT_LENGTH"
+  echo ""
+  ((ERRORS++))
+else
+  echo -e "${GREEN}✓ Subject length: $SUBJECT_LENGTH chars${NC}"
+fi
+
+# ============================================================================
+# RECOMMENDED: Check for "What Changed" section
+# ============================================================================
+
+if ! echo "$COMMIT_MSG" | grep -qi "What Changed\|What changed"; then
+  echo -e "${YELLOW}⚠ Missing 'What Changed' section${NC}"
+  echo "  Recommended: Describe what changed in the code"
+  echo ""
+  ((WARNINGS++))
+else
+  echo -e "${GREEN}✓ 'What Changed' section present${NC}"
+fi
+
+# ============================================================================
+# RECOMMENDED: Check for "Why" section
+# ============================================================================
+
+if ! echo "$COMMIT_MSG" | grep -qi "Why"; then
+  echo -e "${YELLOW}⚠ Missing 'Why' section${NC}"
+  echo "  Recommended: Explain the motivation for the change"
+  echo ""
+  ((WARNINGS++))
+else
+  echo -e "${GREEN}✓ 'Why' section present${NC}"
+fi
+
+# ============================================================================
+# RECOMMENDED: Check for "Verification" section (for feat/fix)
+# ============================================================================
+
+if echo "$FIRST_LINE" | grep -qE '^(feat|fix)'; then
+  if ! echo "$COMMIT_MSG" | grep -qi "Verification\|Tested\|Testing"; then
+    echo -e "${YELLOW}⚠ Missing 'Verification' section${NC}"
+    echo "  Recommended for feat/fix: Describe how you verified the change"
+    echo ""
+    ((WARNINGS++))
+  else
+    echo -e "${GREEN}✓ 'Verification' section present${NC}"
+  fi
+fi
+
+# ============================================================================
+# OPTIONAL: Check for Evidence section
+# ============================================================================
+
+if echo "$COMMIT_MSG" | grep -qi "Evidence"; then
+  echo -e "${GREEN}✓ 'Evidence' section present (excellent!)${NC}"
+fi
+
+# ============================================================================
+# OPTIONAL: Check for Risk Assessment (for high-impact changes)
+# ============================================================================
+
+if echo "$FIRST_LINE" | grep -qE '\(auth|\(security|\(database|\(api)'; then
+  if echo "$COMMIT_MSG" | grep -qi "Risk"; then
+    echo -e "${GREEN}✓ 'Risk Assessment' present for high-impact change${NC}"
+  else
+    echo -e "${YELLOW}⚠ Consider adding 'Risk Assessment' for high-impact change${NC}"
+    echo "  This change affects: auth, security, database, or api"
+    echo ""
+    ((WARNINGS++))
+  fi
+fi
+
+# ============================================================================
+# STYLE: Check for imperative mood in subject
+# ============================================================================
+
+# Common past-tense patterns to catch
+if echo "$FIRST_LINE" | grep -qE '(: (Added|Fixed|Updated|Changed|Removed|Deleted)|ed |ing )'; then
+  echo -e "${YELLOW}⚠ Subject should use imperative mood${NC}"
+  echo "  Use 'Add' not 'Added', 'Fix' not 'Fixed'"
+  echo "  Example: 'feat(api): add user endpoint' not 'feat(api): added user endpoint'"
+  echo ""
+  ((WARNINGS++))
+fi
+
+# ============================================================================
+# Summary
+# ============================================================================
+
+echo ""
+echo -e "${BLUE}━━━ Validation Summary ━━━${NC}"
+echo ""
+
+if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
+  echo -e "${GREEN}✅ Commit message is EXCELLENT${NC}"
+  echo ""
+  exit 0
+elif [ $ERRORS -eq 0 ]; then
+  echo -e "${YELLOW}⚠️  Commit message is ACCEPTABLE with $WARNINGS warning(s)${NC}"
+  echo ""
+  echo -e "${YELLOW}Consider addressing warnings for better compliance${NC}"
+  echo ""
+
+  # Allow commit but suggest improvements
+  exit 0
+else
+  echo -e "${RED}❌ Commit message has $ERRORS error(s) and $WARNINGS warning(s)${NC}"
+  echo ""
+  echo -e "${RED}Please fix errors before committing${NC}"
+  echo ""
+  echo "Resources:"
+  echo "  • Use template: git config --local commit.template .gitmessage"
+  echo "  • Examples: docs/governance/S-AOS_EXAMPLES_GOOD_VS_BAD.md"
+  echo "  • Bypass (not recommended): git commit --no-verify"
+  echo ""
+  exit 1
+fi

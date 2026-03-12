@@ -128,7 +128,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
     ports:
-      - '4000:4000'
+      - '4001:4000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -151,11 +151,13 @@ services:
 
   gateway:
     build:
-      context: ./services/dev-gateway
+      context: ./services/api-gateway
     container_name: summit-gateway
     restart: unless-stopped
     environment:
-      PORT: 4100
+      PORT: 4000
+      NODE_ENV: development
+      GRAPH_SERVICE_URL: http://api:4000
       PROMETHEUS_PORT: 9464
       # OpenTelemetry Configuration
       OTEL_SERVICE_NAME: summit-gateway
@@ -178,7 +180,7 @@ services:
       typesense:
         condition: service_healthy
     ports:
-      - '4100:4100'
+      - '4000:4000'
       - '9464:9464'
     healthcheck:
       test: [ 'CMD', 'curl', '-f', 'http://localhost:4100/health' ]
@@ -236,7 +238,7 @@ services:
     environment:
       PORT: 9092
       PROMETHEUS_URL: http://prometheus:9090
-      API_URL: http://api:4000
+      API_URL: http://gateway:4000
       PREDICTD_PORT: 4001
     ports:
       - '9092:9092'
@@ -290,8 +292,8 @@ services:
     env_file:
       - .env
     environment:
-      VITE_API_URL: http://api:4000/graphql
-      VITE_WS_URL: ws://api:4000/graphql
+      VITE_API_URL: http://gateway:4000/graphql
+      VITE_WS_URL: ws://gateway:4000/graphql
       VITE_WEBSOCKET_URL: ws://websocket-server:9001
       VITE_PORT: 3000
     ports:

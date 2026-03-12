@@ -1,8 +1,8 @@
-// @ts-nocheck
+
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import * as z from 'zod';
+import { z } from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { fipsService } from './fips-compliance.js';
 
@@ -60,14 +60,14 @@ const AuditChainConfigSchema = z.object({
 });
 
 export class WORMAuditChainService {
-  private config: z.infer<typeof AuditChainConfigSchema>;
+  private config: any;
   private currentSegment: AuditSegment | null = null;
   private pendingEntries: AuditEntry[] = [];
   private lastHash: string = '0'; // Genesis hash
   private segmentTimer: NodeJS.Timeout | null = null;
   private sequenceCounter: number = 0;
 
-  constructor(config?: Partial<z.infer<typeof AuditChainConfigSchema>>) {
+  constructor(config?: any) {
     this.config = AuditChainConfigSchema.parse({
       ...config,
       s3Bucket: process.env.AUDIT_WORM_BUCKET || config?.s3Bucket,
@@ -102,10 +102,11 @@ export class WORMAuditChainService {
         'audit.retention_years': this.config.retentionYears,
         'audit.sign_roots': this.config.signRoots,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('WORM audit chain initialization failed:', error);
-      otelService.recordException(error);
-      span.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error as Error);
+      span.setStatus({ code: 2, message: errorMessage });
       throw error;
     } finally {
       span?.end();
@@ -138,10 +139,11 @@ export class WORMAuditChainService {
         'audit.classification': entry.classification,
         'audit.critical': this.isCriticalEvent(entry.eventType),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to add audit entry:', error);
-      otelService.recordException(error);
-      span.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error as Error);
+      span.setStatus({ code: 2, message: errorMessage });
       throw error;
     } finally {
       span?.end();
@@ -184,10 +186,11 @@ export class WORMAuditChainService {
         'audit.entries_processed': this.pendingEntries.length,
         'audit.current_segment': this.currentSegment?.segmentId || 'none',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to process pending entries:', error);
-      otelService.recordException(error);
-      span.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error as Error);
+      span.setStatus({ code: 2, message: errorMessage });
       throw error;
     } finally {
       span?.end();
@@ -229,7 +232,7 @@ export class WORMAuditChainService {
       try {
         const keyId = 'audit-chain-signing-key'; // Would be created during initialization
         chainEntry.signature = await fipsService.sign(currentHash, keyId);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.warn('Failed to sign hash chain entry:', error);
       }
     }
@@ -272,10 +275,11 @@ export class WORMAuditChainService {
         'audit.retention_until':
           this.currentSegment.retentionUntil.toISOString(),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to start new segment:', error);
-      otelService.recordException(error);
-      span.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error as Error);
+      span.setStatus({ code: 2, message: errorMessage });
       throw error;
     } finally {
       span?.end();
@@ -303,7 +307,7 @@ export class WORMAuditChainService {
             segment.rootHash,
             keyId,
           );
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Failed to sign segment root:', error);
           segment.rootSignature = 'signing_failed';
         }
@@ -322,10 +326,11 @@ export class WORMAuditChainService {
         'audit.chain_length': segment.hashChain.length,
         'audit.root_hash': segment.rootHash,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to finalize segment:', error);
-      otelService.recordException(error);
-      span.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error as Error);
+      span.setStatus({ code: 2, message: errorMessage });
       throw error;
     } finally {
       span?.end();
@@ -396,7 +401,7 @@ export class WORMAuditChainService {
       let segmentJson = JSON.stringify(segmentData, null, 2);
       if (this.config.compressionEnabled) {
         const { gzipSync } = await import('node:zlib');
-        segmentJson = gzipSync(segmentJson).toString('base64');
+        segmentJson = (gzipSync as any)(segmentJson).toString('base64');
       }
 
       // Encrypt if enabled
@@ -405,7 +410,7 @@ export class WORMAuditChainService {
           const keyId = 'audit-encryption-key';
           const encrypted = await fipsService.encrypt(segmentJson, keyId);
           segmentJson = JSON.stringify(encrypted);
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.warn(
             'Failed to encrypt segment, storing unencrypted:',
             error,
@@ -452,10 +457,11 @@ export class WORMAuditChainService {
         'audit.encrypted': this.config.encryptionEnabled,
         'audit.retention_until': segment.retentionUntil.toISOString(),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to store segment to WORM:', error);
-      otelService.recordException(error);
-      span.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error as Error);
+      span.setStatus({ code: 2, message: errorMessage });
       throw error;
     } finally {
       span?.end();
@@ -513,9 +519,9 @@ export class WORMAuditChainService {
             } else {
               result.errors.push(`Invalid signature at entry ${i}`);
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             result.errors.push(
-              `Signature verification failed at entry ${i}: ${error}`,
+              `Signature verification failed at entry ${i}: ${error instanceof Error ? error.message : String(error)}`,
             );
           }
         }
@@ -536,16 +542,16 @@ export class WORMAuditChainService {
       });
 
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Hash chain verification failed:', error);
-      otelService.recordException(error);
-      span.setStatus({ code: 2, message: error.message });
-
+      otelService.recordException(error as Error);
+      span.setStatus({ code: 2, message: errorMessage });
       return {
         valid: false,
         totalEntries: chain.length,
         verifiedSignatures: 0,
-        errors: [error.message],
+        errors: [errorMessage],
       };
     } finally {
       span?.end();
@@ -561,7 +567,7 @@ export class WORMAuditChainService {
   }
 
   private scheduleSegmentRotation(): void {
-    let intervalMs: number;
+    let intervalMs = 24 * 60 * 60 * 1000; // Default to daily
 
     switch (this.config.segmentInterval) {
       case 'hourly':
@@ -582,7 +588,7 @@ export class WORMAuditChainService {
 
         // Start new segment (finalizes current one)
         await this.startNewSegment();
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Segment rotation failed:', error);
       }
     }, intervalMs);
@@ -594,7 +600,7 @@ export class WORMAuditChainService {
       // In production, this would read from database or S3
       this.lastHash = '0'; // Start with genesis hash
       this.sequenceCounter = 0;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.warn('No existing chain state found, starting fresh');
       this.lastHash = '0';
       this.sequenceCounter = 0;
@@ -663,7 +669,7 @@ export class WORMAuditChainService {
         });
         const keyId = 'audit-export-signing-key';
         exportSignature = await fipsService.sign(exportData, keyId);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.warn('Failed to sign export:', error);
       }
 

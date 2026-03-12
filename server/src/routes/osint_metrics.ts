@@ -2,11 +2,7 @@ import express, { type Request, type Response } from 'express';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { OSINTMetricsService } from '../osint/metrics/OSINTMetricsService.js';
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    tenantId?: string;
-  };
-}
+import { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 

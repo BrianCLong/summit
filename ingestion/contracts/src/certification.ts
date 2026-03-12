@@ -1,5 +1,5 @@
 import { createHash, createSign, generateKeyPairSync, verify } from 'crypto';
-import { ContractSpec, CertificatePayload, ValidationFinding } from './types.js';
+import { ContractSpec, CertificatePayload, ValidationFinding, Certification } from './types.js';
 import { ContractSpecification } from './specification.js';
 
 export class CertificateAuthority {
@@ -48,7 +48,13 @@ export class CertificateAuthority {
 export class CertificationWorkflow {
   constructor(private readonly ca: CertificateAuthority) {}
 
-  certify(spec: ContractSpec): { cert: CertificatePayload; findings: ValidationFinding[] } {
+  async certify(spec: ContractSpec): Promise<{ cert: Certification; findings: ValidationFinding[] }> {
+    const findings = new ContractSpecification(spec).validate();
+    const cert = await this.issueCertificate(spec, 'default-secret');
+    return { cert, findings };
+  }
+
+  async issueCertificate(spec: ContractSpec, secret: string, validUntil?: string): Promise<Certification> {
     const specification = new ContractSpecification(spec);
     const findings = specification.validate();
     const blockingIssues = findings.filter((finding) => finding.severity === 'error');
@@ -60,15 +66,12 @@ export class CertificationWorkflow {
     const signature = this.ca.signContract(spec);
     const hashedTerms = specification.hashTerms();
 
-    const cert: CertificatePayload = {
-      ...signature,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 180).toISOString(),
+    const cert: Certification = {
+      id: signature.signature.slice(0, 8),
       contractId: spec.id,
-      dataset: spec.dataset,
-      version: spec.version,
-      signedBy: signature.signedBy,
-      signature: signature.signature,
-      issuedAt: signature.issuedAt
+      issuedAt: signature.issuedAt,
+      expiresAt: validUntil || new Date(Date.now() + 1000 * 60 * 60 * 24 * 180).toISOString(),
+      signature: signature.signature
     };
 
     spec.termsHash = hashedTerms;
@@ -76,7 +79,20 @@ export class CertificationWorkflow {
     spec.certifiedAt = cert.issuedAt;
     spec.signature = cert.signature;
 
-    return { cert, findings };
+    return cert;
+  }
+
+  async verifyCertificate(spec: ContractSpec, certificate: Certification, secret: string): Promise<{ verified: boolean }> {
+    const payload: CertificatePayload = {
+      contractId: certificate.contractId,
+      dataset: spec.dataset,
+      version: spec.version,
+      issuedAt: certificate.issuedAt,
+      expiresAt: certificate.expiresAt,
+      signedBy: 'dpic-ca',
+      signature: certificate.signature
+    };
+    return { verified: this.ca.verify(payload, spec) };
   }
 
   enforceProductionGate(spec: ContractSpec): void {

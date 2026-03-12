@@ -167,11 +167,13 @@ services:
 
   gateway:
     build:
-      context: ./services/dev-gateway
+      context: .
+      dockerfile: apps/gateway/Dockerfile
     container_name: summit-gateway
     restart: unless-stopped
     environment:
-      PORT: 4100
+      PORT: 8080
+      SERVER_URL: http://api:4000/graphql
       # OpenTelemetry Configuration
       OTEL_SERVICE_NAME: summit-gateway
       OTEL_SERVICE_VERSION: 1.0.0
@@ -181,7 +183,7 @@ services:
       api:
         condition: service_healthy
     ports:
-      - '4100:4100'
+      - '4100:8080'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
       interval: 15s

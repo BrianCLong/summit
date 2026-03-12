@@ -4,7 +4,9 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "declaration": true,
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "typeRoots": ["/Users/brianlong/Developer/summit/node_modules/@types"],
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]

@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
 
-const baseUrl = __ENV.BASE_URL || 'http://localhost:3000';
+const baseUrl = __ENV.BASE_URL || 'http://localhost:4000';
 const sloMode = (__ENV.SLO_MODE || 'mock').toLowerCase();
 const strictMode = sloMode === 'strict';
 

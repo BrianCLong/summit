@@ -1,9 +1,9 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import pino from 'pino';
+import logger from '../../shared/logging/index.js';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = (pino as any)({ name: 'ObjectDetectionEngine' });
+// No need for separate pino instance, use shared logger
 
 export interface DetectionResult {
   className: string;
@@ -60,8 +60,9 @@ export class ObjectDetectionEngine {
 
       this.isInitialized = true;
       logger.info('Object Detection Engine initialized successfully');
-    } catch (error: any) {
-      logger.error('Failed to initialize Object Detection Engine:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to initialize Object Detection Engine:', errorMessage);
       throw error;
     }
   }
@@ -123,8 +124,9 @@ export class ObjectDetectionEngine {
         `Object detection completed: ${detections.length} objects detected`,
       );
       return detections;
-    } catch (error: any) {
-      logger.error('Object detection failed:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Object detection failed:', errorMessage);
       throw error;
     }
   }
@@ -182,8 +184,9 @@ export class ObjectDetectionEngine {
         `Video object detection completed: ${results.length} frames processed`,
       );
       return results;
-    } catch (error: any) {
-      logger.error('Video object detection failed:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Video object detection failed:', errorMessage);
       throw error;
     }
   }
@@ -231,15 +234,15 @@ export class ObjectDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code !== 0) {
           reject(
             new Error(
@@ -317,15 +320,15 @@ export class ObjectDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code !== 0) {
           reject(
             new Error(
@@ -422,10 +425,11 @@ export class ObjectDetectionEngine {
           detection.boundingBox,
         );
         detection.features = features;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.warn(
           `Failed to extract features for object ${detection.className}:`,
-          error,
+          errorMessage,
         );
       }
     }
@@ -456,15 +460,15 @@ export class ObjectDetectionEngine {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code !== 0) {
           reject(new Error(`Feature extraction failed: ${errorOutput}`));
           return;
@@ -675,7 +679,7 @@ export class ObjectDetectionEngine {
         'import ultralytics, cv2, numpy; print("Dependencies OK")',
       ]);
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           resolve();
         } else {
@@ -718,8 +722,9 @@ export class ObjectDetectionEngine {
 
       this.availableModels = models;
       logger.info(`Available models: ${this.availableModels.join(', ')}`);
-    } catch (error: any) {
-      logger.error('Failed to load available models:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to load available models:', errorMessage);
       throw error;
     }
   }

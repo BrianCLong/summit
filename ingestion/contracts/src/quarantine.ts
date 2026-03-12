@@ -1,12 +1,12 @@
 import { QuarantineRecord } from './types.js';
 
-export class QuarantineRegistry {
+export class QuarantineService {
   private readonly records: QuarantineRecord[] = [];
 
-  quarantine(contractId: string, version: string, reason: string): QuarantineRecord {
+  place(contractId: string, reason: string, payload: any): QuarantineRecord {
     const record: QuarantineRecord = {
       contractId,
-      version,
+      version: '1.0.0', // Default version for legacy parity
       reason,
       at: new Date().toISOString()
     };

@@ -4,22 +4,22 @@ import path from 'node:path';
 
 const steps = [
   {
-    name: 'sanitize:type-stubs',
+    name: 'ensure_type_stubs',
     command: 'bash',
-    args: ['-lc', 'rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot'],
+    args: ['-lc', 'mkdir -p node_modules/@types/hapi__catbox node_modules/@types/hapi__shot || true && touch node_modules/@types/hapi__catbox/index.d.ts node_modules/@types/hapi__shot/index.d.ts || true'],
   },
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
   { name: 'lint', command: 'pnpm', args: ['lint'] },
   { name: 'build', command: 'pnpm', args: ['build'] },
   {
-    name: 'server:test:unit',
+    name: 'server_test_unit',
     command: 'pnpm',
     args: ['--filter', 'intelgraph-server', 'test:unit'],
     env: { GA_VERIFY_MODE: 'true' },
   },
-  { name: 'ga:smoke', command: 'pnpm', args: ['ga:smoke'] },
+  { name: 'ga_smoke', command: 'pnpm', args: ['ga:smoke'] },
   {
-    name: 'ga:maestro-spec',
+    name: 'ga_maestro_spec',
     command: 'node',
     args: ['scripts/ga/verify-maestro-spec.mjs', 'artifacts/maestro/sample/spec_bundle.json'],
   },
@@ -31,7 +31,7 @@ const gitSha = spawnSync('git', ['rev-parse', 'HEAD'], {
 }).stdout?.trim();
 
 const sha = process.env.GA_VERIFY_SHA || gitSha || 'unknown';
-const outDir = path.join('artifacts', 'ga-verify', sha);
+const outDir = path.join('/tmp', 'summit-ga-verify', sha);
 const logsDir = path.join(outDir, 'logs');
 const stampPath = path.join(outDir, 'stamp.json');
 

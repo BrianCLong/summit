@@ -11,6 +11,8 @@ import {
 } from '../../observability/telemetry.js';
 import { Request, Response, NextFunction } from 'express';
 import logger from '../../utils/logger.js';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 
 interface TracingConfig {
   enabled: boolean;
@@ -62,8 +64,8 @@ export class OTelTracingService {
   private initializeSDK(): void {
     try {
       // Dynamic import to avoid breaking if @opentelemetry not installed
-      const { trace } = require('@opentelemetry/api');
-      this.tracer = trace.getTracer(this.config.service_name, this.config.service_version);
+    const { trace } = require('@opentelemetry/api');
+    this.tracer = trace.getTracer(this.config.service_name, this.config.service_version);
       logger.info({ message: 'OTel tracing enabled', service: this.config.service_name });
     } catch {
       this.tracer = noopTracer;

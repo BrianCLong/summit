@@ -30,3 +30,8 @@ export const expressMiddleware = () => {
     next();
   };
 };
+
+export const tracingService = {
+  expressMiddleware,
+};
+

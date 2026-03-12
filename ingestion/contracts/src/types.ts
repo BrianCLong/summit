@@ -7,6 +7,8 @@ export interface ContractField {
   unit?: string;
   description?: string;
   classification?: DataClassification;
+  pii?: boolean;
+  dp?: boolean;
 }
 
 export interface ContractLicense {
@@ -27,6 +29,8 @@ export interface ContractSpec {
   certified?: boolean;
   certifiedAt?: string;
   signature?: string;
+  createdAt?: string;
+  status?: 'draft' | 'certified' | 'revoked';
 }
 
 export interface ValidationFinding {
@@ -41,6 +45,16 @@ export interface DriftDiffEntry {
   details: string;
 }
 
+export interface ConformanceResult {
+  conforms: boolean;
+  missingFields: string[];
+  nullabilityViolations: string[];
+  typeViolations: string[];
+  score: number;
+  piiFlagsValid: boolean;
+  dpFlagsValid: boolean;
+}
+
 export interface Scorecard {
   contractId: string;
   version: string;
@@ -49,6 +63,8 @@ export interface Scorecard {
   governance: number;
   webhooksDelivered: number;
   findings: ValidationFinding[];
+  conformanceScores?: number[];
+  quarantinedEvents?: number;
 }
 
 export interface QuarantineRecord {
@@ -68,4 +84,19 @@ export interface CertificatePayload {
   expiresAt?: string;
   signedBy: string;
   signature: string;
+}
+
+export interface Certification {
+  id: string;
+  contractId: string;
+  issuedAt: string;
+  expiresAt?: string;
+  signature: string;
+}
+
+export interface ScorecardBuildInput {
+  contractId: string;
+  version: string;
+  conformanceScores: number[];
+  quarantinedEvents: number;
 }

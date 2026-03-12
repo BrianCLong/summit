@@ -93,7 +93,7 @@ services:
 
   api-gateway:
     build: ./services/api-gateway
-    ports: [ "4000:4000" ]
+    ports: [ "4002:4000" ]
     environment:
       - POLICY_DRY_RUN=true
       - ENABLE_INSECURE_DEV_AUTH=true
@@ -117,7 +117,7 @@ services:
     build:
       context: .
       dockerfile: apps/gateway/Dockerfile
-    ports: [ "8080:8080" ]
+    ports: [ "4000:8080" ]
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
       - API_GATEWAY_URL=http://api-gateway:4000
@@ -209,6 +209,49 @@ services:
       - default
       - observability
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.48
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - observability
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.85.0
+    volumes:
+      - ./ops/observability/otel-config.yaml:/etc/otel-collector-config.yaml
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    ports:
+      - "1888:1888"   # pprof extension
+      - "8888:8888"   # Prometheus metrics exposed by the collector
+      - "8889:8889"   # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP http receiver
+      - "55679:55679" # zpages extension
+    depends_on:
+      - jaeger
+    networks:
+      - observability
+
+  minio:
+    image: minio/minio:RELEASE.2023-09-30T07-02-29Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - default
+      - intelgraph
+
   prometheus:
     image: prom/prometheus:v2.47.0
     ports:
@@ -246,6 +289,7 @@ volumes:
   redis_data: {}
   prometheus_data: {}
   grafana_data: {}
+  minio_data: {}
 
 networks:
   observability:
