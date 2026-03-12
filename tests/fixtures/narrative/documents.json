@@ -1,0 +1,18 @@
+[
+  {
+    "doc_id": "doc_1",
+    "tokens": ["the", "new", "law", "will", "hurt", "small", "businesses", "economy"]
+  },
+  {
+    "doc_id": "doc_2",
+    "tokens": ["the", "new", "law", "hurts", "small", "businesses", "and", "jobs"]
+  },
+  {
+    "doc_id": "doc_3",
+    "tokens": ["this", "legislation", "protects", "workers", "rights", "fair", "wages"]
+  },
+  {
+    "doc_id": "doc_4",
+    "tokens": ["worker", "protection", "is", "ensured", "by", "this", "legislation", "wages"]
+  }
+]

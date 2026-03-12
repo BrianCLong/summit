@@ -1,0 +1,42 @@
+[
+  {
+    "id": "claim_1",
+    "text": "The new legislation will destroy small businesses.",
+    "source": "actor_A",
+    "timestamp": "2023-10-01T10:00:00Z",
+    "cluster_id": "cluster_alpha",
+    "sentiment": -0.8
+  },
+  {
+    "id": "claim_2",
+    "text": "Small businesses are going to fail because of this bill.",
+    "source": "actor_B",
+    "timestamp": "2023-10-01T10:15:00Z",
+    "cluster_id": "cluster_alpha",
+    "sentiment": -0.9
+  },
+  {
+    "id": "claim_3",
+    "text": "This legislation provides necessary protections for workers.",
+    "source": "actor_C",
+    "timestamp": "2023-10-01T12:00:00Z",
+    "cluster_id": "cluster_beta",
+    "sentiment": 0.5
+  },
+  {
+    "id": "claim_4",
+    "text": "The bill protects employees from unfair practices.",
+    "source": "actor_D",
+    "timestamp": "2023-10-01T14:30:00Z",
+    "cluster_id": "cluster_beta",
+    "sentiment": 0.6
+  },
+  {
+    "id": "claim_5",
+    "text": "The legislation will not only destroy small businesses, but also ruin the economy.",
+    "source": "actor_A",
+    "timestamp": "2023-10-05T10:00:00Z",
+    "cluster_id": "cluster_alpha",
+    "sentiment": -0.95
+  }
+]
