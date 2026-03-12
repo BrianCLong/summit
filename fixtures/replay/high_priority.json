@@ -1,0 +1,46 @@
+{
+  "scenario": "high_priority",
+  "window_days": 30,
+  "prs": [
+    {
+      "number": 101,
+      "title": "Fix critical stability issue in engine",
+      "labels": ["priority", "critical", "stability"],
+      "files": ["src/engine/core.ts", "src/engine/memory.ts"],
+      "created_at": "2024-01-01T10:00:00Z",
+      "merged_at": "2024-01-01T12:00:00Z",
+      "market_score": 0.85,
+      "author": "dev-lead"
+    },
+    {
+      "number": 102,
+      "title": "Resolve priority security bug",
+      "labels": ["priority", "security"],
+      "files": ["src/auth/token.ts"],
+      "created_at": "2024-01-05T09:00:00Z",
+      "merged_at": "2024-01-05T14:00:00Z",
+      "market_score": 0.90,
+      "author": "sec-eng"
+    },
+    {
+      "number": 103,
+      "title": "Emergency hotfix for production outage",
+      "labels": ["priority", "critical", "hotfix"],
+      "files": ["src/api/routes.ts"],
+      "created_at": "2024-01-15T02:00:00Z",
+      "merged_at": "2024-01-15T03:30:00Z",
+      "market_score": 0.95,
+      "author": "oncall-dev"
+    },
+    {
+      "number": 104,
+      "title": "Patch market strategy adjustment",
+      "labels": ["priority"],
+      "files": ["scripts/repoos/patch-market.mjs"],
+      "created_at": "2024-01-28T11:00:00Z",
+      "merged_at": "2024-01-29T10:00:00Z",
+      "market_score": 0.70,
+      "author": "arch-lead"
+    }
+  ]
+}

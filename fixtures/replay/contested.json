@@ -1,0 +1,46 @@
+{
+  "scenario": "contested",
+  "window_days": 30,
+  "prs": [
+    {
+      "number": 301,
+      "title": "Refactor authentication flow",
+      "labels": ["refactor", "contested"],
+      "files": ["src/auth/login.ts", "src/auth/session.ts"],
+      "created_at": "2024-01-03T10:00:00Z",
+      "merged_at": "2024-01-10T10:00:00Z",
+      "market_score": 0.45,
+      "author": "senior-dev1"
+    },
+    {
+      "number": 302,
+      "title": "Add support for OAuth2",
+      "labels": ["feature", "contested"],
+      "files": ["src/auth/oauth.ts", "src/auth/session.ts"],
+      "created_at": "2024-01-04T10:00:00Z",
+      "merged_at": "2024-01-12T10:00:00Z",
+      "market_score": 0.55,
+      "author": "senior-dev2"
+    },
+    {
+      "number": 303,
+      "title": "Change API response format",
+      "labels": ["breaking", "contested"],
+      "files": ["src/api/response.ts"],
+      "created_at": "2024-01-15T09:00:00Z",
+      "merged_at": "2024-01-25T14:00:00Z",
+      "market_score": 0.35,
+      "author": "api-lead"
+    },
+    {
+      "number": 304,
+      "title": "Migrate database schema for users",
+      "labels": ["database", "contested"],
+      "files": ["src/db/schema/users.ts", "src/db/migrations/001.ts"],
+      "created_at": "2024-01-20T11:00:00Z",
+      "merged_at": "2024-01-30T16:00:00Z",
+      "market_score": 0.60,
+      "author": "db-admin"
+    }
+  ]
+}

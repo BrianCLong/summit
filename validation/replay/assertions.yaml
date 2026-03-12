@@ -1,0 +1,10 @@
+scenarios:
+  high_priority:
+    expected_outcome: "pass"
+    min_market_score: 0.5
+  low_signal:
+    expected_outcome: "fail"
+    max_market_score: 0.2
+  contested:
+    expected_outcome: "pass"
+    min_market_score: 0.3
