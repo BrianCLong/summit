@@ -30,7 +30,7 @@
     "@vitest/coverage-v8": "1.0.4",
     "supertest": "6.3.3",
     "tsx": "4.6.2",
-    "typescript": "5.3.3",
+    "typescript": "^5.0.0",
     "vitest": "1.0.4"
   }
 }

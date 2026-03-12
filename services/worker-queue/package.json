@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "ts-node-dev": "2.0.0",
-    "typescript": "5.3.3",
+    "typescript": "^5.0.0",
     "@types/node": "20.11.20"
   }
 }

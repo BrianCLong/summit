@@ -12,7 +12,7 @@
     "ioredis": "5.3.2",
     "prom-client": "15.0.0",
     "ts-node": "10.9.1",
-    "typescript": "5.2.2",
+    "typescript": "^5.0.0",
     "uuid": "9.0.1",
     "@intelgraph/events-producer": "workspace:*"
   },

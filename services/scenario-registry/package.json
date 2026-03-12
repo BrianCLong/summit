@@ -40,6 +40,6 @@
     "@types/cors": "2.8.17",
     "@types/compression": "1.7.5",
     "tsx": "4.7.0",
-    "typescript": "5.3.3"
+    "typescript": "^5.0.0"
   }
 }
