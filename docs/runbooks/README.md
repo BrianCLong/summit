@@ -153,6 +153,7 @@ Automated index of available runbooks.
 - [ransomware-triage.yaml](ransomware-triage.yaml)
 - [rapid-attribution.yaml](rapid-attribution.yaml)
 - [realtime.md](realtime.md)
+- [release-rc-readiness.md](release-rc-readiness.md)
 - [release-captain-quick-reference.md](release-captain-quick-reference.md)
 - [release-captain-verification.md](release-captain-verification.md)
 - [release-captain.md](release-captain.md)
