@@ -308,3 +308,43 @@ security:
       - '**/*.spec.*'
       - 'evidence/**'
       - 'artifacts/**'
+
+# REQUIRED BY MISSION
+# =============================================================================
+
+backend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'server/**/*'
+      - 'apps/api/**/*'
+      - 'services/**/*'
+      - 'packages/api/**/*'
+
+infra:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'infra/**/*'
+      - 'terraform/**/*'
+      - 'k8s/**/*'
+      - 'helm/**/*'
+      - 'ops/**/*'
+      - '**/Dockerfile*'
+
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.test.ts'
+      - '**/*.test.tsx'
+      - '**/*.test.js'
+      - '**/*.test.jsx'
+      - '**/*.spec.ts'
+      - '**/*.spec.tsx'
+      - '**/*.spec.js'
+      - '**/*.spec.jsx'
+      - 'tests/**/*'
+      - '**/__tests__/**/*'
+      - '**/test/**/*'
+      - 'e2e/**/*'
+      - 'playwright/**/*'
+      - 'jest.config.*'
+      - 'vitest.config.*'
