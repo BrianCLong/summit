@@ -1,0 +1,65 @@
+playbook_id: "EXECUTIVE_BRAND_PERSONA_ARMY_DEFENSE"
+name: "Executive Brand Persona Army Defense"
+description: "Defensive playbook for mitigating coordinated persona army attacks against executive brands."
+applicability_conditions:
+  persona_attributes:
+    risk_level: "HIGH"
+    platform_spread: ["linkedin", "twitter"]
+  campaign_attributes:
+    narrative_type: "executive-targeting"
+objectives:
+  - "reduce amplification"
+  - "protect executive brand"
+  - "increase early warning"
+phases:
+  OBSERVE:
+    - name: "Baseline Executive Mention Volume"
+      description: "Monitor baseline metrics for executive mentions across key platforms."
+      step_type: "SAFE_AUTOMATION"
+      dependencies: []
+      suggested_integrations: ["Summit Dashboard"]
+    - name: "Enrich Persona Profiles"
+      description: "Gather enrichment data on participating personas."
+      step_type: "AGENT_ASSIST"
+      dependencies: ["Baseline Executive Mention Volume"]
+      suggested_integrations: ["Enrichment API"]
+  ORIENT:
+    - name: "Analyze Campaign Context"
+      description: "Determine the core narrative and intent of the campaign."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Enrich Persona Profiles"]
+      suggested_integrations: []
+    - name: "Map Stakeholders"
+      description: "Identify key internal stakeholders (PR, Legal, Exec Comms)."
+      step_type: "HUMAN_ONLY"
+      dependencies: []
+      suggested_integrations: []
+  DECIDE:
+    - name: "Determine Communication Strategy"
+      description: "Draft internal briefing and potential external messaging."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Analyze Campaign Context", "Map Stakeholders"]
+      suggested_integrations: []
+    - name: "Evaluate Hardening Options"
+      description: "Assess needs for account lockdowns or increased monitoring."
+      step_type: "AGENT_ASSIST"
+      dependencies: ["Analyze Campaign Context"]
+      suggested_integrations: []
+  ACT:
+    - name: "Issue Internal Alerts"
+      description: "Send alerts to mapped stakeholders."
+      step_type: "SAFE_AUTOMATION"
+      dependencies: ["Determine Communication Strategy"]
+      suggested_integrations: ["Slack", "Email"]
+    - name: "Tune Detection Config"
+      description: "Update Summit detection rules for related keywords/personas."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Evaluate Hardening Options"]
+      suggested_integrations: ["Summit Config"]
+role_assignments:
+  CTI_Analyst: "Lead investigation and attribution."
+  Narrative_Intel: "Analyze messaging trends."
+  Comms: "Manage internal and external communications."
+automation_suggestions:
+  - "Automate initial persona enrichment."
+  - "Automate internal alert routing based on severity."
