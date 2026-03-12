@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-11T09:53:26Z",
+  "environment": "synthetic",
+  "results": {
+    "scale_10": {
+      "scale": 10,
+      "query_latency_sec": {
+        "p50": 0.1017,
+        "p95": 0.1591,
+        "p99": 0.3309,
+        "mean": 0.0936
+      },
+      "total_queries": 100
+    },
+    "scale_100": {
+      "scale": 100,
+      "query_latency_sec": {
+        "p50": 0.1051,
+        "p95": 0.1617,
+        "p99": 0.2949,
+        "mean": 0.1048
+      },
+      "total_queries": 100
+    },
+    "scale_1000": {
+      "scale": 1000,
+      "query_latency_sec": {
+        "p50": 0.1211,
+        "p95": 0.1791,
+        "p99": 0.2163,
+        "mean": 0.1097
+      },
+      "total_queries": 100
+    }
+  }
+}
