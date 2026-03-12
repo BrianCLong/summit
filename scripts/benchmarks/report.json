@@ -1,11 +1,11 @@
 {
   "metrics": {
     "total_tasks": 40,
-    "overall_precision": 0.8875,
-    "overall_recall": 0.875,
-    "overall_coverage": 0.875,
-    "overall_f1": 0.8,
-    "timestamp": "2026-03-08T15:40:08.319Z"
+    "overall_precision": 0.95,
+    "overall_recall": 0.825,
+    "overall_coverage": 0.825,
+    "overall_f1": 0.7833333333333333,
+    "timestamp": "2026-03-12T09:20:48.767Z"
   },
   "results": [
     {
@@ -52,10 +52,10 @@
       "taskId": "task_4",
       "type": "entity_relationship_inference",
       "score": {
-        "precision": 1,
+        "precision": 0.5,
         "recall": 1,
         "coverage": 1,
-        "f1_score": 1
+        "f1_score": 0.6666666666666666
       }
     },
     {
@@ -93,19 +93,19 @@
       "type": "entity_relationship_inference",
       "score": {
         "precision": 1,
-        "recall": 1,
-        "coverage": 1,
-        "f1_score": 1
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
       }
     },
     {
       "taskId": "task_9",
       "type": "multi_hop_retrieval",
       "score": {
-        "precision": 1,
+        "precision": 0.5,
         "recall": 1,
         "coverage": 1,
-        "f1_score": 1
+        "f1_score": 0.6666666666666666
       }
     },
     {
@@ -133,9 +133,9 @@
       "type": "entity_relationship_inference",
       "score": {
         "precision": 1,
-        "recall": 0,
-        "coverage": 0,
-        "f1_score": 0
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
       }
     },
     {
@@ -143,9 +143,9 @@
       "type": "multi_hop_retrieval",
       "score": {
         "precision": 1,
-        "recall": 1,
-        "coverage": 1,
-        "f1_score": 1
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
       }
     },
     {
@@ -172,20 +172,20 @@
       "taskId": "task_16",
       "type": "entity_relationship_inference",
       "score": {
-        "precision": 0.5,
+        "precision": 1,
         "recall": 1,
         "coverage": 1,
-        "f1_score": 0.6666666666666666
+        "f1_score": 1
       }
     },
     {
       "taskId": "task_17",
       "type": "multi_hop_retrieval",
       "score": {
-        "precision": 0.5,
-        "recall": 1,
-        "coverage": 1,
-        "f1_score": 0.6666666666666666
+        "precision": 1,
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
       }
     },
     {
@@ -193,9 +193,9 @@
       "type": "conflicting_evidence",
       "score": {
         "precision": 1,
-        "recall": 1,
-        "coverage": 1,
-        "f1_score": 1
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
       }
     },
     {
@@ -242,10 +242,10 @@
       "taskId": "task_23",
       "type": "missing_evidence",
       "score": {
-        "precision": 0,
+        "precision": 1,
         "recall": 1,
         "coverage": 1,
-        "f1_score": 0
+        "f1_score": 1
       }
     },
     {
@@ -253,9 +253,9 @@
       "type": "entity_relationship_inference",
       "score": {
         "precision": 1,
-        "recall": 0,
-        "coverage": 0,
-        "f1_score": 0
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
       }
     },
     {
@@ -263,19 +263,19 @@
       "type": "multi_hop_retrieval",
       "score": {
         "precision": 1,
-        "recall": 0,
-        "coverage": 0,
-        "f1_score": 0
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
       }
     },
     {
       "taskId": "task_26",
       "type": "conflicting_evidence",
       "score": {
-        "precision": 0,
-        "recall": 0,
-        "coverage": 0,
-        "f1_score": 0
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
       }
     },
     {
@@ -292,10 +292,10 @@
       "taskId": "task_28",
       "type": "entity_relationship_inference",
       "score": {
-        "precision": 0.5,
-        "recall": 1,
-        "coverage": 1,
-        "f1_score": 0.6666666666666666
+        "precision": 1,
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
       }
     },
     {
@@ -393,9 +393,9 @@
       "type": "conflicting_evidence",
       "score": {
         "precision": 1,
-        "recall": 1,
-        "coverage": 1,
-        "f1_score": 1
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
       }
     },
     {

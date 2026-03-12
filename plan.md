@@ -1,15 +1,17 @@
-1. **Understand requirements**: We need to implement Eval-driven Agentic RAG, incorporating testing harnesses (evals), verifier loops for grounding citations, cost controls, agent copilot structures, and updating CI.
-2. **Reviewing Codebase**: Searched `server/src/ai/rag` and `server/src/ai/evals`, identifying entry points, policy integrations. Also confirmed github actions workflows and scripts.
-3. **Execute creation**:
-   - `docs/standards/eval-driven-agentic-rag-2026.md`, `docs/security/data-handling/eval-driven-agentic-rag-2026.md`, `docs/ops/runbooks/eval-driven-agentic-rag-2026.md`
-   - `repo_assumptions.md` created
-   - Evals harness logic: `server/src/ai/evals/harness.ts`, `server/api-schemas/ai-evals.report.schema.json`
-   - Graders: `string_check`, `citation_match`, `groundedness`, fixtures `jailbreaks.jsonl`
-   - Script for evals `scripts/ai/run_ai_evals.mjs` which emits deterministic artifacts.
-   - Verifier loop: `flags.ts`, `citation_resolver.ts`, `verifier.ts`, `verifier.test.ts`.
-   - Router: `intent_router.ts`, `workflow.ts`, `action_envelope.ts`.
-   - Model Routing: `model_router.ts`, `budgets.ts`, `response_cache.ts`
-   - Drift check: `eval-driven-agentic-rag-2026-drift.mjs`
-4. **Update Repo logic**: We also modified `package.json` with `test:ai-evals`, patched `.github/workflows/ci.yml` and `.github/required-checks.yml`.
-5. **Verify/Pre-commit**: We ran tests successfully and generated artifacts.
-6. **Submit**: Use `submit` to complete the issue.
+1. **Create/Update Monitoring Scripts (Hourly)**
+    - `scripts/monitoring/ci_health.ts`: Fetch workflow runs from GitHub API (`GET /repos/{owner}/{repo}/actions/runs`), compute failure rates per workflow, output to `artifacts/monitoring/ci-health.json`.
+    - `scripts/monitoring/determinism_drift.ts`: Compare `artifacts/ai-evals` outputs to baselines, detect drift (e.g. random IDs, timestamps), output to `artifacts/monitoring/determinism-drift.json`.
+    - `scripts/monitoring/repo_entropy.ts`: Fetch PR count, issue count, and average CI runtime from GitHub API, output to `artifacts/monitoring/repo-health.json`.
+    - `scripts/monitoring/security_drift.ts`: Run a simple security check or file scan (mock logic if no actual SBOM tool is specified, but ensure it meets requirements), output to `artifacts/monitoring/security-health.json`.
+
+2. **Create Workflows**
+    - `.github/workflows/monitoring.yml`: Runs on `schedule` (`cron: '0 * * * *'`). Checks out the repo, sets up Node.js, runs the 4 scripts from step 1, uploads artifacts. Issues should only be raised if thresholds are breached.
+    - `.github/workflows/daily-benchmarks.yml`: Runs on `schedule` (`cron: '0 0 * * *'`). Checks out repo, runs `scripts/benchmarks/run-graphrag.ts`, outputs `metrics.json`, `report.json`, and generates `stamp.json` with execution info, uploads artifacts.
+
+3. **Documentation**
+    - `docs/ci/monitoring.md`: Document the new workflows, schedule (hourly vs daily), and expected JSON artifacts and alert thresholds.
+
+4. **Verify and Pre-commit**
+    - Ensure strict deterministic JSON output across all scripts (e.g., sort keys).
+    - Ensure scripts work without failing, perhaps by mocking GitHub API responses if `GITHUB_TOKEN` is not present locally, but using `github.rest` in Actions.
+    - Run `pre_commit_instructions` tool to verify before submitting.

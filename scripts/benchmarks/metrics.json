@@ -1,8 +1,8 @@
 {
   "total_tasks": 40,
-  "overall_precision": 0.8875,
-  "overall_recall": 0.875,
-  "overall_coverage": 0.875,
-  "overall_f1": 0.8,
-  "timestamp": "2026-03-08T15:40:08.319Z"
+  "overall_precision": 0.95,
+  "overall_recall": 0.825,
+  "overall_coverage": 0.825,
+  "overall_f1": 0.7833333333333333,
+  "timestamp": "2026-03-12T09:20:48.767Z"
 }
