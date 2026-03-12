@@ -489,3 +489,8 @@ gh workflow run enhanced-testing.yml \
 - [Testing Library](https://testing-library.com/)
 - [CLAUDE.md Testing Section](../CLAUDE.md#testing-strategy)
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Full testing guidelines
+
+## Suites
+- determinism (`grep determinism`)
+- evidence (`grep evidence`)
+- repoos (`grep repoos`)

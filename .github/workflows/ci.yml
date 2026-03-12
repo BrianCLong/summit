@@ -229,3 +229,48 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+
+  repoos-governance-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - run: pnpm test --grep "repoos|governance|concern|ga-gate" || pytest 'tests/**/test_*repoos*.py' 'tests/**/test_*governance*.py' --verbose
+
+  evidence-determinism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - run: pytest 'tests/**/test_*evidence*.py' 'tests/**/test_*determinism*.py' -k "ledger or provenance or parity" --junitxml=evidence.xml
+
+  agent-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - run: pnpm test --grep "agent|control-plane|cognitive" || pytest 'tests/**/test_agent*.py' 'tests/**/test_*parity*.py'
