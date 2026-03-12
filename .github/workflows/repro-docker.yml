@@ -21,7 +21,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Verify Lockfile
-        run: echo "Verifying pnpm lock"
+        run: scripts/ci/verify_pnpm_lock.sh
 
       - name: Set SOURCE_DATE_EPOCH
         run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> $GITHUB_ENV

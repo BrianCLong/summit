@@ -34,9 +34,9 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ] || [ -f pnpm-lock.yaml ] || [ -f yarn.lock ]; then
-            npm install -g js-yaml
+            npm install js-yaml
           else
-            npm install -g js-yaml
+            npm install js-yaml
           fi
       - name: Validate exceptions
         run: node scripts/audit/check-exceptions.js

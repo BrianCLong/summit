@@ -12,6 +12,6 @@ jobs:
       - name: Enable corepack
         run: corepack enable
       - name: Install
-        run: npm install -g pnpm && pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Detect drift
         run: npx tsx scripts/monitoring/agent-capability-graph-drift.ts
