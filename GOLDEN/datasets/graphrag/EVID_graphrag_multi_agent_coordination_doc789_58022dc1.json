@@ -1,0 +1,9 @@
+{
+  "id": "EVID:graphrag:multi_agent_coordination:doc789:58022dc1",
+  "case": "multi_agent_coordination",
+  "content": "This is evidence for GraphRAG multi-agent coordination.",
+  "metadata": {
+    "source": "doc789",
+    "confidence": 0.99
+  }
+}

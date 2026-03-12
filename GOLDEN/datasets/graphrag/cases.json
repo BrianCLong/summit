@@ -2,6 +2,16 @@
   {
     "id": "EVID:graphrag:case1",
     "task": "Identify relationship between entity A and entity B",
-    "required_evidence": ["EVID:doc123", "EVID:doc456"]
+    "required_evidence": [
+      "EVID:doc123",
+      "EVID:doc456"
+    ]
+  },
+  {
+    "id": "EVID:graphrag:case2",
+    "task": "Resolve conflicts from multiple knowledge bases",
+    "required_evidence": [
+      "EVID:graphrag:multi_agent_coordination:doc789:58022dc1"
+    ]
   }
 ]

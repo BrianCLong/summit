@@ -1,0 +1,9 @@
+{
+  "id": "EVID:tooluse:evidence:tooluse:doc1:ab0b0c42",
+  "case": "tooluse_case1",
+  "content": "This is some evidence for tooluse test number 1.",
+  "metadata": {
+    "source": "doc_1",
+    "confidence": 0.99
+  }
+}

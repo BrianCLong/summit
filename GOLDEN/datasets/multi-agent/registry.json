@@ -1,0 +1,22 @@
+{
+  "fixtures": [
+    {
+      "id": "EVD-MULTIAGENT-FIXTURE-001",
+      "name": "case1",
+      "path": "cases.json",
+      "hash": "sha256:dummysha"
+    },
+    {
+      "id": "EVD-MULTIAGENT-FIXTURE-002",
+      "name": "case2",
+      "path": "cases.json",
+      "hash": "sha256:dummysha"
+    },
+    {
+      "id": "EVD-MULTIAGENT-FIXTURE-003",
+      "name": "case3",
+      "path": "cases.json",
+      "hash": "sha256:dummysha"
+    }
+  ]
+}

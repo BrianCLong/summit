@@ -1,0 +1,23 @@
+[
+  {
+    "id": "EVID:multi-agent:case1",
+    "task": "Agent A requests context from Agent B, which searches a database.",
+    "required_evidence": [
+      "EVID:multi-agent:evidence:multi-agent:doc1:e899552f"
+    ]
+  },
+  {
+    "id": "EVID:multi-agent:case2",
+    "task": "Agent C coordinates a deployment plan across Agent D and Agent E.",
+    "required_evidence": [
+      "EVID:multi-agent:evidence:multi-agent:doc2:fdc87763"
+    ]
+  },
+  {
+    "id": "EVID:multi-agent:case3",
+    "task": "Agent F handles frontend task, Agent G handles backend task, they negotiate API spec.",
+    "required_evidence": [
+      "EVID:multi-agent:evidence:multi-agent:doc3:4efcb8b4"
+    ]
+  }
+]

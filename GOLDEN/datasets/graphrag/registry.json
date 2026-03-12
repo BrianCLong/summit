@@ -5,6 +5,18 @@
       "name": "basic-entity-extraction",
       "path": "basic.json",
       "hash": "sha256:dummysha"
+    },
+    {
+      "id": "EVD-GRAPHRAG-FIXTURE-002",
+      "name": "case1",
+      "path": "cases.json",
+      "hash": "sha256:dummysha"
+    },
+    {
+      "id": "EVD-GRAPHRAG-FIXTURE-003",
+      "name": "case2",
+      "path": "cases.json",
+      "hash": "sha256:dummysha"
     }
   ]
 }
