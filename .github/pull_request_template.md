@@ -1,20 +1,19 @@
 ## Summary
 
 <!-- What does this PR do? Link to Jira ticket or issue. -->
+Resolves #
 
 ## Risk & Surface (Required)
 
 <!-- Select the appropriate risk level and surface area. -->
 
 **Risk Level** (Select one):
-
 - [ ] `risk:low` (Docs, comments, safe refactors)
 - [ ] `risk:medium` (Feature flags, backward-compatible changes)
 - [ ] `risk:high` (Database migrations, auth changes, critical path)
 - [ ] `risk:release-blocking` (Critical fixes only)
 
 **Surface Area** (Select all that apply):
-
 - [ ] `area:client`
 - [ ] `area:server`
 - [ ] `area:docs`
@@ -25,7 +24,6 @@
 ## Assumption Ledger
 
 <!-- State your assumptions, ambiguities, tradeoffs, and stop conditions. -->
-
 - **Assumptions**:
 - **Ambiguities**:
 - **Tradeoffs**:
@@ -41,7 +39,6 @@
 ## Evidence Bundle
 
 <!-- Attach evidence that your change works and is safe. See docs/evidence-bundle-spec.md -->
-
 - [ ] **Tests**: New or updated tests passing?
 - [ ] **Screenshots**: Attached for UI changes?
 - [ ] **Evidence Generated**: Bundle attached or linked?
@@ -55,7 +52,6 @@
 ## Green CI Contract Checklist
 
 <!-- Must be checked before merge. See docs/governance/GREEN_CI_CONTRACT.md -->
-
 - [ ] **Lint**: Ran `pnpm lint` locally.
 - [ ] **Tests**: Ran `pnpm test:unit` locally.
 - [ ] **Determinism**: No leaked singletons or open handles.
@@ -64,9 +60,7 @@
 ## CI & Merge Train Rules
 
 <!-- See docs/runbooks/CI_RELEASE_GATE_RUNBOOK.md and docs/release/DAILY_DASHBOARD.md -->
-
 **If CI is Blocked:**
-
 - [ ] Docs/Metadata PRs may proceed.
 - [ ] Behavior changes must wait for green CI.
 - [ ] Do not bypass gates without written approval from Release Captain.
@@ -74,17 +68,14 @@
 ## Verification
 
 <!-- How did you verify this change? -->
-
 - [ ] Automated Test
 - [ ] Manual Verification
 - [ ] Snapshot / Screenshot
 
 <!-- AGENT-METADATA:START -->
-
 {
-"promptId": "",
-"taskId": "",
-"tags": []
+  "promptId": "",
+  "taskId": "",
+  "tags": []
 }
-
 <!-- AGENT-METADATA:END -->
