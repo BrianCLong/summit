@@ -9,12 +9,16 @@ import { localTaskCommand } from './commands/local-task';
 import { taskCommand } from './commands/task';
 import { capabilityCommand } from './commands/capability';
 
+import { intelCommand } from './commands/intel.js';
+
 const program = new Command();
 
 program
   .name('summitctl')
-  .description('Summit Control Plane CLI')
-  .version('0.1.0');
+  .description('Summit Platform Control Tool')
+  .version('1.0.0');
+
+program.addCommand(intelCommand);
 
 // Register new commands
 program.addCommand(initCommand);
