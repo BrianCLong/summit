@@ -16,9 +16,9 @@ describe('InfoWar SITREP Integration', () => {
       frequency: 1420e6,
       bandwidth: 1e6,
       timestamp: new Date(),
-      strength: -70,
-      source: 'test',
-      location: { latitude: 0, longitude: 0 }
+      power: -70,
+      snr: 15,
+      duration: 500
     };
     const classification = await classificationService.classifySignal(mockSignal);
     expect(classification).toBeDefined();
@@ -26,7 +26,7 @@ describe('InfoWar SITREP Integration', () => {
     // 2. Narrative Assembly
     const sitrep = {
       id: 'SITREP-2026-03-INT',
-      type: 'Monthly SITREP',
+      type: 'Monthly SITREP' as const,
       generatedAt: new Date().toISOString(),
       narratives: [
         {
@@ -52,7 +52,7 @@ describe('InfoWar SITREP Integration', () => {
       connectivity: [],
       evidenceIndex: {
         version: "1.0",
-        item_slug: "INFOWAR",
+        item_slug: "INFOWAR" as const,
         entries: ['EVD-INFOWAR-001']
       }
     };
