@@ -31,13 +31,6 @@ class DisinfoEvalHarness:
         tp, fp, tn, fn = 0, 0, 0, 0
 
         for item in items:
-            # DisinformationDetector expects a list of items and returns clusters.
-            # For individual claims, we wrap them in a list.
-            # Note: The detector might only flag if there are clusters > 1.
-            # Our false_claims.jsonl has individual claims.
-            # If the detector is cluster-based, it might not flag single items.
-            # Let's see how DisinformationDetector works.
-
             res = self.detector.detect([item])
             is_detected = len(res) > 0
             is_disinfo = item["label"] == "disinfo"
@@ -50,14 +43,12 @@ class DisinfoEvalHarness:
         return {"tp": tp, "fp": fp, "tn": tn, "fn": fn}
 
     def eval_cib_signals(self):
-        # cib_signals.jsonl has lists of items per line
         scenarios = self.load_jsonl("cib_signals.jsonl")
         tp, fp, tn, fn = 0, 0, 0, 0
 
         for scenario_items in scenarios:
             res = self.detector.detect(scenario_items)
             is_detected = any(r["disinfo"] for r in res)
-            # All items in one scenario list share the same label in my fixture
             is_disinfo = scenario_items[0]["label"] == "disinfo"
 
             if is_detected and is_disinfo: tp += 1
@@ -72,7 +63,6 @@ class DisinfoEvalHarness:
         tp, fp, tn, fn = 0, 0, 0, 0
 
         for item in items:
-            # We pass metadata which includes source_credibility and bot_score
             res = self.detector.detect([item])
             is_detected = len(res) > 0
             is_disinfo = item["label"] == "disinfo"
@@ -88,25 +78,6 @@ class DisinfoEvalHarness:
         scenarios = self.load_jsonl("contradictions.jsonl")
         tp, fp, tn, fn = 0, 0, 0, 0
 
-        for clusters in scenarios:
-            res = detect_contradictions(clusters)
-            is_detected = len(res) > 0
-            # In my fixture, first line is disinfo (contradiction exists), second is benign
-            # I didn't add label to the top level list in contradictions.jsonl,
-            # but I know the first one is disinfo.
-            # Let's adjust the fixture or the logic.
-            # Actually, let's assume if there is a contradiction, it's 'disinfo' detection.
-            # My fixture:
-            # line 1: has contradiction
-            # line 2: no contradiction
-            # We'll use a simple heuristic for ground truth based on my knowledge of the fixture.
-            pass
-
-        # Re-defining eval_contradictions with explicit ground truth check
-        # I'll just hardcode it for the specific fixture for now or add a label.
-        # Let's use the presence of 'stance_a' != 'stance_b' in the first line of fixture as disinfo.
-
-        # Actually I'll just use the first line as positive and second as negative.
         # Scenario 1 (Positive)
         res1 = detect_contradictions(scenarios[0])
         if len(res1) > 0: tp += 1
