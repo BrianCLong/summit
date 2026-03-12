@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Security Ledger Entry",
+  "description": "Deterministic schema for security ledger entries",
+  "type": "object",
+  "required": ["id", "timestamp", "event_type", "actor", "outcome", "evidence_ref", "version"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the ledger entry"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "description": "Strict ISO-8601 UTC timestamp (no milliseconds, e.g., 2023-10-24T12:00:00Z)"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Type of the security event"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Actor responsible for the event"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["success", "failure", "blocked", "warn"],
+      "description": "Outcome of the event"
+    },
+    "evidence_ref": {
+      "type": "string",
+      "description": "Reference to the supporting evidence artifact"
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version string (e.g. 1.0.0)"
+    }
+  },
+  "additionalProperties": false
+}

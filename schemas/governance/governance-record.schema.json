@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Governance Record",
+  "description": "Deterministic schema for governance records",
+  "type": "object",
+  "required": ["id", "timestamp", "record_type", "policy_ref", "version", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the governance record"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "description": "Strict ISO-8601 UTC timestamp (no milliseconds)"
+    },
+    "record_type": {
+      "type": "string",
+      "description": "Type of the governance record"
+    },
+    "policy_ref": {
+      "type": "string",
+      "description": "Reference to the governing policy"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["compliant", "non-compliant", "exempt", "pending"],
+      "description": "Status of the governance check"
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version string"
+    },
+    "details": {
+      "type": "object",
+      "description": "Additional unstructured details regarding the governance action",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,23 @@
+version: "1.0.0"
+description: "Mapping of security ledger event types to supporting evidence artifacts and schemas"
+
+maps:
+  - event_type: "branch_protection_audit"
+    evidence_artifact: "branch-protection-audit.json"
+    schema_ref: "schemas/governance/branch-protection-audit.evidence.schema.json"
+    description: "Audit events ensuring branch protection policies are met"
+
+  - event_type: "determinism_scan"
+    evidence_artifact: "determinism-scan.json"
+    schema_ref: "schemas/governance/determinism-scan.evidence.schema.json"
+    description: "Results of deterministic build verification scans"
+
+  - event_type: "required_checks_policy"
+    evidence_artifact: "required-checks-policy.json"
+    schema_ref: "schemas/governance/required-checks-policy.evidence.schema.json"
+    description: "Verification that required status checks were evaluated and passed"
+
+  - event_type: "governance_record_creation"
+    evidence_artifact: "governance-record.json"
+    schema_ref: "schemas/governance/governance-record.schema.json"
+    description: "A generalized governance record creation event"
