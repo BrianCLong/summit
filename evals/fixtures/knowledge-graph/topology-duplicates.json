@@ -1,0 +1,25 @@
+{
+  "nodes": [
+    {
+      "id": "service:svc-1",
+      "type": "service",
+      "data": { "name": "Payment Service", "externalId": "PAY-001" }
+    },
+    {
+      "id": "service:svc-2",
+      "type": "service",
+      "data": { "name": "payment-service", "externalId": "PAY-001" }
+    },
+    {
+      "id": "person:p-1",
+      "type": "person",
+      "data": { "name": "Alice Smith", "email": "alice@example.com" }
+    },
+    {
+      "id": "person:p-2",
+      "type": "person",
+      "data": { "name": "A. Smith", "email": "alice@example.com" }
+    }
+  ],
+  "edges": []
+}

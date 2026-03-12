@@ -1,0 +1,17 @@
+{
+  "nodes": [
+    { "id": "service:frontend", "type": "service", "data": { "name": "Frontend" } },
+    { "id": "service:gateway", "type": "service", "data": { "name": "Gateway" } },
+    { "id": "service:auth", "type": "service", "data": { "name": "Auth" } },
+    { "id": "service:user-db", "type": "service", "data": { "name": "UserDB" } },
+    { "id": "env:prod-us", "type": "environment", "data": { "name": "Prod US", "region": "us-east-1" } },
+    { "id": "env:prod-eu", "type": "environment", "data": { "name": "Prod EU", "region": "eu-central-1" } }
+  ],
+  "edges": [
+    { "id": "fe:gt", "from": "service:frontend", "to": "service:gateway", "type": "DEPENDS_ON" },
+    { "id": "gt:auth", "from": "service:gateway", "to": "service:auth", "type": "DEPENDS_ON" },
+    { "id": "auth:db", "from": "service:auth", "to": "service:user-db", "type": "DEPENDS_ON" },
+    { "id": "fe:us", "from": "service:frontend", "to": "env:prod-us", "type": "DEPLOYED_IN" },
+    { "id": "fe:eu", "from": "service:frontend", "to": "env:prod-eu", "type": "DEPLOYED_IN" }
+  ]
+}
