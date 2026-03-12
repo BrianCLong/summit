@@ -199,6 +199,7 @@ jobs:
       - name: Configure AWS credentials (OIDC only)
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d44e03b00a1
         with:
+        with:
           role-to-assume: ${{ env.AWS_STAGE_ROLE_ARN }}
           role-session-name: pilot-hardening-stage
           aws-region: ${{ env.AWS_REGION }}

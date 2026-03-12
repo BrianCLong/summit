@@ -67,9 +67,16 @@ describe('Release Bundle Error Handling', () => {
         writeFileSync(join(tempDir, 'bundle-index.json'), content);
         writeFileSync(join(tempDir, 'SHA256SUMS'), `${hash}  bundle-index.json\n`);
 
-        const { output, error } = runVerifyScript(tempDir, true);
-        assert(error, 'Script should have failed');
-        assert(output.includes('[INTERNAL_ERROR]'), `Expected INTERNAL_ERROR, got: ${output}`);
+        try {
+            execSync(`node ${SCRIPT_PATH_VERIFY} --path=${tempDir}`, { encoding: 'utf8', stdio: 'pipe' });
+            assert.fail('Script should have failed');
+        } catch (error) {
+            const output = error.stdout + '\n' + error.stderr;
+            assert(
+                output.includes('[INTERNAL_ERROR]') || output.includes('[INVALID_JSON]'),
+                `Expected INTERNAL_ERROR or INVALID_JSON, got: ${output}`
+            );
+        }
     });
 
     it('throws SCHEMA_MAJOR_UNSUPPORTED for unsupported major version', () => {

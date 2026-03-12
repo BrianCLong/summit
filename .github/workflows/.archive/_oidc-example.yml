@@ -5,6 +5,7 @@ permissions:
 steps:
   - name: Configure AWS creds via OIDC
     uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d44e03b00a1
+        with:
     with:
       role-to-assume: arn:aws:iam::123456789012:role/summit-gha-deploy
       aws-region: us-east-1

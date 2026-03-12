@@ -20,6 +20,7 @@ jobs:
       - name: Configure AWS creds (OIDC)
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d44e03b00a1
         with:
+        with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/intelgraph-gh-deployer
           aws-region: ${{ env.AWS_REGION }}
       - name: Login to ECR

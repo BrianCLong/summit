@@ -81,6 +81,7 @@ jobs:
         if: ${{ env.AWS_REGION != '' }} # Skip if not configured
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d44e03b00a1
         with:
+        with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
