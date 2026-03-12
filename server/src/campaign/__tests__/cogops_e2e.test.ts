@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { loadCampaignTemplate, validateCampaign } from '../builders';
 import { assembleCogOpsBundle } from '../../provenance/evidence_bundle/generator';
 import { CogOpsReportSchema, CogOpsMetricsSchema, CogOpsStampSchema } from '../../provenance/evidence_bundle/cogops_schemas';
@@ -9,12 +10,17 @@ import addFormats from 'ajv-formats';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
 
-const reportSchema = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'schemas/cogops/report.schema.json'), 'utf8'));
-const metricsSchema = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'schemas/cogops/metrics.schema.json'), 'utf8'));
+const schemaRoot = path.resolve(__dirname, '../../../../schemas/cogops');
+const reportSchema = JSON.parse(fs.readFileSync(path.join(schemaRoot, 'report.schema.json'), 'utf8'));
+const metricsSchema = JSON.parse(fs.readFileSync(path.join(schemaRoot, 'metrics.schema.json'), 'utf8'));
 
 const validateReport = ajv.compile(reportSchema);
 const validateMetrics = ajv.compile(metricsSchema);
@@ -107,7 +113,8 @@ describe('CogOps Assembler E2E Pipeline', () => {
         expect(validateMetrics(bundle.metrics)).toBe(true);
 
         // 7. Policy Gate Validation (OPA)
-        const tempBundlePath = path.join(process.cwd(), 'temp_bundle_e2e.json');
+        const tempBundlePath = path.join(__dirname, 'temp_bundle_e2e.json');
+        const policyPath = path.resolve(__dirname, '../../../../policy/cogops/evidence_gate.rego');
         fs.writeFileSync(tempBundlePath, JSON.stringify(bundle));
 
         try {
@@ -120,7 +127,7 @@ describe('CogOps Assembler E2E Pipeline', () => {
             }
 
             if (opaAvailable) {
-                const opaResult = execSync(`opa eval -d policy/cogops/evidence_gate.rego -i ${tempBundlePath} "data.cogops.allow"`, { encoding: 'utf8' });
+                const opaResult = execSync(`opa eval -d ${policyPath} -i ${tempBundlePath} "data.cogops.allow"`, { encoding: 'utf8' });
                 const resultObj = JSON.parse(opaResult);
                 expect(resultObj.result[0].expressions[0].value).toBe(true);
             }

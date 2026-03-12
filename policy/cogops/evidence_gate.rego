@@ -19,10 +19,18 @@ valid_report if {
 }
 
 all_findings_valid if {
-    every finding in input.report.findings {
-        finding.severity in ["low", "medium", "high"]
-        count(finding.evidence_refs) > 0
-    }
+    not any_finding_invalid
+}
+
+any_finding_invalid if {
+    some i
+    finding := input.report.findings[i]
+    not finding_valid(finding)
+}
+
+finding_valid(finding) if {
+    finding.severity in ["low", "medium", "high"]
+    count(finding.evidence_refs) > 0
 }
 
 valid_metrics if {
