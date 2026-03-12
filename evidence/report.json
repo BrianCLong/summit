@@ -1,5 +1,11 @@
 {
-  "summary": "Partitioning eval completed",
-  "scenarios": 3,
-  "status": "PASS"
+  "evidence_id": "EVD-SUMMIT-CI-001",
+  "item_slug": "ci-baseline",
+  "summary": "CI baseline report",
+  "artifacts": [
+    {
+      "path": "report.json",
+      "sha256": "4390547070183307529452934098230948230948230948230948230948230948"
+    }
+  ]
 }

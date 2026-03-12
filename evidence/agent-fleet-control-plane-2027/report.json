@@ -1,8 +1,8 @@
 {
-  "item_slug": "agent-fleet-control-plane-2027",
+  "item_slug": "agent-fleet-control-plane-vnext",
   "category": "ecosystem_scan",
   "source": "CIO: 21 agent orchestration tools for managing your AI fleet",
-  "source_date": "2026-03-05",
+  "source_v": "vnext",
   "verified_inputs": [
     "Enterprises deploy multiple AI agents across workflows",
     "Organizations require platforms to build, coordinate, monitor, and manage agents",
