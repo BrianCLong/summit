@@ -1,0 +1,115 @@
+name: Post-release signal intake
+about: Canonical first-week signal intake for launch feedback, operator observations, and telemetry-backed issues.
+title: "[post-release] <short signal summary>"
+labels: ["triage:needed", "post-ga", "area:release"]
+body:
+  - type: input
+    id: release
+    attributes:
+      label: Release / tag / build
+      description: Exact release or deployment identifier.
+      placeholder: e.g., v4.1.2 / sha / workflow run
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - production
+        - staging
+        - preview
+    validations:
+      required: true
+
+  - type: dropdown
+    id: signal_class
+    attributes:
+      label: Signal class
+      options:
+        - user-reported issue
+        - operator observation
+        - deployment regression
+        - feature friction
+        - false positive / false negative / noisy behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Symptom and expected vs actual behavior
+      description: Include concrete steps, payloads, and where behavior diverged.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - sev1-critical
+        - sev2-major
+        - sev3-minor
+        - sev4-observed
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      options:
+        - deterministic
+        - intermittent
+        - not-yet-reproduced
+    validations:
+      required: true
+
+  - type: dropdown
+    id: blast_radius
+    attributes:
+      label: Blast radius
+      options:
+        - single-user
+        - single-tenant
+        - multi-tenant
+        - systemic
+    validations:
+      required: true
+
+  - type: textarea
+    id: operator_impact
+    attributes:
+      label: Operator impact / toil
+      description: Manual mitigations, pages/escalations, and estimated time consumed.
+      placeholder: e.g., 3 manual restarts + 2 on-call escalations + 45m triage
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence links
+      description: Link to logs, traces, dashboard panels, incidents, or deploy runs.
+      placeholder: Include URLs/paths and trace IDs where possible.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: rollback_trigger
+    attributes:
+      label: Rollback trigger check
+      options:
+        - label: Rollback trigger has been hit or is trending toward breach
+        - label: Rollback trigger not hit
+
+  - type: textarea
+    id: proposed_action
+    attributes:
+      label: Proposed action class
+      description: Pick one class and justify with evidence.
+      placeholder: fix-now / stabilize-next / observe / defer
+    validations:
+      required: true
