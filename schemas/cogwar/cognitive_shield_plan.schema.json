@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/cogwar/cognitive_shield_plan.schema.json",
+  "title": "CogWar Cognitive Shield Plan",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "shield_plan_id",
+    "objective",
+    "summary",
+    "interventions",
+    "policy"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "cogwar.cognitive_shield_plan.v1" },
+    "shield_plan_id": {
+      "type": "string",
+      "pattern": "^CSP-[a-f0-9]{16}$"
+    },
+    "objective": {
+      "type": "string",
+      "enum": [
+        "stabilize-public-understanding",
+        "reduce-synthetic-amplification",
+        "improve-source-trust-calibration"
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "observation_count",
+        "dominant_channel",
+        "dominant_channel_ratio",
+        "top_narrative_tokens",
+        "trust_fragility_index",
+        "synthetic_pressure_score"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "observation_count": { "type": "integer", "minimum": 1 },
+        "dominant_channel": { "type": "string", "minLength": 1 },
+        "dominant_channel_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "top_narrative_tokens": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "maxItems": 5
+        },
+        "trust_fragility_index": { "type": "number", "minimum": 0, "maximum": 1 },
+        "synthetic_pressure_score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "interventions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "countermeasure_id",
+          "name",
+          "kind",
+          "expected_stability_gain",
+          "rationale",
+          "guardrails"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "countermeasure_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{12}$"
+          },
+          "name": { "type": "string", "minLength": 3 },
+          "kind": {
+            "type": "string",
+            "enum": ["prebunk", "provenance", "contextualization"]
+          },
+          "expected_stability_gain": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "rationale": { "type": "string", "minLength": 8 },
+          "guardrails": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 3 }
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["mode", "requires_human_approval_above_gain", "prohibited_actions"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "const": "defensive" },
+        "requires_human_approval_above_gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "prohibited_actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 3 }
+        }
+      }
+    }
+  }
+}
