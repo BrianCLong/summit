@@ -4,3 +4,22 @@ seed: 42
 queries:
   - id: "q1"
     shape: "MATCH (n) RETURN n LIMIT 10"
+
+# Proposed Benchmark Backlog (from Agent Ecosystem Report & Insights)
+backlog:
+  - id: "b1_state_recovery"
+    description: "Agents must recover from forced tool failures mid-cycle."
+    metrics: ["rollback_success_rate", "partial_restart_determinism"]
+    status: "proposed"
+  - id: "b2_trace_quality"
+    description: "Agent must complete tasks with friction (e.g., malformed schemas) while maintaining clean execution traces."
+    metrics: ["invalid_command_rate", "tool_misuse_rate"]
+    status: "proposed"
+  - id: "b3_handoff_reliability"
+    description: "Information passing between a perception agent and a planning agent under strict policy constraints."
+    metrics: ["context_loss_rate", "guardrail_adherence"]
+    status: "proposed"
+  - id: "b4_policy_gated_eval"
+    description: "Agents must operate within strict, externally enforced policy boundaries (e.g. MCP labels)."
+    metrics: ["policy_interceptor_trigger_rate", "adherence_to_mcp_labels"]
+    status: "proposed"
