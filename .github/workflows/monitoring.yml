@@ -1,0 +1,100 @@
+name: Hourly Repository Monitoring
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  monitor-repo-health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run CI Health Monitoring
+        id: ci_health
+        run: npx tsx scripts/monitoring/ci_health.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Repo Entropy Monitoring
+        id: repo_entropy
+        if: always()
+        run: npx tsx scripts/monitoring/repo_entropy.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Determinism Drift Checks
+        id: determinism
+        if: always()
+        run: npx tsx scripts/monitoring/determinism_drift.ts
+
+      - name: Run Security Drift Checks
+        id: security
+        if: always()
+        run: npx tsx scripts/monitoring/security_drift.ts
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-health-reports
+          path: artifacts/monitoring/
+          retention-days: 14
+
+      - name: Report Failures
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const title = '🚨 Repository Monitoring Threshold Breached';
+            const body = `One or more repository monitoring checks failed during scheduled run.\n\nView details here: https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+
+            // Look for existing issue to prevent spam
+            const issues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              creator: 'github-actions[bot]',
+              labels: 'monitoring'
+            });
+
+            const existingIssue = issues.data.find(i => i.title === title);
+
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['monitoring', 'automated-issue']
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existingIssue.number,
+                body: `Recurring breach detected in run ${context.runId}`
+              });
+            }

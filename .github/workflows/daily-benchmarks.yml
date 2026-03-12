@@ -1,0 +1,98 @@
+name: Daily GraphRAG Benchmarks
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  run-benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Create output directories
+        run: mkdir -p artifacts/benchmarks/graphrag/
+
+      - name: Run GraphRAG Benchmarks
+        id: benchmarks
+        run: npx tsx scripts/benchmarks/run-graphrag.ts
+
+      - name: Move and Stamp Benchmarks
+        run: |
+          cp scripts/benchmarks/metrics.json artifacts/benchmarks/graphrag/metrics.json
+          cp scripts/benchmarks/report.json artifacts/benchmarks/graphrag/report.json
+
+          cat <<EOF > artifacts/benchmarks/graphrag/stamp.json
+          {
+            "run_id": "${{ github.run_id }}",
+            "run_number": "${{ github.run_number }}",
+            "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "actor": "${{ github.actor }}",
+            "sha": "${{ github.sha }}"
+          }
+          EOF
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graphrag-benchmarks
+          path: artifacts/benchmarks/graphrag/
+          retention-days: 30
+
+      - name: Report Failures
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const title = '📉 GraphRAG Benchmarks Failed';
+            const body = `Daily GraphRAG Benchmarks failed during scheduled run.\n\nView details here: https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+
+            const issues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              creator: 'github-actions[bot]',
+              labels: 'benchmarks'
+            });
+
+            const existingIssue = issues.data.find(i => i.title === title);
+
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['benchmarks', 'automated-issue']
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existingIssue.number,
+                body: `Recurring benchmark failure detected in run ${context.runId}`
+              });
+            }
