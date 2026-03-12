@@ -1,0 +1,17 @@
+{
+  "id": "doc1",
+  "text": "Apple Inc. was founded by Steve Jobs and Steve Wozniak. It is headquartered in Cupertino, California.",
+  "entities": [
+    {"id": "e1", "mention": "Apple Inc.", "type": "ORGANIZATION", "linked_id": "WIKIDATA:Q312"},
+    {"id": "e2", "mention": "Steve Jobs", "type": "PERSON", "linked_id": "WIKIDATA:Q19837"},
+    {"id": "e3", "mention": "Steve Wozniak", "type": "PERSON", "linked_id": "WIKIDATA:Q48469"},
+    {"id": "e4", "mention": "Cupertino", "type": "LOCATION", "linked_id": "WIKIDATA:Q188460"},
+    {"id": "e5", "mention": "California", "type": "LOCATION", "linked_id": "WIKIDATA:Q99"}
+  ],
+  "relations": [
+    {"source": "e1", "target": "e2", "type": "FOUNDED_BY"},
+    {"source": "e1", "target": "e3", "type": "FOUNDED_BY"},
+    {"source": "e1", "target": "e4", "type": "HEADQUARTERED_IN"},
+    {"source": "e4", "target": "e5", "type": "LOCATED_IN"}
+  ]
+}
