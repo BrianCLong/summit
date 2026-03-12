@@ -1,0 +1,318 @@
+[
+  {
+    "id": "q_1",
+    "query": "Who funded the organization that trained the actor in Event 1?",
+    "hop_depth": 2,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1"
+    ],
+    "expected_final_answer": "Target_Actor_1"
+  },
+  {
+    "id": "q_2",
+    "query": "Who funded the organization that trained the actor in Event 2?",
+    "hop_depth": 3,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2"
+    ],
+    "expected_final_answer": "Target_Actor_2"
+  },
+  {
+    "id": "q_3",
+    "query": "Who funded the organization that trained the actor in Event 3?",
+    "hop_depth": 4,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3",
+      "Funded_4"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2",
+      "Person_3"
+    ],
+    "expected_final_answer": "Target_Actor_3"
+  },
+  {
+    "id": "q_4",
+    "query": "Who funded the organization that trained the actor in Event 4?",
+    "hop_depth": 2,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1"
+    ],
+    "expected_final_answer": "Target_Actor_4"
+  },
+  {
+    "id": "q_5",
+    "query": "Who funded the organization that trained the actor in Event 5?",
+    "hop_depth": 3,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2"
+    ],
+    "expected_final_answer": "Target_Actor_5"
+  },
+  {
+    "id": "q_6",
+    "query": "Who funded the organization that trained the actor in Event 6?",
+    "hop_depth": 2,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1"
+    ],
+    "expected_final_answer": "Target_Actor_6"
+  },
+  {
+    "id": "q_7",
+    "query": "Who funded the organization that trained the actor in Event 7?",
+    "hop_depth": 4,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3",
+      "Funded_4"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2",
+      "Person_3"
+    ],
+    "expected_final_answer": "Target_Actor_7"
+  },
+  {
+    "id": "q_8",
+    "query": "Who funded the organization that trained the actor in Event 8?",
+    "hop_depth": 3,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2"
+    ],
+    "expected_final_answer": "Target_Actor_8"
+  },
+  {
+    "id": "q_9",
+    "query": "Who funded the organization that trained the actor in Event 9?",
+    "hop_depth": 2,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1"
+    ],
+    "expected_final_answer": "Target_Actor_9"
+  },
+  {
+    "id": "q_10",
+    "query": "Who funded the organization that trained the actor in Event 10?",
+    "hop_depth": 5,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3",
+      "Funded_4",
+      "Trained_5"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2",
+      "Person_3",
+      "Organization_4"
+    ],
+    "expected_final_answer": "Target_Actor_10"
+  },
+  {
+    "id": "q_11",
+    "query": "Who funded the organization that trained the actor in Event 11?",
+    "hop_depth": 2,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1"
+    ],
+    "expected_final_answer": "Target_Actor_11"
+  },
+  {
+    "id": "q_12",
+    "query": "Who funded the organization that trained the actor in Event 12?",
+    "hop_depth": 3,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2"
+    ],
+    "expected_final_answer": "Target_Actor_12"
+  },
+  {
+    "id": "q_13",
+    "query": "Who funded the organization that trained the actor in Event 13?",
+    "hop_depth": 4,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3",
+      "Funded_4"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2",
+      "Person_3"
+    ],
+    "expected_final_answer": "Target_Actor_13"
+  },
+  {
+    "id": "q_14",
+    "query": "Who funded the organization that trained the actor in Event 14?",
+    "hop_depth": 2,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1"
+    ],
+    "expected_final_answer": "Target_Actor_14"
+  },
+  {
+    "id": "q_15",
+    "query": "Who funded the organization that trained the actor in Event 15?",
+    "hop_depth": 3,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2"
+    ],
+    "expected_final_answer": "Target_Actor_15"
+  },
+  {
+    "id": "q_16",
+    "query": "Who funded the organization that trained the actor in Event 16?",
+    "hop_depth": 2,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1"
+    ],
+    "expected_final_answer": "Target_Actor_16"
+  },
+  {
+    "id": "q_17",
+    "query": "Who funded the organization that trained the actor in Event 17?",
+    "hop_depth": 4,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3",
+      "Funded_4"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2",
+      "Person_3"
+    ],
+    "expected_final_answer": "Target_Actor_17"
+  },
+  {
+    "id": "q_18",
+    "query": "Who funded the organization that trained the actor in Event 18?",
+    "hop_depth": 3,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2"
+    ],
+    "expected_final_answer": "Target_Actor_18"
+  },
+  {
+    "id": "q_19",
+    "query": "Who funded the organization that trained the actor in Event 19?",
+    "hop_depth": 2,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1"
+    ],
+    "expected_final_answer": "Target_Actor_19"
+  },
+  {
+    "id": "q_20",
+    "query": "Who funded the organization that trained the actor in Event 20?",
+    "hop_depth": 3,
+    "requires_multi_hop": true,
+    "expected_reasoning_chain": [
+      "Trained_1",
+      "Funded_2",
+      "Trained_3"
+    ],
+    "expected_intermediate_entities": [
+      "Person_1",
+      "Organization_2"
+    ],
+    "expected_final_answer": "Target_Actor_20"
+  }
+]
