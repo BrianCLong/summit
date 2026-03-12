@@ -1,0 +1,4002 @@
+[
+  {
+    "id": "q_0",
+    "query": "Mock query 0?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.619044665333107,
+    "is_correct": true
+  },
+  {
+    "id": "q_1",
+    "query": "Mock query 1?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.499509954768262,
+    "is_correct": false
+  },
+  {
+    "id": "q_2",
+    "query": "Mock query 2?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8398253039527013,
+    "is_correct": true
+  },
+  {
+    "id": "q_3",
+    "query": "Mock query 3?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.18942916799153728,
+    "is_correct": false
+  },
+  {
+    "id": "q_4",
+    "query": "Mock query 4?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.18088007095308545,
+    "is_correct": false
+  },
+  {
+    "id": "q_5",
+    "query": "Mock query 5?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6020853710947823,
+    "is_correct": false
+  },
+  {
+    "id": "q_6",
+    "query": "Mock query 6?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7494939932456797,
+    "is_correct": false
+  },
+  {
+    "id": "q_7",
+    "query": "Mock query 7?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.760586670945979,
+    "is_correct": true
+  },
+  {
+    "id": "q_8",
+    "query": "Mock query 8?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.966748821299213,
+    "is_correct": true
+  },
+  {
+    "id": "q_9",
+    "query": "Mock query 9?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4316214113710091,
+    "is_correct": false
+  },
+  {
+    "id": "q_10",
+    "query": "Mock query 10?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9646221546276496,
+    "is_correct": true
+  },
+  {
+    "id": "q_11",
+    "query": "Mock query 11?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9920529243460026,
+    "is_correct": true
+  },
+  {
+    "id": "q_12",
+    "query": "Mock query 12?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9490796571116697,
+    "is_correct": false
+  },
+  {
+    "id": "q_13",
+    "query": "Mock query 13?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7732532670698866,
+    "is_correct": true
+  },
+  {
+    "id": "q_14",
+    "query": "Mock query 14?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.3691350096018696,
+    "is_correct": true
+  },
+  {
+    "id": "q_15",
+    "query": "Mock query 15?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.31653313791174287,
+    "is_correct": true
+  },
+  {
+    "id": "q_16",
+    "query": "Mock query 16?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7179972091025455,
+    "is_correct": true
+  },
+  {
+    "id": "q_17",
+    "query": "Mock query 17?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.34769897123192417,
+    "is_correct": false
+  },
+  {
+    "id": "q_18",
+    "query": "Mock query 18?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8011676098973712,
+    "is_correct": true
+  },
+  {
+    "id": "q_19",
+    "query": "Mock query 19?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7323221864888578,
+    "is_correct": true
+  },
+  {
+    "id": "q_20",
+    "query": "Mock query 20?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_21",
+    "query": "Mock query 21?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9005469768488426,
+    "is_correct": false
+  },
+  {
+    "id": "q_22",
+    "query": "Mock query 22?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.29286853074249486,
+    "is_correct": false
+  },
+  {
+    "id": "q_23",
+    "query": "Mock query 23?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3774875538564601,
+    "is_correct": false
+  },
+  {
+    "id": "q_24",
+    "query": "Mock query 24?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8954974654176784,
+    "is_correct": true
+  },
+  {
+    "id": "q_25",
+    "query": "Mock query 25?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6908697977706945,
+    "is_correct": false
+  },
+  {
+    "id": "q_26",
+    "query": "Mock query 26?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.38589238550663707,
+    "is_correct": false
+  },
+  {
+    "id": "q_27",
+    "query": "Mock query 27?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4855690838854104,
+    "is_correct": false
+  },
+  {
+    "id": "q_28",
+    "query": "Mock query 28?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4853166318595028,
+    "is_correct": false
+  },
+  {
+    "id": "q_29",
+    "query": "Mock query 29?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5348938585933097,
+    "is_correct": true
+  },
+  {
+    "id": "q_30",
+    "query": "Mock query 30?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3759531167914543,
+    "is_correct": false
+  },
+  {
+    "id": "q_31",
+    "query": "Mock query 31?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.4567862852853344,
+    "is_correct": true
+  },
+  {
+    "id": "q_32",
+    "query": "Mock query 32?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 1.0,
+    "is_correct": false
+  },
+  {
+    "id": "q_33",
+    "query": "Mock query 33?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7920680683704444,
+    "is_correct": true
+  },
+  {
+    "id": "q_34",
+    "query": "Mock query 34?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8064593943438984,
+    "is_correct": true
+  },
+  {
+    "id": "q_35",
+    "query": "Mock query 35?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6462350909426094,
+    "is_correct": true
+  },
+  {
+    "id": "q_36",
+    "query": "Mock query 36?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7491237433196892,
+    "is_correct": false
+  },
+  {
+    "id": "q_37",
+    "query": "Mock query 37?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.4608870745159621,
+    "is_correct": true
+  },
+  {
+    "id": "q_38",
+    "query": "Mock query 38?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_39",
+    "query": "Mock query 39?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7938506593242558,
+    "is_correct": true
+  },
+  {
+    "id": "q_40",
+    "query": "Mock query 40?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8718223490960086,
+    "is_correct": false
+  },
+  {
+    "id": "q_41",
+    "query": "Mock query 41?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5244545065945251,
+    "is_correct": true
+  },
+  {
+    "id": "q_42",
+    "query": "Mock query 42?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.39431097878805094,
+    "is_correct": false
+  },
+  {
+    "id": "q_43",
+    "query": "Mock query 43?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.857586661109742,
+    "is_correct": true
+  },
+  {
+    "id": "q_44",
+    "query": "Mock query 44?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_45",
+    "query": "Mock query 45?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5095561261938062,
+    "is_correct": false
+  },
+  {
+    "id": "q_46",
+    "query": "Mock query 46?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.751184982795519,
+    "is_correct": true
+  },
+  {
+    "id": "q_47",
+    "query": "Mock query 47?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6193598634779729,
+    "is_correct": false
+  },
+  {
+    "id": "q_48",
+    "query": "Mock query 48?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5020498137933341,
+    "is_correct": false
+  },
+  {
+    "id": "q_49",
+    "query": "Mock query 49?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7442901742888897,
+    "is_correct": true
+  },
+  {
+    "id": "q_50",
+    "query": "Mock query 50?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_51",
+    "query": "Mock query 51?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5503619315889523,
+    "is_correct": true
+  },
+  {
+    "id": "q_52",
+    "query": "Mock query 52?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5469610652551343,
+    "is_correct": true
+  },
+  {
+    "id": "q_53",
+    "query": "Mock query 53?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.2974718333639574,
+    "is_correct": false
+  },
+  {
+    "id": "q_54",
+    "query": "Mock query 54?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5547794309507619,
+    "is_correct": false
+  },
+  {
+    "id": "q_55",
+    "query": "Mock query 55?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.2280872702216213,
+    "is_correct": false
+  },
+  {
+    "id": "q_56",
+    "query": "Mock query 56?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3110830005138584,
+    "is_correct": false
+  },
+  {
+    "id": "q_57",
+    "query": "Mock query 57?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6986357825537659,
+    "is_correct": false
+  },
+  {
+    "id": "q_58",
+    "query": "Mock query 58?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8031205725218781,
+    "is_correct": true
+  },
+  {
+    "id": "q_59",
+    "query": "Mock query 59?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5719145328310783,
+    "is_correct": false
+  },
+  {
+    "id": "q_60",
+    "query": "Mock query 60?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8852700437558709,
+    "is_correct": false
+  },
+  {
+    "id": "q_61",
+    "query": "Mock query 61?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.29952068155224776,
+    "is_correct": false
+  },
+  {
+    "id": "q_62",
+    "query": "Mock query 62?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8639349292583185,
+    "is_correct": true
+  },
+  {
+    "id": "q_63",
+    "query": "Mock query 63?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5854553302168268,
+    "is_correct": true
+  },
+  {
+    "id": "q_64",
+    "query": "Mock query 64?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5768248380884842,
+    "is_correct": false
+  },
+  {
+    "id": "q_65",
+    "query": "Mock query 65?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9541768775444188,
+    "is_correct": true
+  },
+  {
+    "id": "q_66",
+    "query": "Mock query 66?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 1.0,
+    "is_correct": false
+  },
+  {
+    "id": "q_67",
+    "query": "Mock query 67?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_68",
+    "query": "Mock query 68?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5526370901203294,
+    "is_correct": true
+  },
+  {
+    "id": "q_69",
+    "query": "Mock query 69?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.26060025567081796,
+    "is_correct": false
+  },
+  {
+    "id": "q_70",
+    "query": "Mock query 70?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5473836271222924,
+    "is_correct": false
+  },
+  {
+    "id": "q_71",
+    "query": "Mock query 71?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7256012810500323,
+    "is_correct": false
+  },
+  {
+    "id": "q_72",
+    "query": "Mock query 72?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7601371413133924,
+    "is_correct": true
+  },
+  {
+    "id": "q_73",
+    "query": "Mock query 73?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.627979069886399,
+    "is_correct": false
+  },
+  {
+    "id": "q_74",
+    "query": "Mock query 74?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7581488292131386,
+    "is_correct": true
+  },
+  {
+    "id": "q_75",
+    "query": "Mock query 75?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7181971904430311,
+    "is_correct": false
+  },
+  {
+    "id": "q_76",
+    "query": "Mock query 76?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5141798533339217,
+    "is_correct": true
+  },
+  {
+    "id": "q_77",
+    "query": "Mock query 77?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.42717050071958684,
+    "is_correct": false
+  },
+  {
+    "id": "q_78",
+    "query": "Mock query 78?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3241291001848822,
+    "is_correct": false
+  },
+  {
+    "id": "q_79",
+    "query": "Mock query 79?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.47532802429093224,
+    "is_correct": false
+  },
+  {
+    "id": "q_80",
+    "query": "Mock query 80?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6104816190560653,
+    "is_correct": false
+  },
+  {
+    "id": "q_81",
+    "query": "Mock query 81?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9090427660162028,
+    "is_correct": true
+  },
+  {
+    "id": "q_82",
+    "query": "Mock query 82?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4096845161300532,
+    "is_correct": false
+  },
+  {
+    "id": "q_83",
+    "query": "Mock query 83?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.43485082272056597,
+    "is_correct": false
+  },
+  {
+    "id": "q_84",
+    "query": "Mock query 84?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.2955201483801017,
+    "is_correct": false
+  },
+  {
+    "id": "q_85",
+    "query": "Mock query 85?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9188553746139655,
+    "is_correct": true
+  },
+  {
+    "id": "q_86",
+    "query": "Mock query 86?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5921381451984338,
+    "is_correct": false
+  },
+  {
+    "id": "q_87",
+    "query": "Mock query 87?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9142743206092994,
+    "is_correct": true
+  },
+  {
+    "id": "q_88",
+    "query": "Mock query 88?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9780579412380569,
+    "is_correct": true
+  },
+  {
+    "id": "q_89",
+    "query": "Mock query 89?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_90",
+    "query": "Mock query 90?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8434969337523628,
+    "is_correct": true
+  },
+  {
+    "id": "q_91",
+    "query": "Mock query 91?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8914313374596935,
+    "is_correct": true
+  },
+  {
+    "id": "q_92",
+    "query": "Mock query 92?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3515958744329789,
+    "is_correct": false
+  },
+  {
+    "id": "q_93",
+    "query": "Mock query 93?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7991475177658185,
+    "is_correct": true
+  },
+  {
+    "id": "q_94",
+    "query": "Mock query 94?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6865855375971867,
+    "is_correct": true
+  },
+  {
+    "id": "q_95",
+    "query": "Mock query 95?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_96",
+    "query": "Mock query 96?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5218646852426566,
+    "is_correct": true
+  },
+  {
+    "id": "q_97",
+    "query": "Mock query 97?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9080293916061156,
+    "is_correct": true
+  },
+  {
+    "id": "q_98",
+    "query": "Mock query 98?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.858488853016262,
+    "is_correct": true
+  },
+  {
+    "id": "q_99",
+    "query": "Mock query 99?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.1303089177088021,
+    "is_correct": false
+  },
+  {
+    "id": "q_100",
+    "query": "Mock query 100?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9868199440095713,
+    "is_correct": false
+  },
+  {
+    "id": "q_101",
+    "query": "Mock query 101?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.61043578886208,
+    "is_correct": true
+  },
+  {
+    "id": "q_102",
+    "query": "Mock query 102?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.616301126566884,
+    "is_correct": false
+  },
+  {
+    "id": "q_103",
+    "query": "Mock query 103?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_104",
+    "query": "Mock query 104?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.33046187787987524,
+    "is_correct": false
+  },
+  {
+    "id": "q_105",
+    "query": "Mock query 105?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9292209781104421,
+    "is_correct": true
+  },
+  {
+    "id": "q_106",
+    "query": "Mock query 106?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.502606975373866,
+    "is_correct": false
+  },
+  {
+    "id": "q_107",
+    "query": "Mock query 107?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 1.0,
+    "is_correct": false
+  },
+  {
+    "id": "q_108",
+    "query": "Mock query 108?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.34079843104507557,
+    "is_correct": false
+  },
+  {
+    "id": "q_109",
+    "query": "Mock query 109?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 1.0,
+    "is_correct": false
+  },
+  {
+    "id": "q_110",
+    "query": "Mock query 110?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8286411661378528,
+    "is_correct": false
+  },
+  {
+    "id": "q_111",
+    "query": "Mock query 111?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4481265359941926,
+    "is_correct": false
+  },
+  {
+    "id": "q_112",
+    "query": "Mock query 112?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5229229557156103,
+    "is_correct": false
+  },
+  {
+    "id": "q_113",
+    "query": "Mock query 113?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5827563436167389,
+    "is_correct": true
+  },
+  {
+    "id": "q_114",
+    "query": "Mock query 114?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.17687048425947383,
+    "is_correct": false
+  },
+  {
+    "id": "q_115",
+    "query": "Mock query 115?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_116",
+    "query": "Mock query 116?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7330889061941204,
+    "is_correct": false
+  },
+  {
+    "id": "q_117",
+    "query": "Mock query 117?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8107437280803923,
+    "is_correct": true
+  },
+  {
+    "id": "q_118",
+    "query": "Mock query 118?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9298908336695214,
+    "is_correct": false
+  },
+  {
+    "id": "q_119",
+    "query": "Mock query 119?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.34489385418278823,
+    "is_correct": false
+  },
+  {
+    "id": "q_120",
+    "query": "Mock query 120?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7769392427806607,
+    "is_correct": true
+  },
+  {
+    "id": "q_121",
+    "query": "Mock query 121?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6246970777390006,
+    "is_correct": false
+  },
+  {
+    "id": "q_122",
+    "query": "Mock query 122?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5164135900611168,
+    "is_correct": true
+  },
+  {
+    "id": "q_123",
+    "query": "Mock query 123?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_124",
+    "query": "Mock query 124?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8947486136014811,
+    "is_correct": true
+  },
+  {
+    "id": "q_125",
+    "query": "Mock query 125?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.35525035437442987,
+    "is_correct": false
+  },
+  {
+    "id": "q_126",
+    "query": "Mock query 126?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6055370998985883,
+    "is_correct": false
+  },
+  {
+    "id": "q_127",
+    "query": "Mock query 127?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4330432132316073,
+    "is_correct": false
+  },
+  {
+    "id": "q_128",
+    "query": "Mock query 128?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5106168704039639,
+    "is_correct": true
+  },
+  {
+    "id": "q_129",
+    "query": "Mock query 129?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7184661682373816,
+    "is_correct": false
+  },
+  {
+    "id": "q_130",
+    "query": "Mock query 130?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_131",
+    "query": "Mock query 131?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5384715524177448,
+    "is_correct": true
+  },
+  {
+    "id": "q_132",
+    "query": "Mock query 132?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6179059543505723,
+    "is_correct": false
+  },
+  {
+    "id": "q_133",
+    "query": "Mock query 133?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6046384919890536,
+    "is_correct": true
+  },
+  {
+    "id": "q_134",
+    "query": "Mock query 134?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7489031964759373,
+    "is_correct": false
+  },
+  {
+    "id": "q_135",
+    "query": "Mock query 135?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.2611917779759803,
+    "is_correct": false
+  },
+  {
+    "id": "q_136",
+    "query": "Mock query 136?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7069091612355769,
+    "is_correct": false
+  },
+  {
+    "id": "q_137",
+    "query": "Mock query 137?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9027492111997358,
+    "is_correct": true
+  },
+  {
+    "id": "q_138",
+    "query": "Mock query 138?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.2666315624993092,
+    "is_correct": true
+  },
+  {
+    "id": "q_139",
+    "query": "Mock query 139?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7350303837624637,
+    "is_correct": true
+  },
+  {
+    "id": "q_140",
+    "query": "Mock query 140?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6204824230194896,
+    "is_correct": true
+  },
+  {
+    "id": "q_141",
+    "query": "Mock query 141?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8053965510955351,
+    "is_correct": true
+  },
+  {
+    "id": "q_142",
+    "query": "Mock query 142?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6265098543308367,
+    "is_correct": false
+  },
+  {
+    "id": "q_143",
+    "query": "Mock query 143?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7480131398282817,
+    "is_correct": true
+  },
+  {
+    "id": "q_144",
+    "query": "Mock query 144?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5280991580490872,
+    "is_correct": false
+  },
+  {
+    "id": "q_145",
+    "query": "Mock query 145?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.21493419201050423,
+    "is_correct": false
+  },
+  {
+    "id": "q_146",
+    "query": "Mock query 146?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7055944408928174,
+    "is_correct": false
+  },
+  {
+    "id": "q_147",
+    "query": "Mock query 147?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 1.0,
+    "is_correct": false
+  },
+  {
+    "id": "q_148",
+    "query": "Mock query 148?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9969364374768784,
+    "is_correct": true
+  },
+  {
+    "id": "q_149",
+    "query": "Mock query 149?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7529932827759461,
+    "is_correct": false
+  },
+  {
+    "id": "q_150",
+    "query": "Mock query 150?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_151",
+    "query": "Mock query 151?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3815251600249133,
+    "is_correct": false
+  },
+  {
+    "id": "q_152",
+    "query": "Mock query 152?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.869040891286127,
+    "is_correct": true
+  },
+  {
+    "id": "q_153",
+    "query": "Mock query 153?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.3429229636934514,
+    "is_correct": true
+  },
+  {
+    "id": "q_154",
+    "query": "Mock query 154?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4132849561913764,
+    "is_correct": false
+  },
+  {
+    "id": "q_155",
+    "query": "Mock query 155?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.28007769313138065,
+    "is_correct": false
+  },
+  {
+    "id": "q_156",
+    "query": "Mock query 156?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6844039685698052,
+    "is_correct": true
+  },
+  {
+    "id": "q_157",
+    "query": "Mock query 157?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6588211826340791,
+    "is_correct": true
+  },
+  {
+    "id": "q_158",
+    "query": "Mock query 158?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7075663577207936,
+    "is_correct": false
+  },
+  {
+    "id": "q_159",
+    "query": "Mock query 159?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9134379988895547,
+    "is_correct": false
+  },
+  {
+    "id": "q_160",
+    "query": "Mock query 160?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.40607364821736724,
+    "is_correct": true
+  },
+  {
+    "id": "q_161",
+    "query": "Mock query 161?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9588144852182401,
+    "is_correct": false
+  },
+  {
+    "id": "q_162",
+    "query": "Mock query 162?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6594717267972727,
+    "is_correct": false
+  },
+  {
+    "id": "q_163",
+    "query": "Mock query 163?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6487636794501388,
+    "is_correct": true
+  },
+  {
+    "id": "q_164",
+    "query": "Mock query 164?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.4573762268213239,
+    "is_correct": true
+  },
+  {
+    "id": "q_165",
+    "query": "Mock query 165?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7646085087639709,
+    "is_correct": true
+  },
+  {
+    "id": "q_166",
+    "query": "Mock query 166?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5122004585701962,
+    "is_correct": false
+  },
+  {
+    "id": "q_167",
+    "query": "Mock query 167?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.23977923842602156,
+    "is_correct": false
+  },
+  {
+    "id": "q_168",
+    "query": "Mock query 168?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3145065314750507,
+    "is_correct": false
+  },
+  {
+    "id": "q_169",
+    "query": "Mock query 169?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.48444414528779767,
+    "is_correct": true
+  },
+  {
+    "id": "q_170",
+    "query": "Mock query 170?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3673819688335778,
+    "is_correct": false
+  },
+  {
+    "id": "q_171",
+    "query": "Mock query 171?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6289039195177445,
+    "is_correct": false
+  },
+  {
+    "id": "q_172",
+    "query": "Mock query 172?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.32638909525439724,
+    "is_correct": true
+  },
+  {
+    "id": "q_173",
+    "query": "Mock query 173?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8315075868907897,
+    "is_correct": true
+  },
+  {
+    "id": "q_174",
+    "query": "Mock query 174?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8544851894831684,
+    "is_correct": false
+  },
+  {
+    "id": "q_175",
+    "query": "Mock query 175?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9882700830624176,
+    "is_correct": true
+  },
+  {
+    "id": "q_176",
+    "query": "Mock query 176?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.162018717591703,
+    "is_correct": false
+  },
+  {
+    "id": "q_177",
+    "query": "Mock query 177?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8047579502749342,
+    "is_correct": true
+  },
+  {
+    "id": "q_178",
+    "query": "Mock query 178?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8896414065037929,
+    "is_correct": true
+  },
+  {
+    "id": "q_179",
+    "query": "Mock query 179?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.810175690699331,
+    "is_correct": true
+  },
+  {
+    "id": "q_180",
+    "query": "Mock query 180?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_181",
+    "query": "Mock query 181?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.21412991371638138,
+    "is_correct": false
+  },
+  {
+    "id": "q_182",
+    "query": "Mock query 182?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.985534603019705,
+    "is_correct": true
+  },
+  {
+    "id": "q_183",
+    "query": "Mock query 183?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.36798150705434207,
+    "is_correct": false
+  },
+  {
+    "id": "q_184",
+    "query": "Mock query 184?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.41326530984214843,
+    "is_correct": false
+  },
+  {
+    "id": "q_185",
+    "query": "Mock query 185?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6166458113736699,
+    "is_correct": false
+  },
+  {
+    "id": "q_186",
+    "query": "Mock query 186?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8302694066813504,
+    "is_correct": true
+  },
+  {
+    "id": "q_187",
+    "query": "Mock query 187?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5482449378775683,
+    "is_correct": true
+  },
+  {
+    "id": "q_188",
+    "query": "Mock query 188?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_189",
+    "query": "Mock query 189?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_190",
+    "query": "Mock query 190?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7964930584671647,
+    "is_correct": false
+  },
+  {
+    "id": "q_191",
+    "query": "Mock query 191?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9534037039066824,
+    "is_correct": true
+  },
+  {
+    "id": "q_192",
+    "query": "Mock query 192?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6755875763235635,
+    "is_correct": true
+  },
+  {
+    "id": "q_193",
+    "query": "Mock query 193?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7653396328588654,
+    "is_correct": false
+  },
+  {
+    "id": "q_194",
+    "query": "Mock query 194?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7905836845291851,
+    "is_correct": false
+  },
+  {
+    "id": "q_195",
+    "query": "Mock query 195?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.43450329133373433,
+    "is_correct": false
+  },
+  {
+    "id": "q_196",
+    "query": "Mock query 196?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4118014426336381,
+    "is_correct": false
+  },
+  {
+    "id": "q_197",
+    "query": "Mock query 197?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.30910784078007514,
+    "is_correct": false
+  },
+  {
+    "id": "q_198",
+    "query": "Mock query 198?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6363670684588946,
+    "is_correct": false
+  },
+  {
+    "id": "q_199",
+    "query": "Mock query 199?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3240601949365511,
+    "is_correct": false
+  },
+  {
+    "id": "q_200",
+    "query": "Mock query 200?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.38451276879767526,
+    "is_correct": false
+  },
+  {
+    "id": "q_201",
+    "query": "Mock query 201?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9137145246199301,
+    "is_correct": true
+  },
+  {
+    "id": "q_202",
+    "query": "Mock query 202?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7305369285025641,
+    "is_correct": true
+  },
+  {
+    "id": "q_203",
+    "query": "Mock query 203?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.48481326696658467,
+    "is_correct": false
+  },
+  {
+    "id": "q_204",
+    "query": "Mock query 204?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7072226148937513,
+    "is_correct": true
+  },
+  {
+    "id": "q_205",
+    "query": "Mock query 205?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6641836811782547,
+    "is_correct": true
+  },
+  {
+    "id": "q_206",
+    "query": "Mock query 206?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.743558881841474,
+    "is_correct": true
+  },
+  {
+    "id": "q_207",
+    "query": "Mock query 207?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.2542999958372999,
+    "is_correct": true
+  },
+  {
+    "id": "q_208",
+    "query": "Mock query 208?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7573480551522308,
+    "is_correct": true
+  },
+  {
+    "id": "q_209",
+    "query": "Mock query 209?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4183672880666971,
+    "is_correct": false
+  },
+  {
+    "id": "q_210",
+    "query": "Mock query 210?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_211",
+    "query": "Mock query 211?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.23865615989995465,
+    "is_correct": false
+  },
+  {
+    "id": "q_212",
+    "query": "Mock query 212?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.24779774512514183,
+    "is_correct": false
+  },
+  {
+    "id": "q_213",
+    "query": "Mock query 213?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6117375407574352,
+    "is_correct": false
+  },
+  {
+    "id": "q_214",
+    "query": "Mock query 214?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6958177622156781,
+    "is_correct": false
+  },
+  {
+    "id": "q_215",
+    "query": "Mock query 215?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7545188761185835,
+    "is_correct": false
+  },
+  {
+    "id": "q_216",
+    "query": "Mock query 216?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6076581953852112,
+    "is_correct": true
+  },
+  {
+    "id": "q_217",
+    "query": "Mock query 217?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.42342045277729323,
+    "is_correct": false
+  },
+  {
+    "id": "q_218",
+    "query": "Mock query 218?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8779047489151263,
+    "is_correct": true
+  },
+  {
+    "id": "q_219",
+    "query": "Mock query 219?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6196392878493586,
+    "is_correct": true
+  },
+  {
+    "id": "q_220",
+    "query": "Mock query 220?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6414223312203197,
+    "is_correct": false
+  },
+  {
+    "id": "q_221",
+    "query": "Mock query 221?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.42409428336702754,
+    "is_correct": false
+  },
+  {
+    "id": "q_222",
+    "query": "Mock query 222?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8002988049942459,
+    "is_correct": true
+  },
+  {
+    "id": "q_223",
+    "query": "Mock query 223?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5932278731168019,
+    "is_correct": false
+  },
+  {
+    "id": "q_224",
+    "query": "Mock query 224?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9836390816692464,
+    "is_correct": true
+  },
+  {
+    "id": "q_225",
+    "query": "Mock query 225?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8097315214414678,
+    "is_correct": false
+  },
+  {
+    "id": "q_226",
+    "query": "Mock query 226?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.329537883250459,
+    "is_correct": false
+  },
+  {
+    "id": "q_227",
+    "query": "Mock query 227?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.27778973920263206,
+    "is_correct": true
+  },
+  {
+    "id": "q_228",
+    "query": "Mock query 228?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.2372916894676193,
+    "is_correct": false
+  },
+  {
+    "id": "q_229",
+    "query": "Mock query 229?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.40245030159162987,
+    "is_correct": false
+  },
+  {
+    "id": "q_230",
+    "query": "Mock query 230?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7985994443970866,
+    "is_correct": false
+  },
+  {
+    "id": "q_231",
+    "query": "Mock query 231?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_232",
+    "query": "Mock query 232?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9090469718163483,
+    "is_correct": true
+  },
+  {
+    "id": "q_233",
+    "query": "Mock query 233?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7299403199892072,
+    "is_correct": false
+  },
+  {
+    "id": "q_234",
+    "query": "Mock query 234?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.782727878776792,
+    "is_correct": true
+  },
+  {
+    "id": "q_235",
+    "query": "Mock query 235?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.570776766712273,
+    "is_correct": false
+  },
+  {
+    "id": "q_236",
+    "query": "Mock query 236?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3681945680970859,
+    "is_correct": false
+  },
+  {
+    "id": "q_237",
+    "query": "Mock query 237?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.942589820203786,
+    "is_correct": true
+  },
+  {
+    "id": "q_238",
+    "query": "Mock query 238?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5191687310458578,
+    "is_correct": true
+  },
+  {
+    "id": "q_239",
+    "query": "Mock query 239?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5423194063361081,
+    "is_correct": true
+  },
+  {
+    "id": "q_240",
+    "query": "Mock query 240?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4616348399626392,
+    "is_correct": false
+  },
+  {
+    "id": "q_241",
+    "query": "Mock query 241?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.84539517071785,
+    "is_correct": false
+  },
+  {
+    "id": "q_242",
+    "query": "Mock query 242?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7186785752327075,
+    "is_correct": true
+  },
+  {
+    "id": "q_243",
+    "query": "Mock query 243?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8461653113055357,
+    "is_correct": true
+  },
+  {
+    "id": "q_244",
+    "query": "Mock query 244?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8873049745083518,
+    "is_correct": true
+  },
+  {
+    "id": "q_245",
+    "query": "Mock query 245?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7553455162205736,
+    "is_correct": true
+  },
+  {
+    "id": "q_246",
+    "query": "Mock query 246?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.478361363135248,
+    "is_correct": false
+  },
+  {
+    "id": "q_247",
+    "query": "Mock query 247?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8851275745939717,
+    "is_correct": true
+  },
+  {
+    "id": "q_248",
+    "query": "Mock query 248?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6141322981581278,
+    "is_correct": false
+  },
+  {
+    "id": "q_249",
+    "query": "Mock query 249?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6765250597579451,
+    "is_correct": true
+  },
+  {
+    "id": "q_250",
+    "query": "Mock query 250?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6496744470633689,
+    "is_correct": false
+  },
+  {
+    "id": "q_251",
+    "query": "Mock query 251?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8081127662978104,
+    "is_correct": false
+  },
+  {
+    "id": "q_252",
+    "query": "Mock query 252?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6580491467255525,
+    "is_correct": true
+  },
+  {
+    "id": "q_253",
+    "query": "Mock query 253?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6163564335380123,
+    "is_correct": false
+  },
+  {
+    "id": "q_254",
+    "query": "Mock query 254?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7690599003538958,
+    "is_correct": true
+  },
+  {
+    "id": "q_255",
+    "query": "Mock query 255?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9735730371972717,
+    "is_correct": true
+  },
+  {
+    "id": "q_256",
+    "query": "Mock query 256?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4890849114366042,
+    "is_correct": false
+  },
+  {
+    "id": "q_257",
+    "query": "Mock query 257?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3389514190036901,
+    "is_correct": false
+  },
+  {
+    "id": "q_258",
+    "query": "Mock query 258?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5697638876274432,
+    "is_correct": false
+  },
+  {
+    "id": "q_259",
+    "query": "Mock query 259?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9687782710409694,
+    "is_correct": true
+  },
+  {
+    "id": "q_260",
+    "query": "Mock query 260?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9152271904272795,
+    "is_correct": true
+  },
+  {
+    "id": "q_261",
+    "query": "Mock query 261?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5891250810695917,
+    "is_correct": false
+  },
+  {
+    "id": "q_262",
+    "query": "Mock query 262?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9573149779052419,
+    "is_correct": true
+  },
+  {
+    "id": "q_263",
+    "query": "Mock query 263?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6834292555771885,
+    "is_correct": false
+  },
+  {
+    "id": "q_264",
+    "query": "Mock query 264?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_265",
+    "query": "Mock query 265?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8564876726678943,
+    "is_correct": false
+  },
+  {
+    "id": "q_266",
+    "query": "Mock query 266?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7523549826033986,
+    "is_correct": true
+  },
+  {
+    "id": "q_267",
+    "query": "Mock query 267?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.514925996541662,
+    "is_correct": false
+  },
+  {
+    "id": "q_268",
+    "query": "Mock query 268?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5362909028393975,
+    "is_correct": false
+  },
+  {
+    "id": "q_269",
+    "query": "Mock query 269?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5416743784756493,
+    "is_correct": false
+  },
+  {
+    "id": "q_270",
+    "query": "Mock query 270?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5608088985619121,
+    "is_correct": true
+  },
+  {
+    "id": "q_271",
+    "query": "Mock query 271?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8295380346919273,
+    "is_correct": true
+  },
+  {
+    "id": "q_272",
+    "query": "Mock query 272?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7335297698085976,
+    "is_correct": false
+  },
+  {
+    "id": "q_273",
+    "query": "Mock query 273?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9076049755894651,
+    "is_correct": true
+  },
+  {
+    "id": "q_274",
+    "query": "Mock query 274?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8771753291004942,
+    "is_correct": false
+  },
+  {
+    "id": "q_275",
+    "query": "Mock query 275?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5073688030968118,
+    "is_correct": false
+  },
+  {
+    "id": "q_276",
+    "query": "Mock query 276?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8330544374563182,
+    "is_correct": false
+  },
+  {
+    "id": "q_277",
+    "query": "Mock query 277?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6100302938588102,
+    "is_correct": false
+  },
+  {
+    "id": "q_278",
+    "query": "Mock query 278?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8009486479804234,
+    "is_correct": true
+  },
+  {
+    "id": "q_279",
+    "query": "Mock query 279?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3643361553126586,
+    "is_correct": false
+  },
+  {
+    "id": "q_280",
+    "query": "Mock query 280?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5786603668172099,
+    "is_correct": false
+  },
+  {
+    "id": "q_281",
+    "query": "Mock query 281?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 1.0,
+    "is_correct": false
+  },
+  {
+    "id": "q_282",
+    "query": "Mock query 282?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.49900586419814397,
+    "is_correct": false
+  },
+  {
+    "id": "q_283",
+    "query": "Mock query 283?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9692363526870518,
+    "is_correct": true
+  },
+  {
+    "id": "q_284",
+    "query": "Mock query 284?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.34408490280163334,
+    "is_correct": false
+  },
+  {
+    "id": "q_285",
+    "query": "Mock query 285?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_286",
+    "query": "Mock query 286?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.36887884974079577,
+    "is_correct": false
+  },
+  {
+    "id": "q_287",
+    "query": "Mock query 287?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.663143190167335,
+    "is_correct": false
+  },
+  {
+    "id": "q_288",
+    "query": "Mock query 288?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.37563581449043376,
+    "is_correct": false
+  },
+  {
+    "id": "q_289",
+    "query": "Mock query 289?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4435438105300714,
+    "is_correct": false
+  },
+  {
+    "id": "q_290",
+    "query": "Mock query 290?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7904982916970353,
+    "is_correct": true
+  },
+  {
+    "id": "q_291",
+    "query": "Mock query 291?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.42442656012145213,
+    "is_correct": false
+  },
+  {
+    "id": "q_292",
+    "query": "Mock query 292?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5665125382921168,
+    "is_correct": true
+  },
+  {
+    "id": "q_293",
+    "query": "Mock query 293?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5451131325080607,
+    "is_correct": true
+  },
+  {
+    "id": "q_294",
+    "query": "Mock query 294?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3489078682564407,
+    "is_correct": false
+  },
+  {
+    "id": "q_295",
+    "query": "Mock query 295?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6894813951807996,
+    "is_correct": true
+  },
+  {
+    "id": "q_296",
+    "query": "Mock query 296?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5527240110923918,
+    "is_correct": false
+  },
+  {
+    "id": "q_297",
+    "query": "Mock query 297?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5144766180910286,
+    "is_correct": false
+  },
+  {
+    "id": "q_298",
+    "query": "Mock query 298?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.37478157397731754,
+    "is_correct": false
+  },
+  {
+    "id": "q_299",
+    "query": "Mock query 299?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.46134136924728136,
+    "is_correct": false
+  },
+  {
+    "id": "q_300",
+    "query": "Mock query 300?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9827228610664989,
+    "is_correct": false
+  },
+  {
+    "id": "q_301",
+    "query": "Mock query 301?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7089279667964129,
+    "is_correct": true
+  },
+  {
+    "id": "q_302",
+    "query": "Mock query 302?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8720402465368071,
+    "is_correct": true
+  },
+  {
+    "id": "q_303",
+    "query": "Mock query 303?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7341433804183407,
+    "is_correct": false
+  },
+  {
+    "id": "q_304",
+    "query": "Mock query 304?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5686133570196352,
+    "is_correct": false
+  },
+  {
+    "id": "q_305",
+    "query": "Mock query 305?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5728421280700208,
+    "is_correct": false
+  },
+  {
+    "id": "q_306",
+    "query": "Mock query 306?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8584900798999002,
+    "is_correct": false
+  },
+  {
+    "id": "q_307",
+    "query": "Mock query 307?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9591441246760828,
+    "is_correct": false
+  },
+  {
+    "id": "q_308",
+    "query": "Mock query 308?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7097523522982091,
+    "is_correct": true
+  },
+  {
+    "id": "q_309",
+    "query": "Mock query 309?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7833669746764937,
+    "is_correct": true
+  },
+  {
+    "id": "q_310",
+    "query": "Mock query 310?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5603326207848356,
+    "is_correct": true
+  },
+  {
+    "id": "q_311",
+    "query": "Mock query 311?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.36755016589275313,
+    "is_correct": false
+  },
+  {
+    "id": "q_312",
+    "query": "Mock query 312?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7987279913067371,
+    "is_correct": false
+  },
+  {
+    "id": "q_313",
+    "query": "Mock query 313?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5529830114133321,
+    "is_correct": false
+  },
+  {
+    "id": "q_314",
+    "query": "Mock query 314?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9691586002501268,
+    "is_correct": true
+  },
+  {
+    "id": "q_315",
+    "query": "Mock query 315?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.4810037538204708,
+    "is_correct": true
+  },
+  {
+    "id": "q_316",
+    "query": "Mock query 316?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_317",
+    "query": "Mock query 317?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_318",
+    "query": "Mock query 318?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6298246301011343,
+    "is_correct": true
+  },
+  {
+    "id": "q_319",
+    "query": "Mock query 319?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6656936549354098,
+    "is_correct": false
+  },
+  {
+    "id": "q_320",
+    "query": "Mock query 320?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8132406653764603,
+    "is_correct": false
+  },
+  {
+    "id": "q_321",
+    "query": "Mock query 321?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8847373440834126,
+    "is_correct": true
+  },
+  {
+    "id": "q_322",
+    "query": "Mock query 322?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3852901732816415,
+    "is_correct": false
+  },
+  {
+    "id": "q_323",
+    "query": "Mock query 323?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8986148870167245,
+    "is_correct": true
+  },
+  {
+    "id": "q_324",
+    "query": "Mock query 324?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_325",
+    "query": "Mock query 325?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4685697883884965,
+    "is_correct": false
+  },
+  {
+    "id": "q_326",
+    "query": "Mock query 326?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.4912790531782659,
+    "is_correct": true
+  },
+  {
+    "id": "q_327",
+    "query": "Mock query 327?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8505066614347029,
+    "is_correct": true
+  },
+  {
+    "id": "q_328",
+    "query": "Mock query 328?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8593310115370885,
+    "is_correct": false
+  },
+  {
+    "id": "q_329",
+    "query": "Mock query 329?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6579821071613731,
+    "is_correct": true
+  },
+  {
+    "id": "q_330",
+    "query": "Mock query 330?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4616141123626041,
+    "is_correct": false
+  },
+  {
+    "id": "q_331",
+    "query": "Mock query 331?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7119491661724783,
+    "is_correct": true
+  },
+  {
+    "id": "q_332",
+    "query": "Mock query 332?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5294388928057588,
+    "is_correct": false
+  },
+  {
+    "id": "q_333",
+    "query": "Mock query 333?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8141665420266028,
+    "is_correct": true
+  },
+  {
+    "id": "q_334",
+    "query": "Mock query 334?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.82892544802133,
+    "is_correct": true
+  },
+  {
+    "id": "q_335",
+    "query": "Mock query 335?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.47545428284382235,
+    "is_correct": true
+  },
+  {
+    "id": "q_336",
+    "query": "Mock query 336?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9148417613420999,
+    "is_correct": true
+  },
+  {
+    "id": "q_337",
+    "query": "Mock query 337?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7925073616424376,
+    "is_correct": true
+  },
+  {
+    "id": "q_338",
+    "query": "Mock query 338?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8025063415129006,
+    "is_correct": true
+  },
+  {
+    "id": "q_339",
+    "query": "Mock query 339?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5722454265736774,
+    "is_correct": false
+  },
+  {
+    "id": "q_340",
+    "query": "Mock query 340?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3305113018529292,
+    "is_correct": false
+  },
+  {
+    "id": "q_341",
+    "query": "Mock query 341?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4071138967282175,
+    "is_correct": false
+  },
+  {
+    "id": "q_342",
+    "query": "Mock query 342?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.35979027909806593,
+    "is_correct": false
+  },
+  {
+    "id": "q_343",
+    "query": "Mock query 343?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.2791899641731866,
+    "is_correct": true
+  },
+  {
+    "id": "q_344",
+    "query": "Mock query 344?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6365801590137129,
+    "is_correct": true
+  },
+  {
+    "id": "q_345",
+    "query": "Mock query 345?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8033672132149421,
+    "is_correct": true
+  },
+  {
+    "id": "q_346",
+    "query": "Mock query 346?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.25511666648329473,
+    "is_correct": false
+  },
+  {
+    "id": "q_347",
+    "query": "Mock query 347?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7445680037884924,
+    "is_correct": true
+  },
+  {
+    "id": "q_348",
+    "query": "Mock query 348?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8763850187341197,
+    "is_correct": true
+  },
+  {
+    "id": "q_349",
+    "query": "Mock query 349?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.786695644719689,
+    "is_correct": true
+  },
+  {
+    "id": "q_350",
+    "query": "Mock query 350?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9866758691122551,
+    "is_correct": true
+  },
+  {
+    "id": "q_351",
+    "query": "Mock query 351?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7556418726147542,
+    "is_correct": true
+  },
+  {
+    "id": "q_352",
+    "query": "Mock query 352?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6036707051524588,
+    "is_correct": false
+  },
+  {
+    "id": "q_353",
+    "query": "Mock query 353?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7651253320499489,
+    "is_correct": true
+  },
+  {
+    "id": "q_354",
+    "query": "Mock query 354?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.3471216090186655,
+    "is_correct": true
+  },
+  {
+    "id": "q_355",
+    "query": "Mock query 355?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5099358169366672,
+    "is_correct": false
+  },
+  {
+    "id": "q_356",
+    "query": "Mock query 356?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6585366814132114,
+    "is_correct": false
+  },
+  {
+    "id": "q_357",
+    "query": "Mock query 357?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6446003715209712,
+    "is_correct": true
+  },
+  {
+    "id": "q_358",
+    "query": "Mock query 358?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9172613560255254,
+    "is_correct": true
+  },
+  {
+    "id": "q_359",
+    "query": "Mock query 359?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9314221590810706,
+    "is_correct": true
+  },
+  {
+    "id": "q_360",
+    "query": "Mock query 360?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5297920050816005,
+    "is_correct": true
+  },
+  {
+    "id": "q_361",
+    "query": "Mock query 361?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5875960174044065,
+    "is_correct": true
+  },
+  {
+    "id": "q_362",
+    "query": "Mock query 362?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.640943563926859,
+    "is_correct": true
+  },
+  {
+    "id": "q_363",
+    "query": "Mock query 363?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.49900665053529436,
+    "is_correct": true
+  },
+  {
+    "id": "q_364",
+    "query": "Mock query 364?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7933865412909868,
+    "is_correct": true
+  },
+  {
+    "id": "q_365",
+    "query": "Mock query 365?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9345675843741903,
+    "is_correct": true
+  },
+  {
+    "id": "q_366",
+    "query": "Mock query 366?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7376479903892033,
+    "is_correct": true
+  },
+  {
+    "id": "q_367",
+    "query": "Mock query 367?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3038644521737777,
+    "is_correct": false
+  },
+  {
+    "id": "q_368",
+    "query": "Mock query 368?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.9606550448619022,
+    "is_correct": false
+  },
+  {
+    "id": "q_369",
+    "query": "Mock query 369?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_370",
+    "query": "Mock query 370?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6261564564134858,
+    "is_correct": false
+  },
+  {
+    "id": "q_371",
+    "query": "Mock query 371?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.31186140986423244,
+    "is_correct": false
+  },
+  {
+    "id": "q_372",
+    "query": "Mock query 372?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6228305300733351,
+    "is_correct": false
+  },
+  {
+    "id": "q_373",
+    "query": "Mock query 373?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.999323645320383,
+    "is_correct": false
+  },
+  {
+    "id": "q_374",
+    "query": "Mock query 374?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9388134717931751,
+    "is_correct": true
+  },
+  {
+    "id": "q_375",
+    "query": "Mock query 375?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.39972835246134764,
+    "is_correct": false
+  },
+  {
+    "id": "q_376",
+    "query": "Mock query 376?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.36808300171154484,
+    "is_correct": false
+  },
+  {
+    "id": "q_377",
+    "query": "Mock query 377?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.44913514809710564,
+    "is_correct": true
+  },
+  {
+    "id": "q_378",
+    "query": "Mock query 378?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9657864936575634,
+    "is_correct": true
+  },
+  {
+    "id": "q_379",
+    "query": "Mock query 379?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.40345132711766907,
+    "is_correct": true
+  },
+  {
+    "id": "q_380",
+    "query": "Mock query 380?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7614292736146187,
+    "is_correct": true
+  },
+  {
+    "id": "q_381",
+    "query": "Mock query 381?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4837327131585674,
+    "is_correct": false
+  },
+  {
+    "id": "q_382",
+    "query": "Mock query 382?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8917465629577119,
+    "is_correct": true
+  },
+  {
+    "id": "q_383",
+    "query": "Mock query 383?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.18931003027256338,
+    "is_correct": false
+  },
+  {
+    "id": "q_384",
+    "query": "Mock query 384?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.720805821554356,
+    "is_correct": false
+  },
+  {
+    "id": "q_385",
+    "query": "Mock query 385?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6211426199221307,
+    "is_correct": true
+  },
+  {
+    "id": "q_386",
+    "query": "Mock query 386?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7380997673677571,
+    "is_correct": true
+  },
+  {
+    "id": "q_387",
+    "query": "Mock query 387?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5301430524923993,
+    "is_correct": false
+  },
+  {
+    "id": "q_388",
+    "query": "Mock query 388?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6473312557704078,
+    "is_correct": true
+  },
+  {
+    "id": "q_389",
+    "query": "Mock query 389?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5817660913255251,
+    "is_correct": true
+  },
+  {
+    "id": "q_390",
+    "query": "Mock query 390?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.31015762495344795,
+    "is_correct": true
+  },
+  {
+    "id": "q_391",
+    "query": "Mock query 391?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.36481685672106645,
+    "is_correct": false
+  },
+  {
+    "id": "q_392",
+    "query": "Mock query 392?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3546180752152447,
+    "is_correct": false
+  },
+  {
+    "id": "q_393",
+    "query": "Mock query 393?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.750216137970934,
+    "is_correct": false
+  },
+  {
+    "id": "q_394",
+    "query": "Mock query 394?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.4161897058805028,
+    "is_correct": true
+  },
+  {
+    "id": "q_395",
+    "query": "Mock query 395?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3913419596192403,
+    "is_correct": false
+  },
+  {
+    "id": "q_396",
+    "query": "Mock query 396?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7326272328552178,
+    "is_correct": false
+  },
+  {
+    "id": "q_397",
+    "query": "Mock query 397?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.46870717967392395,
+    "is_correct": true
+  },
+  {
+    "id": "q_398",
+    "query": "Mock query 398?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6002111898495467,
+    "is_correct": false
+  },
+  {
+    "id": "q_399",
+    "query": "Mock query 399?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_400",
+    "query": "Mock query 400?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8485824302985777,
+    "is_correct": true
+  },
+  {
+    "id": "q_401",
+    "query": "Mock query 401?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6379000434583052,
+    "is_correct": true
+  },
+  {
+    "id": "q_402",
+    "query": "Mock query 402?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.47153121166671075,
+    "is_correct": true
+  },
+  {
+    "id": "q_403",
+    "query": "Mock query 403?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5425946195852844,
+    "is_correct": false
+  },
+  {
+    "id": "q_404",
+    "query": "Mock query 404?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9295507649057545,
+    "is_correct": true
+  },
+  {
+    "id": "q_405",
+    "query": "Mock query 405?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9996699829448858,
+    "is_correct": true
+  },
+  {
+    "id": "q_406",
+    "query": "Mock query 406?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.27633691546935046,
+    "is_correct": false
+  },
+  {
+    "id": "q_407",
+    "query": "Mock query 407?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9048249395931354,
+    "is_correct": true
+  },
+  {
+    "id": "q_408",
+    "query": "Mock query 408?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8665135789032649,
+    "is_correct": false
+  },
+  {
+    "id": "q_409",
+    "query": "Mock query 409?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8425732967847177,
+    "is_correct": false
+  },
+  {
+    "id": "q_410",
+    "query": "Mock query 410?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7421829224404175,
+    "is_correct": false
+  },
+  {
+    "id": "q_411",
+    "query": "Mock query 411?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9795627219350644,
+    "is_correct": true
+  },
+  {
+    "id": "q_412",
+    "query": "Mock query 412?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.28729142594749035,
+    "is_correct": false
+  },
+  {
+    "id": "q_413",
+    "query": "Mock query 413?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3365905700528508,
+    "is_correct": false
+  },
+  {
+    "id": "q_414",
+    "query": "Mock query 414?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.4839004395952534,
+    "is_correct": true
+  },
+  {
+    "id": "q_415",
+    "query": "Mock query 415?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7883766056825336,
+    "is_correct": false
+  },
+  {
+    "id": "q_416",
+    "query": "Mock query 416?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9687372136895444,
+    "is_correct": true
+  },
+  {
+    "id": "q_417",
+    "query": "Mock query 417?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.636464238543309,
+    "is_correct": false
+  },
+  {
+    "id": "q_418",
+    "query": "Mock query 418?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.951621523540714,
+    "is_correct": true
+  },
+  {
+    "id": "q_419",
+    "query": "Mock query 419?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7179279925830163,
+    "is_correct": true
+  },
+  {
+    "id": "q_420",
+    "query": "Mock query 420?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.23925097138684104,
+    "is_correct": true
+  },
+  {
+    "id": "q_421",
+    "query": "Mock query 421?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9223327999160991,
+    "is_correct": true
+  },
+  {
+    "id": "q_422",
+    "query": "Mock query 422?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5554068746316754,
+    "is_correct": true
+  },
+  {
+    "id": "q_423",
+    "query": "Mock query 423?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5820331569761736,
+    "is_correct": false
+  },
+  {
+    "id": "q_424",
+    "query": "Mock query 424?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3388525610156312,
+    "is_correct": false
+  },
+  {
+    "id": "q_425",
+    "query": "Mock query 425?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5285256618502822,
+    "is_correct": false
+  },
+  {
+    "id": "q_426",
+    "query": "Mock query 426?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9255731523417239,
+    "is_correct": true
+  },
+  {
+    "id": "q_427",
+    "query": "Mock query 427?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3791185614640998,
+    "is_correct": false
+  },
+  {
+    "id": "q_428",
+    "query": "Mock query 428?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8759561499251128,
+    "is_correct": false
+  },
+  {
+    "id": "q_429",
+    "query": "Mock query 429?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8986323404665981,
+    "is_correct": true
+  },
+  {
+    "id": "q_430",
+    "query": "Mock query 430?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.31808894072820754,
+    "is_correct": false
+  },
+  {
+    "id": "q_431",
+    "query": "Mock query 431?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7763713655501129,
+    "is_correct": true
+  },
+  {
+    "id": "q_432",
+    "query": "Mock query 432?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.943276325877397,
+    "is_correct": true
+  },
+  {
+    "id": "q_433",
+    "query": "Mock query 433?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9772850014352752,
+    "is_correct": true
+  },
+  {
+    "id": "q_434",
+    "query": "Mock query 434?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9847995799544165,
+    "is_correct": true
+  },
+  {
+    "id": "q_435",
+    "query": "Mock query 435?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7149221180073857,
+    "is_correct": true
+  },
+  {
+    "id": "q_436",
+    "query": "Mock query 436?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.49824177777204093,
+    "is_correct": true
+  },
+  {
+    "id": "q_437",
+    "query": "Mock query 437?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5556546092274244,
+    "is_correct": false
+  },
+  {
+    "id": "q_438",
+    "query": "Mock query 438?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.3225040431802336,
+    "is_correct": true
+  },
+  {
+    "id": "q_439",
+    "query": "Mock query 439?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8058849400490748,
+    "is_correct": true
+  },
+  {
+    "id": "q_440",
+    "query": "Mock query 440?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_441",
+    "query": "Mock query 441?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5993037789055977,
+    "is_correct": true
+  },
+  {
+    "id": "q_442",
+    "query": "Mock query 442?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4500500602845549,
+    "is_correct": false
+  },
+  {
+    "id": "q_443",
+    "query": "Mock query 443?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9595913668765811,
+    "is_correct": true
+  },
+  {
+    "id": "q_444",
+    "query": "Mock query 444?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5733963075596376,
+    "is_correct": false
+  },
+  {
+    "id": "q_445",
+    "query": "Mock query 445?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.42328377409912277,
+    "is_correct": true
+  },
+  {
+    "id": "q_446",
+    "query": "Mock query 446?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8335076033863511,
+    "is_correct": true
+  },
+  {
+    "id": "q_447",
+    "query": "Mock query 447?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5901614785774676,
+    "is_correct": false
+  },
+  {
+    "id": "q_448",
+    "query": "Mock query 448?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8784430016480758,
+    "is_correct": false
+  },
+  {
+    "id": "q_449",
+    "query": "Mock query 449?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_450",
+    "query": "Mock query 450?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5637358838910131,
+    "is_correct": false
+  },
+  {
+    "id": "q_451",
+    "query": "Mock query 451?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9938907589104564,
+    "is_correct": true
+  },
+  {
+    "id": "q_452",
+    "query": "Mock query 452?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.49235628013253985,
+    "is_correct": false
+  },
+  {
+    "id": "q_453",
+    "query": "Mock query 453?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5744095158640677,
+    "is_correct": false
+  },
+  {
+    "id": "q_454",
+    "query": "Mock query 454?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.8664517426856215,
+    "is_correct": true
+  },
+  {
+    "id": "q_455",
+    "query": "Mock query 455?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5898249023665576,
+    "is_correct": true
+  },
+  {
+    "id": "q_456",
+    "query": "Mock query 456?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7339020270595128,
+    "is_correct": true
+  },
+  {
+    "id": "q_457",
+    "query": "Mock query 457?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5657779156181618,
+    "is_correct": true
+  },
+  {
+    "id": "q_458",
+    "query": "Mock query 458?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.29320764414483025,
+    "is_correct": false
+  },
+  {
+    "id": "q_459",
+    "query": "Mock query 459?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_460",
+    "query": "Mock query 460?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_461",
+    "query": "Mock query 461?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7743843863035024,
+    "is_correct": true
+  },
+  {
+    "id": "q_462",
+    "query": "Mock query 462?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9726308630950532,
+    "is_correct": true
+  },
+  {
+    "id": "q_463",
+    "query": "Mock query 463?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7990093824259383,
+    "is_correct": true
+  },
+  {
+    "id": "q_464",
+    "query": "Mock query 464?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.24015779554769043,
+    "is_correct": false
+  },
+  {
+    "id": "q_465",
+    "query": "Mock query 465?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7572138319525479,
+    "is_correct": true
+  },
+  {
+    "id": "q_466",
+    "query": "Mock query 466?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.27537996167115986,
+    "is_correct": false
+  },
+  {
+    "id": "q_467",
+    "query": "Mock query 467?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.26414722042111394,
+    "is_correct": false
+  },
+  {
+    "id": "q_468",
+    "query": "Mock query 468?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4989482618961634,
+    "is_correct": false
+  },
+  {
+    "id": "q_469",
+    "query": "Mock query 469?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.5823218399169259,
+    "is_correct": true
+  },
+  {
+    "id": "q_470",
+    "query": "Mock query 470?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3366235596106727,
+    "is_correct": false
+  },
+  {
+    "id": "q_471",
+    "query": "Mock query 471?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6640169378627236,
+    "is_correct": true
+  },
+  {
+    "id": "q_472",
+    "query": "Mock query 472?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6571812278897858,
+    "is_correct": false
+  },
+  {
+    "id": "q_473",
+    "query": "Mock query 473?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.311961291923728,
+    "is_correct": false
+  },
+  {
+    "id": "q_474",
+    "query": "Mock query 474?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_475",
+    "query": "Mock query 475?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.6668092999673778,
+    "is_correct": false
+  },
+  {
+    "id": "q_476",
+    "query": "Mock query 476?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.30779287818805445,
+    "is_correct": false
+  },
+  {
+    "id": "q_477",
+    "query": "Mock query 477?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.5957243009659056,
+    "is_correct": false
+  },
+  {
+    "id": "q_478",
+    "query": "Mock query 478?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9377571947315807,
+    "is_correct": true
+  },
+  {
+    "id": "q_479",
+    "query": "Mock query 479?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.29927267419847403,
+    "is_correct": false
+  },
+  {
+    "id": "q_480",
+    "query": "Mock query 480?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.47381407968485123,
+    "is_correct": false
+  },
+  {
+    "id": "q_481",
+    "query": "Mock query 481?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.8458321559243526,
+    "is_correct": false
+  },
+  {
+    "id": "q_482",
+    "query": "Mock query 482?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3833375495368062,
+    "is_correct": false
+  },
+  {
+    "id": "q_483",
+    "query": "Mock query 483?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.34789593963776194,
+    "is_correct": true
+  },
+  {
+    "id": "q_484",
+    "query": "Mock query 484?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.4135360475294248,
+    "is_correct": false
+  },
+  {
+    "id": "q_485",
+    "query": "Mock query 485?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_486",
+    "query": "Mock query 486?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7599637642752652,
+    "is_correct": true
+  },
+  {
+    "id": "q_487",
+    "query": "Mock query 487?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9844127367061573,
+    "is_correct": true
+  },
+  {
+    "id": "q_488",
+    "query": "Mock query 488?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.30998575888990865,
+    "is_correct": false
+  },
+  {
+    "id": "q_489",
+    "query": "Mock query 489?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9630374129022129,
+    "is_correct": true
+  },
+  {
+    "id": "q_490",
+    "query": "Mock query 490?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_491",
+    "query": "Mock query 491?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9952311293620535,
+    "is_correct": true
+  },
+  {
+    "id": "q_492",
+    "query": "Mock query 492?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.7053431612907489,
+    "is_correct": true
+  },
+  {
+    "id": "q_493",
+    "query": "Mock query 493?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.9215153428353005,
+    "is_correct": true
+  },
+  {
+    "id": "q_494",
+    "query": "Mock query 494?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.3623308952974372,
+    "is_correct": false
+  },
+  {
+    "id": "q_495",
+    "query": "Mock query 495?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7099321240493934,
+    "is_correct": false
+  },
+  {
+    "id": "q_496",
+    "query": "Mock query 496?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.39394413587263255,
+    "is_correct": false
+  },
+  {
+    "id": "q_497",
+    "query": "Mock query 497?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 0.6814926275787005,
+    "is_correct": true
+  },
+  {
+    "id": "q_498",
+    "query": "Mock query 498?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "True Answer",
+    "confidence_score": 1.0,
+    "is_correct": true
+  },
+  {
+    "id": "q_499",
+    "query": "Mock query 499?",
+    "ground_truth": "True Answer",
+    "predicted_answer": "Wrong Answer",
+    "confidence_score": 0.7190033695019333,
+    "is_correct": false
+  }
+]
