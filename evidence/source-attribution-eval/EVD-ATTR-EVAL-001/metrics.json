@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-ATTR-EVAL-001",
+  "metrics": {
+    "test_cases": 5,
+    "attribution_precision": 0.8400000000000001,
+    "source_verification_rate": 0.8
+  }
+}

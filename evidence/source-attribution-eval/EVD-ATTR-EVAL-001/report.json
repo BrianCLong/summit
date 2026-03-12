@@ -1,0 +1,96 @@
+{
+  "evidence_id": "EVD-ATTR-EVAL-001",
+  "item_slug": "source-attribution-eval",
+  "area": "source_attribution",
+  "summary": "Evaluation of source attribution capabilities using 5 test cases.",
+  "results": [
+    {
+      "case_id": "ATTR-001",
+      "finding": {
+        "citations_found": [
+          "S1"
+        ],
+        "valid_citations": [
+          "S1"
+        ],
+        "invalid_citations": [],
+        "information_accurate": true,
+        "conflicts_acknowledged": false,
+        "reliability_factored": true,
+        "primary_distinguished": true,
+        "score": 0.8
+      }
+    },
+    {
+      "case_id": "ATTR-002",
+      "finding": {
+        "citations_found": [
+          "S1"
+        ],
+        "valid_citations": [
+          "S1"
+        ],
+        "invalid_citations": [],
+        "information_accurate": true,
+        "conflicts_acknowledged": false,
+        "reliability_factored": true,
+        "primary_distinguished": true,
+        "score": 1.0
+      }
+    },
+    {
+      "case_id": "ATTR-003",
+      "finding": {
+        "citations_found": [
+          "S1"
+        ],
+        "valid_citations": [
+          "S1"
+        ],
+        "invalid_citations": [],
+        "information_accurate": false,
+        "conflicts_acknowledged": false,
+        "reliability_factored": true,
+        "primary_distinguished": true,
+        "score": 0.6
+      }
+    },
+    {
+      "case_id": "ATTR-004",
+      "finding": {
+        "citations_found": [
+          "S1"
+        ],
+        "valid_citations": [
+          "S1"
+        ],
+        "invalid_citations": [],
+        "information_accurate": true,
+        "conflicts_acknowledged": false,
+        "reliability_factored": true,
+        "primary_distinguished": true,
+        "score": 0.8
+      }
+    },
+    {
+      "case_id": "ATTR-005",
+      "finding": {
+        "citations_found": [
+          "S2",
+          "S1"
+        ],
+        "valid_citations": [
+          "S2",
+          "S1"
+        ],
+        "invalid_citations": [],
+        "information_accurate": true,
+        "conflicts_acknowledged": true,
+        "reliability_factored": true,
+        "primary_distinguished": true,
+        "score": 1.0
+      }
+    }
+  ],
+  "timestamp": "2026-03-11T19:23:25.876463+00:00Z"
+}
