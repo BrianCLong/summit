@@ -1,0 +1,39 @@
+name: Economic Intelligence
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  economic-intelligence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Collect economic signals
+        run: node scripts/repoos/economic-intelligence.mjs
+
+      - name: Compute economic metrics
+        run: |
+          test -f .repoos/economics/economic-signals.json
+          test -f .repoos/economics/developer-economy.json
+          test -f .repoos/economics/marketplace-growth.json
+          test -f .repoos/economics/ecosystem-value.json
+
+      - name: Publish intelligence artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-economic-intelligence
+          path: |
+            .repoos/economics/economic-signals.json
+            .repoos/economics/developer-economy.json
+            .repoos/economics/marketplace-growth.json
+            .repoos/economics/ecosystem-value.json
+            .repoos/evidence/economic-intelligence-report.json

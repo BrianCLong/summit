@@ -1,0 +1,18 @@
+{
+  "report_name": "platform-economic-intelligence",
+  "deterministic": true,
+  "summary": {
+    "marketplace_revenue": 124000,
+    "developer_earnings": 86800,
+    "partner_revenue_impact": 58000,
+    "top_plugin_category": "Observability",
+    "transaction_volume": 806,
+    "revenue_growth_rate": 0.2917
+  },
+  "artifacts": [
+    ".repoos/economics/economic-signals.json",
+    ".repoos/economics/developer-economy.json",
+    ".repoos/economics/marketplace-growth.json",
+    ".repoos/economics/ecosystem-value.json"
+  ]
+}

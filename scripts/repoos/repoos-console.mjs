@@ -96,6 +96,18 @@ async function loadSimulation() {
 }
 
 /**
+ * Load economic intelligence report
+ */
+async function loadEconomicIntelligence() {
+  try {
+    const content = await fs.readFile('.repoos/evidence/economic-intelligence-report.json', 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
  * Format percentage bar
  */
 function formatBar(value, width = 20, threshold = 0.8) {
@@ -290,6 +302,29 @@ function displaySimulationForecast(simulation) {
 }
 
 /**
+ * Display platform economy dashboard
+ */
+function displayPlatformEconomy(economicReport) {
+  console.log(`${COLORS.bright}Platform Economy${COLORS.reset}`);
+  console.log(`─────────────────────────────────────────────────────────────────\n`);
+
+  if (!economicReport || !economicReport.summary) {
+    console.log(`${COLORS.dim}No economic intelligence data available${COLORS.reset}\n`);
+    return;
+  }
+
+  const summary = economicReport.summary;
+  const growth = (summary.revenue_growth_rate || 0) * 100;
+
+  console.log(`Marketplace Revenue: $${((summary.marketplace_revenue || 0) / 1000).toFixed(0)}k`);
+  console.log(`Developer Earnings: $${((summary.developer_earnings || 0) / 1000).toFixed(0)}k`);
+  console.log(`Partner Revenue Impact: $${((summary.partner_revenue_impact || 0) / 1000).toFixed(0)}k`);
+  console.log(`Top Plugin Category: ${summary.top_plugin_category || 'N/A'}`);
+  console.log(`Revenue Growth: ${growth.toFixed(1)}%`);
+  console.log(`Transaction Volume: ${summary.transaction_volume || 0}\n`);
+}
+
+/**
  * Display recent activity
  */
 async function displayRecentActivity() {
@@ -349,6 +384,7 @@ async function main() {
   const market = await loadPatchMarket();
   const genome = await loadGenome();
   const simulation = await loadSimulation();
+  const economicReport = await loadEconomicIntelligence();
 
   // Display console
   displaySystemHealth(stability, genome, simulation);
@@ -356,6 +392,7 @@ async function main() {
   displayPatchMarket(market);
   displayGenomeFitness(genome);
   displaySimulationForecast(simulation);
+  displayPlatformEconomy(economicReport);
   await displayRecentActivity();
   displayFooter();
 }
