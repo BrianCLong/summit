@@ -6,6 +6,17 @@
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
 [![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
 
+
+**Summit is the undeniable operating system for verifiable, agent-driven open-source intelligence (OSINT) and complex investigations.**
+Designed for Enterprise Intelligence, SOC Teams, Government, Defense, and Legal researchers, Summit transforms opaque, ad-hoc research into a mathematically provable, automated science. By replacing manual analytical toil with an immutable chain-of-custody, Summit empowers investigators to uncover truth rapidly with audit-grade AI orchestration.
+
+### 🎯 Key Product Vision & Strategy
+* **Provable Intelligence:** Differentiates through deterministic, verifiable chain-of-custody. Every alert and risk score is explainable down to the captured raw artifacts.
+* **Code-Enforced Governance:** Strict policies enforced at the tool adapter level, turning unstructured scraping into reproducible, compliant casework.
+* **Deterministic Replay:** The ability to rerun an investigation byte-for-byte, proving exactly how a conclusion was reached.
+
+For detailed product strategy, see [Product Vision](docs/product/vision.md) and [Product Roadmap](docs/product/roadmap.md).
+
 ## ✨ Features
 
 - **🤖 Agentic AI**: Multi-agent orchestration for autonomous research

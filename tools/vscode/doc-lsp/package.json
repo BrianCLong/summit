@@ -2,7 +2,7 @@
   "name": "intelgraph-docs-lsp",
   "version": "4.2.3",
   "engines": {
-    vscode: "1.75.0"
+    "vscode": "1.75.0"
   },
   "main": "extension.js",
   "activationEvents": [
