@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { reportError, ErrorSeverity, ErrorCategory } from '@/telemetry/metrics';
+import { reportError, ErrorSeverity, ErrorCategory, generateErrorFingerprint } from '@/telemetry/metrics';
+import { trackFatalErrorBoundaryTriggered, trackRecoverableErrorShown } from '@/telemetry/events';
 import { ErrorFallback } from './ErrorFallback';
 
 interface Props {
@@ -66,6 +67,18 @@ export class ErrorBoundary extends Component<Props, State> {
     };
 
     reportError(error, errorInfo, this.props.severity || 'high', context);
+
+    // Emit adoption telemetry for the error boundary state
+    const { enableRetry = false, maxRetries = 3, boundaryName = 'unnamed' } = this.props;
+    const fingerprint = generateErrorFingerprint(error);
+    const route = window.location.pathname;
+    const isFatal = !enableRetry || this.state.retryCount >= maxRetries;
+
+    if (isFatal) {
+      trackFatalErrorBoundaryTriggered(boundaryName, error.name, route, fingerprint);
+    } else {
+      trackRecoverableErrorShown(boundaryName, error.name, route);
+    }
 
     // Call optional onError prop
     if (this.props.onError) {

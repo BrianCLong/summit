@@ -9,9 +9,12 @@ import reportWebVitals from './reportWebVitals';
 import { TenantProvider } from './contexts/TenantContext'
 import { BrandPackProvider } from './contexts/BrandPackContext'
 import { initializeInstrumentation } from './instrumentation';
+import { trackAppOpened, trackAppBootFailed } from './telemetry/events';
 
 // Initialize OpenTelemetry
 initializeInstrumentation();
+
+const _bootStart = performance.now();
 
 // Start MSW for development
 async function enableMocking() {
@@ -27,18 +30,30 @@ async function enableMocking() {
 }
 
 enableMocking().then(() => {
-  ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-      <Provider store={store}>
-        <TenantProvider>
-          <BrandPackProvider>
-            <App />
-          </BrandPackProvider>
-        </TenantProvider>
-      </Provider>
-    </React.StrictMode>
-  )
+  try {
+    ReactDOM.createRoot(document.getElementById('root')!).render(
+      <React.StrictMode>
+        <Provider store={store}>
+          <TenantProvider>
+            <BrandPackProvider>
+              <App />
+            </BrandPackProvider>
+          </TenantProvider>
+        </Provider>
+      </React.StrictMode>
+    )
 
-  // Initialize Web Vitals reporting
-  reportWebVitals();
+    trackAppOpened(performance.now() - _bootStart);
+
+    // Initialize Web Vitals reporting
+    reportWebVitals();
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error(String(err));
+    trackAppBootFailed(e.name, e.message);
+    throw err;
+  }
+}).catch((err) => {
+  const e = err instanceof Error ? err : new Error(String(err));
+  trackAppBootFailed(e.name, e.message);
+  throw err;
 })

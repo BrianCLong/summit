@@ -201,7 +201,7 @@ export const getTelemetryContext = () => ({
 });
 
 
-// Tri-pane Telemetry
+// Tri-pane Telemetry — delegate to canonical events module
 export const trackTimeWindowChange = async (
     startMs: number,
     endMs: number,
@@ -209,8 +209,8 @@ export const trackTimeWindowChange = async (
     tzMode: string,
     source: string
 ) => {
-    // Implementation for sending triPane.timeWindow.change
-    // console.log('triPane.timeWindow.change', { startMs, endMs, granularity, tzMode, source });
+    const { trackTimeWindowChange: _emit } = await import('./events');
+    await _emit(startMs, endMs, granularity, tzMode, source);
 };
 
 export const trackSyncDivergence = async (
@@ -219,14 +219,14 @@ export const trackSyncDivergence = async (
     pane: string,
     granularity: string
 ) => {
-    // Implementation for sending triPane.sync.divergence_detected
-    // console.log('triPane.sync.divergence_detected', { deltaStartMs, deltaEndMs, pane, granularity });
+    const { trackSyncDivergence: _emit } = await import('./events');
+    await _emit(deltaStartMs, deltaEndMs, pane, granularity);
 };
 
 export const trackQueryLatency = async (
     pane: string,
     durationMs: number
 ) => {
-    // Implementation for sending triPane.query.latency_ms
-    // console.log('triPane.query.latency_ms', { pane, durationMs });
+    const { trackQueryLatency: _emit } = await import('./events');
+    await _emit(pane, durationMs);
 };
