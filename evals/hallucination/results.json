@@ -1,0 +1,26 @@
+{
+  "aggregate_metrics": {
+    "total_responses": 2,
+    "hallucinated_responses": 0,
+    "average_hallucination_rate": 0.0,
+    "overall_hallucination_percentage": 0.0
+  },
+  "per_response_results": [
+    {
+      "task_id": "task_0",
+      "query": "What can you infer about entity_relationship_inference from document 0?",
+      "hallucination_rate": 0.0,
+      "is_hallucinated": false,
+      "unsupported_claims": [],
+      "fabricated_entities": []
+    },
+    {
+      "task_id": "task_1",
+      "query": "What can you infer about multi_hop_retrieval from document 1?",
+      "hallucination_rate": 0.0,
+      "is_hallucinated": false,
+      "unsupported_claims": [],
+      "fabricated_entities": []
+    }
+  ]
+}
