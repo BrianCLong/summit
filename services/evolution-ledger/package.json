@@ -1,0 +1,12 @@
+{
+  "name": "evolution-ledger",
+  "version": "1.0.0",
+  "description": "Evolution Ledger Service",
+  "main": "decision-api.mjs",
+  "scripts": {
+    "test": "echo \"test placeholder\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
