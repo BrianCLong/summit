@@ -8,15 +8,19 @@ import { TraceEvent } from '../runners/interactive_runner';
 export function scoreInformationGain(trace: TraceEvent[]): number {
   if (!trace || trace.length === 0) return 0;
 
-  // Example heuristic: unique observation states visited
   const uniqueStates = new Set<string>();
+  let totalReward = 0;
 
   for (const event of trace) {
-    if (event.observation) {
-      // JSON.stringify provides a deterministic, simple state hash for basic environments
+    if (event.observation !== undefined) {
       uniqueStates.add(JSON.stringify(event.observation));
+    }
+    if (event.reward) {
+      totalReward += event.reward;
     }
   }
 
-  return uniqueStates.size;
+  const explorationScore = uniqueStates.size / trace.length;
+  const rewardScore = totalReward / trace.length;
+  return explorationScore * 0.6 + rewardScore * 0.4;
 }

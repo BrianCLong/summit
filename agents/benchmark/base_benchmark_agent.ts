@@ -1,6 +1,10 @@
 import { RunConfig, BenchmarkAgent } from '../../benchmarks/interactive/runners/interactive_runner';
 import { Observation, Action, StepResult, BudgetState } from '../../benchmarks/interactive/environments/base/base_environment';
 
+export type AgentMemory = Record<string, unknown>;
+export type RunContext = RunConfig;
+export { BenchmarkAgent };
+
 export abstract class BaseBenchmarkAgent implements BenchmarkAgent {
   protected context!: RunConfig;
   protected stepHistory: StepResult[] = [];

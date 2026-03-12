@@ -7,18 +7,12 @@ import { TraceEvent } from '../runners/interactive_runner';
 export function scoreBudgetEfficiency(trace: TraceEvent[], maxBudget: number): number {
   if (!trace || trace.length === 0 || maxBudget <= 0) return 0;
 
-  let totalReward = 0;
-  let stepsTaken = trace.length - 1; // Subtract 1 for initial reset step
+  const stepsTaken = trace.length;
+  const lastEvent = trace[trace.length - 1];
+  // Check for terminal state: observation.done === true
+  const done = (lastEvent?.observation as any)?.done === true;
 
-  for (const event of trace) {
-    if (event.reward) {
-      totalReward += event.reward;
-    }
-  }
-
-  if (stepsTaken === 0) return 0;
-
-  // Efficiency = total reward / fraction of budget used
-  const fractionUsed = stepsTaken / maxBudget;
-  return totalReward / fractionUsed;
+  const efficiency = (maxBudget - stepsTaken) / maxBudget;
+  const multiplier = done ? 1.5 : 1.0;
+  return efficiency * multiplier;
 }
