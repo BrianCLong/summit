@@ -195,7 +195,7 @@
     winston: "3.10.0"
 =======
 <<<<<<< HEAD
-    "@apollo/server": "4.16.0",
+    "@apollo/server": "4.11.3",
     "apollo-server-express": "3.12.0",
     "argon2": "0.31.0",
     "cors": "2.8.5",

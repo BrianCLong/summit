@@ -12,13 +12,13 @@
     "lint": "eslint src tests --ext .ts"
   },
   "dependencies": {
-    ajv: "8.17.1",
-    ajv-formats: "3.0.1",
-    uuid: "11.1.0"
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "uuid": "11.1.0"
   },
   "devDependencies": {
-    @types/node: "24.0.0",
-    typescript: "5.8.0",
-    vitest: "3.1.0"
+    "@types/node": "24.0.0",
+    "typescript": "5.8.0",
+    "vitest": "3.1.0"
   }
 }
