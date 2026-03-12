@@ -1,0 +1,34 @@
+name: CI Coverage
+
+on:
+  pull_request:
+
+jobs:
+  coverage:
+    name: Test & Coverage Enforcement
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run full test suite with coverage
+        run: |
+          pnpm test -- --coverage --coverageReporters="json-summary" --coverageReporters="lcov"
+
+      - name: Post coverage comment and enforce thresholds
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const script = require('./.github/scripts/post-coverage-comment.js');
+            await script({ github, context, core });
