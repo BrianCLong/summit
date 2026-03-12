@@ -50,7 +50,7 @@ jobs:
           fetch-depth: 0 # Full history for accurate diffs
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6

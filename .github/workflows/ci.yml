@@ -26,9 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -43,7 +43,7 @@ jobs:
           cache: 'pnpm'
           node-version-file: .nvmrc
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm run lint
 
@@ -60,7 +60,7 @@ jobs:
           node-version-file: .nvmrc
           cache: 'pnpm'
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Typecheck
@@ -74,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -108,7 +108,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -158,7 +158,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

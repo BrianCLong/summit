@@ -132,7 +132,7 @@ jobs:
           echo "Commit SHA: ${SHA}"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+        uses: pnpm/action-setup@v3 # v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
@@ -196,7 +196,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+        uses: pnpm/action-setup@v3 # v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4

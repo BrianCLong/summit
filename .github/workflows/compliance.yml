@@ -36,9 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts

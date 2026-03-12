@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4
-      - uses: pnpm/action-setup@v4 # v4
+      - uses: pnpm/action-setup@v3 # v4
+      - uses: pnpm/action-setup@v3 # v4
       - name: Install
         run: pnpm install --no-frozen-lockfile
       - name: Strict Lint
@@ -37,7 +37,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
           cache-dependency-path: '**/pnpm-lock.yaml'
-      - uses: pnpm/action-setup@v4 # v4
+      - uses: pnpm/action-setup@v3 # v4
       - name: Install
         run: pnpm install --no-frozen-lockfile
       - name: Run Flaky Tests

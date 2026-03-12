@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 2  # Need HEAD~1 for git diff
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
