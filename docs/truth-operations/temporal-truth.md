@@ -21,7 +21,6 @@ Summit introduces **Temporal Truth Protection**: the discipline of balancing acc
 **Adversary Strategy**: Withhold critical information until action window closes
 
 **Example**:
-
 - 10:00: Security breach occurs
 - 10:15: Attacker knows breach details
 - 10:45: Containment window closes (lateral movement complete)
@@ -33,7 +32,6 @@ Summit introduces **Temporal Truth Protection**: the discipline of balancing acc
 **Adversary Strategy**: Force decisions with incomplete information
 
 **Example**:
-
 - 09:00: Preliminary data suggests vulnerability
 - 09:05: Adversary leaks incomplete analysis publicly
 - 09:10: Pressure mounts to patch immediately
@@ -46,7 +44,6 @@ Summit introduces **Temporal Truth Protection**: the discipline of balancing acc
 **Adversary Strategy**: Time attacks around known decision points
 
 **Example**:
-
 - 23:45: Quarterly financial close deadline
 - 23:50: False data injected into reporting pipeline
 - 23:58: Teams rushing to meet deadline, skip validation
@@ -58,7 +55,6 @@ Summit introduces **Temporal Truth Protection**: the discipline of balancing acc
 **Adversary Strategy**: Selectively delay specific data types to skew analysis
 
 **Example**:
-
 - Incident investigation: 90% of logs arrive promptly, 10% delayed
 - The delayed 10% contains exculpatory evidence
 - Premature conclusion reached without complete picture
@@ -72,7 +68,7 @@ Summit introduces **Temporal Truth Protection**: the discipline of balancing acc
 
 Every decision has a **temporal relevance window**:
 
-```plaintext
+```
   Perfect Information Window
          ↓
   ┌──────────────────────────────────┐
@@ -99,23 +95,22 @@ Every decision has a **temporal relevance window**:
          │ Too late  │
          │ No value  │
          └───────────┘
-```plaintext
+```
 
 ### Temporal Relevance Curve (TRC)
 
 For each decision class, Summit models:
 
-```plaintext
+```
 Value = V_max × e^(-λt)
 
 Where:
   V_max = Maximum decision value (perfect information, instant action)
   λ = Decay rate (decision-class specific)
   t = Time elapsed since event
-```plaintext
+```
 
 **Example Decay Rates**:
-
 - Security breach containment: λ = 0.1/min (fast decay)
 - Infrastructure capacity planning: λ = 0.001/day (slow decay)
 - Financial fraud detection: λ = 0.05/min (medium-fast decay)
@@ -138,8 +133,7 @@ Where:
 **Principle**: Timely partial information beats perfect delayed information
 
 **Implementation**:
-
-```plaintext
+```
 IF (time_remaining < critical_threshold)
    AND (confidence > minimum_acceptable)
    AND (decision_value_decay > value_threshold)
@@ -147,11 +141,10 @@ THEN
    RELEASE partial analysis with explicit uncertainty bounds
    CONTINUE full analysis in parallel
    UPDATE decision as more information arrives
-```plaintext
+```
 
 **Example**:
-
-```plaintext
+```
 10:05: Possible security breach detected (60% confidence)
 10:06: EWPT: "Potential breach in progress. Recommend containment mode.
                Confidence: 60%. Full analysis ETA: 15 minutes."
@@ -159,27 +152,25 @@ THEN
 10:15: Full analysis confirms breach (95% confidence)
 
 Result: 10-minute head start on containment vs. waiting for 95% certainty
-```plaintext
+```
 
 ### Protocol 2: Timeliness-Accuracy Tradeoff (TAT)
 
 **Principle**: Explicitly quantify the cost of waiting for more information
 
 **Implementation**:
-
-```plaintext
+```
 decision_threshold(t) = base_confidence - (decay_rate × t)
 
 At t=0: Require 95% confidence
 At t=10min: Require 85% confidence
 At t=20min: Require 75% confidence
 At t=30min: Require 65% confidence (minimum)
-```plaintext
+```
 
 **Rationale**: As decision value decays, acceptable uncertainty increases
 
 **Example**:
-
 ```json
 {
   "decision": "Initiate DDoS mitigation",
@@ -190,49 +181,45 @@ At t=30min: Require 65% confidence (minimum)
   "value_lost_by_waiting": "15% of maximum decision value",
   "value_at_risk_if_wrong": "8% (false positive cost)"
 }
-```plaintext
+```
 
 ### Protocol 3: Degraded-But-Timely Signals
 
 **Principle**: Noisy fast signals beat clean slow signals under time pressure
 
 **Implementation**:
-
 - Maintain multiple information channels with different latency-accuracy tradeoffs
 - Fast/noisy channel: 2-min latency, 70% accuracy
 - Medium channel: 10-min latency, 90% accuracy
 - Slow/precise channel: 30-min latency, 98% accuracy
 
 **Decision Rule**:
-
-```plaintext
+```
 IF (time_remaining < 15min)
    THEN use fast/noisy channel
 ELIF (time_remaining < 45min)
    THEN use medium channel
 ELSE
    THEN use slow/precise channel
-```plaintext
+```
 
 ### Protocol 4: Information Arrival Deadline (IAD)
 
 **Principle**: Information arriving after deadline has zero value
 
 **Implementation**:
-
-```plaintext
+```
 FOR each critical decision:
   DEFINE information_deadline
   AT deadline: MAKE decision with available information
   AFTER deadline: IGNORE late-arriving information for this decision
   LOG late information for forensic analysis
-```plaintext
+```
 
 **Rationale**: Prevents decision paralysis and eliminates value of delay attacks
 
 **Example**:
-
-```plaintext
+```
 Decision: "Failover to backup datacenter"
 Information Deadline: 10:30 (15 minutes from now)
 
@@ -240,7 +227,7 @@ Information Deadline: 10:30 (15 minutes from now)
 10:30: DECISION FORCED: Initiate failover based on 75% confidence
 10:35: Complete diagnostics arrive (95% confidence, confirms decision was correct)
 10:35: Late information logged but does not change decision already in progress
-```plaintext
+```
 
 ---
 
@@ -250,9 +237,9 @@ Information Deadline: 10:30 (15 minutes from now)
 
 **Measures**: Elapsed time from event to decision
 
-```plaintext
+```
 TTD = t_decision - t_event
-```plaintext
+```
 
 **Target**: TTD < optimal_window for decision class
 
@@ -260,12 +247,11 @@ TTD = t_decision - t_event
 
 **Measures**: Percentage of relevant information available when decision was made
 
-```plaintext
+```
 ICD = available_information / total_relevant_information
-```plaintext
+```
 
 **Interpretation**:
-
 - ICD = 1.0: Perfect information (rare under time pressure)
 - ICD = 0.7-0.9: Typical for urgent decisions
 - ICD < 0.5: High-risk decision with major gaps
@@ -274,14 +260,13 @@ ICD = available_information / total_relevant_information
 
 **Measures**: Effectiveness of decision given timing
 
-```plaintext
+```
 TDV = decision_quality × e^(-λt)
-```plaintext
+```
 
 **Interpretation**: Captures both correctness and timeliness
 
 **Example**:
-
 - Correct decision, made instantly: TDV ≈ 1.0
 - Correct decision, made 20 min late: TDV ≈ 0.3
 - Incorrect decision, made instantly: TDV ≈ -0.5
@@ -291,29 +276,28 @@ TDV = decision_quality × e^(-λt)
 
 **Measures**: Rate at which relevant information is arriving
 
-```plaintext
+```
 IV = Δ(information_completeness) / Δt
-```plaintext
+```
 
 **Usage**: Predict when sufficient information will be available
 
 **Example**:
-
-```plaintext
+```
 Current ICD: 0.45
 Current IV: 0.05/min
 Predicted time to ICD=0.80: (0.80-0.45)/0.05 = 7 minutes
 Decision deadline: 10 minutes
 Verdict: On track, continue waiting
-```plaintext
+```
 
 ### 5. Delay Attack Detection (DAD)
 
 **Measures**: Anomalous information latency
 
-```plaintext
+```
 DAD_score = (observed_latency - expected_latency) / σ_latency
-```plaintext
+```
 
 **Threshold**: DAD_score > 3.0 indicates potential delay attack
 
@@ -326,62 +310,57 @@ DAD_score = (observed_latency - expected_latency) / σ_latency
 **Pattern**: Multiple information sources experience simultaneous latency increase
 
 **Detection**:
-
-```plaintext
+```
 IF (count(sources with latency_spike) > threshold)
    AND (latency_spikes are temporally correlated)
    AND (delayed sources contain critical information)
 THEN
    ALERT: "Potential coordinated information delay attack"
-```plaintext
+```
 
 ### Signature 2: Selective Withholding
 
 **Pattern**: Specific data types systematically delayed
 
 **Detection**:
-
-```plaintext
+```
 IF (latency[data_type_X] >> latency[other_data_types])
    AND (data_type_X is decision-critical)
 THEN
    ALERT: "Potential selective information withholding"
-```plaintext
+```
 
 ### Signature 3: Deadline-Triggered Release
 
 **Pattern**: Information arrives immediately after decision deadline
 
 **Detection**:
-
-```plaintext
+```
 IF (information_arrival_time - deadline) < ε
    AND (information would have changed decision)
 THEN
    ALERT: "Suspicious timing: critical information arrived post-deadline"
    ACTION: Forensic investigation of information source
-```plaintext
+```
 
 ### Signature 4: Velocity Manipulation
 
 **Pattern**: Information flow rate changes to influence decision timing
 
 **Detection**:
-
-```plaintext
+```
 IF (information_velocity << historical_average)
    AND (decision_deadline approaching)
 THEN
    ALERT: "Information flow rate manipulation suspected"
    ACTION: Activate degraded-but-timely signal protocols
-```plaintext
+```
 
 ---
 
 ## Case Study: Temporal Attack on Incident Response
 
 ### Scenario
-
 Financial trading platform experiencing anomalous activity
 
 ### Timeline Without Temporal Protection
@@ -403,33 +382,28 @@ Financial trading platform experiencing anomalous activity
 **10:00**: Anomaly detected
 **10:05**: Investigation begins
 **10:05**: Temporal framework activated
-
-- Decision deadline set: 10:20 (15-minute window)
-- Information arrival tracking enabled
-- Degraded-signal protocol on standby
+  - Decision deadline set: 10:20 (15-minute window)
+  - Information arrival tracking enabled
+  - Degraded-signal protocol on standby
 
 **10:10**: Information velocity calculated
-
-- Current ICD: 0.40
-- IV: 0.04/min
-- Predicted ICD at deadline (10:20): 0.64
+  - Current ICD: 0.40
+  - IV: 0.04/min
+  - Predicted ICD at deadline (10:20): 0.64
 
 **10:15**:
-
-- ICD: 0.60, confidence: 75%
-- Required confidence at t=15min: 80%
-- Delay attack detection: DAD_score = 2.8 (suspicious latency)
+  - ICD: 0.60, confidence: 75%
+  - Required confidence at t=15min: 80%
+  - Delay attack detection: DAD_score = 2.8 (suspicious latency)
 
 **10:18**:
-
-- ALERT: "Information velocity below expected, possible delay attack"
-- ICD: 0.65, confidence: 78%
-- Decision deadline approaching (2 minutes)
+  - ALERT: "Information velocity below expected, possible delay attack"
+  - ICD: 0.65, confidence: 78%
+  - Decision deadline approaching (2 minutes)
 
 **10:20**: Decision deadline reached
-
-- **FORCED DECISION**: Halt trading based on 78% confidence (below ideal but above minimum)
-- Rationale: Temporal value decay + delay attack suspicion
+  - **FORCED DECISION**: Halt trading based on 78% confidence (below ideal but above minimum)
+  - Rationale: Temporal value decay + delay attack suspicion
 
 **10:25**: Additional logs arrive confirming attack (confidence → 95%)
 **10:30**: Investigation of log delay reveals deliberate withholding
@@ -444,7 +418,7 @@ Financial trading platform experiencing anomalous activity
 
 ### Decision Countdown Display
 
-```plaintext
+```
 ┌─────────────────────────────────────────────┐
 │  DECISION COUNTDOWN: Initiate Failover      │
 ├─────────────────────────────────────────────┤
@@ -461,13 +435,12 @@ Financial trading platform experiencing anomalous activity
 │                                             │
 │  [DECIDE NOW] [WAIT FOR MORE DATA]          │
 └─────────────────────────────────────────────┘
-```plaintext
+```
 
 ### Temporal Value Decay Graph
 
 Visual representation:
-
-```plaintext
+```
 Decision Value
    100% ┤●
         │ ●
@@ -484,11 +457,11 @@ Decision Value
         0   5   10  15  20  25  30  35 min
                         ↑
                   You are here (18 min)
-```plaintext
+```
 
 ### Information Arrival Tracking
 
-```plaintext
+```
 Expected Information Sources: 8
 Arrived: 5 (62%)
 Overdue: 2 (source-A: +4min, source-C: +6min) ⚠
@@ -504,29 +477,25 @@ Not yet due: 1
 │ source-G ██████████ COMPLETE               │
 │ source-H ▒▒▒▒▒▒▒▒▒▒ Expected in 2min       │
 └─────────────────────────────────────────────┘
-```plaintext
+```
 
 ---
 
 ## Integration with Other Pillars
 
 ### With Integrity Scoring
-
 - High integrity sources get extended wait time
 - Low integrity sources trigger faster decisions (don't wait for untrustworthy data)
 
 ### With Narrative Collision
-
 - Temporal pressure can override Mandatory Alternative Hypothesis requirements
 - But only with explicit operator acknowledgment
 
 ### With Authority Continuity
-
 - Delay attacks often involve compromised authority sources
 - Authority validation may be relaxed under extreme time pressure
 
 ### With Blast Radius Containment
-
 - Decisions made under time pressure get elevated monitoring
 - Faster rollback protocols for time-pressured decisions
 
@@ -537,7 +506,6 @@ Not yet due: 1
 ### Predictive Decision Deadlines
 
 Machine learning models predict:
-
 - When decision window will close based on event type
 - Likely information arrival patterns
 - Optimal decision timing given historical patterns
@@ -545,7 +513,6 @@ Machine learning models predict:
 ### Adaptive Confidence Thresholds
 
 System learns:
-
 - Cost of false positives vs. false negatives per decision class
 - Optimal confidence threshold decay rates
 - When to override temporal pressure for critical decisions
@@ -553,7 +520,6 @@ System learns:
 ### Information Triage
 
 Under extreme time pressure:
-
 - Automatically prioritize most decision-relevant information
 - Deprioritize nice-to-have context
 - Focus investigative resources on critical gaps
@@ -581,7 +547,6 @@ Adversaries who control **when** you receive information control **what** you be
 Temporal Truth Protection transforms Summit from a passive recipient of information into an **active manager of decision timing**.
 
 This is essential for any system operating under:
-
 - Adversarial time pressure
 - Hard decision deadlines
 - Rapidly evolving threats

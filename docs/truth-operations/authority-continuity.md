@@ -26,7 +26,7 @@ In high-stakes environments, **source credibility determines action**:
 - Order from validated executive → executed immediately
 - Order from unverified caller → rejected
 
-### Compromising authority = Controlling action
+**Compromising authority = Controlling action**
 
 ### Authority Attack Vectors
 
@@ -44,11 +44,9 @@ In high-stakes environments, **source credibility determines action**:
 Summit separates authority into **three orthogonal dimensions**:
 
 ### 1. Identity (Who)
-
 **Question**: Is this source who it claims to be?
 
 **Verification**:
-
 - Cryptographic signatures
 - Multi-factor authentication
 - Certificate chains
@@ -57,11 +55,9 @@ Summit separates authority into **three orthogonal dimensions**:
 **Failure Mode**: Impersonation, credential theft
 
 ### 2. Authority (Should We Trust)
-
 **Question**: Does this source have a track record of accuracy?
 
 **Verification**:
-
 - Historical accuracy metrics
 - Domain expertise evidence
 - Independent reputation signals
@@ -70,11 +66,9 @@ Summit separates authority into **three orthogonal dimensions**:
 **Failure Mode**: Authority inflation, reputation laundering
 
 ### 3. Continuity (Still Themselves)
-
 **Question**: Is this source behaving consistently with its history?
 
 **Verification**:
-
 - Behavioral pattern matching
 - Communication style analysis
 - Claim pattern analysis
@@ -133,7 +127,7 @@ Summit maintains a **comprehensive historical record** for each information sour
     }
   ]
 }
-```plaintext
+```
 
 ### Continuity Baseline Components
 
@@ -155,7 +149,7 @@ Summit maintains a **comprehensive historical record** for each information sour
 
 **Measures**: Overall departure from historical baseline
 
-```plaintext
+```
 BDS = sqrt(Σ(w_i × (observed_i - baseline_i)² / σ_i²))
 
 Where:
@@ -163,7 +157,7 @@ Where:
   observed_i = current value
   baseline_i = historical mean
   σ_i = historical standard deviation
-```plaintext
+```
 
 **Threshold**: BDS > 3.0 indicates significant behavioral change
 
@@ -171,12 +165,11 @@ Where:
 
 **Measures**: Unusual messaging frequency
 
-```plaintext
+```
 ARA = (current_rate - expected_rate) / σ_rate
-```plaintext
+```
 
 **Warning Signs**:
-
 - ARA > +3.0: Suspiciously high activity (possible flooding)
 - ARA < -3.0: Suspiciously low activity (possible compromise/silencing)
 
@@ -184,12 +177,11 @@ ARA = (current_rate - expected_rate) / σ_rate
 
 **Measures**: Change in typical certainty levels
 
-```plaintext
+```
 CS = |current_confidence_mean - baseline_confidence_mean|
-```plaintext
+```
 
 **Warning Signs**:
-
 - Sudden increase in confidence (possibly overconfident false claims)
 - Sudden decrease in confidence (possibly degraded capability)
 
@@ -197,24 +189,22 @@ CS = |current_confidence_mean - baseline_confidence_mean|
 
 **Measures**: Escalation in claimed urgency
 
-```plaintext
+```
 SIS = (critical_alerts / total_alerts)_current / (critical_alerts / total_alerts)_baseline
-```plaintext
+```
 
 **Warning Signs**:
-
 - SIS > 2.0: Possible manipulation to trigger overreaction
 
 #### 5. Linguistic Drift (LD)
 
 **Measures**: Changes in communication style (NLP-based)
 
-```plaintext
+```
 LD = 1 - cosine_similarity(current_embedding, baseline_embedding)
-```plaintext
+```
 
 **Warning Signs**:
-
 - LD > 0.3: Possible different author, compromised account
 
 ---
@@ -226,8 +216,7 @@ LD = 1 - cosine_similarity(current_embedding, baseline_embedding)
 **Principle**: Identity must be revalidated continuously, not just at login
 
 **Implementation**:
-
-```plaintext
+```
 FOR each high-impact claim:
   VERIFY cryptographic signature
   CHECK certificate validity
@@ -238,15 +227,14 @@ IF verification fails:
   REJECT claim
   ALERT security operations
   SUSPEND source pending investigation
-```plaintext
+```
 
 ### Protocol 2: Authority Score Maintenance
 
 **Principle**: Authority is earned continuously through accuracy
 
 **Implementation**:
-
-```plaintext
+```
 authority_score(t) = authority_score(t-1) × decay_factor
                      + accuracy_bonus
                      - penalty_for_errors
@@ -255,7 +243,7 @@ Where:
   decay_factor = 0.995/day (authority slowly degrades without validation)
   accuracy_bonus = weighted by claim difficulty
   penalty_for_errors = proportional to severity of mistake
-```plaintext
+```
 
 **Result**: Sources must continuously demonstrate accuracy to maintain authority
 
@@ -264,8 +252,7 @@ Where:
 **Principle**: Detect compromised or coerced sources via behavioral changes
 
 **Implementation**:
-
-```plaintext
+```
 FOR each source:
   COMPUTE behavioral_deviation_score
 
@@ -278,15 +265,14 @@ FOR each source:
     QUARANTINE source
     MANDATORY human review
     FORENSIC investigation
-```plaintext
+```
 
 ### Protocol 4: Sudden Elevation Blocking
 
 **Principle**: New sources cannot make high-impact claims without proven track record
 
 **Implementation**:
-
-```plaintext
+```
 IF (source_age < minimum_age)
    AND (claim_impact > threshold)
    AND (NOT emergency_override)
@@ -294,10 +280,9 @@ THEN
    REJECT claim
    LOG as potential authority inflation attack
    REQUIRE established source confirmation
-```plaintext
+```
 
 **Parameters**:
-
 - minimum_age: 30 days of validated activity
 - Impact threshold: Claims affecting critical systems
 - Emergency override: Requires dual authorization
@@ -307,8 +292,7 @@ THEN
 **Principle**: When authority checks are bypassed, create immutable audit trail
 
 **Implementation**:
-
-```plaintext
+```
 IF (authority_override_requested)
 THEN
    REQUIRE:
@@ -325,7 +309,7 @@ THEN
    ALERT:
      - Security operations (immediate)
      - Audit team (for review)
-```plaintext
+```
 
 ---
 
@@ -336,11 +320,9 @@ THEN
 **Attack**: Adversary steals credentials of trusted monitoring system
 
 **Traditional Defense**: Username/password, maybe 2FA
-
 - Once authenticated, full trust granted
 
 **Summit Defense**:
-
 1. **Identity**: Validates cryptographic signature (stolen credentials lack private key)
 2. **Authority**: Checks recent accuracy (compromised account may make unusual claims)
 3. **Continuity**: Detects behavioral changes
@@ -349,35 +331,31 @@ THEN
    - Abnormal timing
 
 **Detection Signal**:
-
-```plaintext
+```
 Identity: PASS (credentials valid)
 Authority: WARNING (recent accuracy declining)
 Continuity: FAIL (BDS = 4.2, LD = 0.45)
 
 ACTION: Quarantine source, require out-of-band verification
-```plaintext
+```
 
 ### Scenario 2: Authority Laundering
 
 **Attack**: Low-credibility source gets claims validated by compromised high-credibility intermediary
 
 **Example**:
-
 - Attacker creates fake analysis
 - Compromises respected analyst's account
 - Analyst "confirms" fake analysis
 - System trusts claim based on analyst authority
 
 **Summit Defense**:
-
 1. **Track claim origination**: Separate originator from validator
 2. **Require primary evidence**: Not just "analyst confirms" but "analyst verified evidence X, Y, Z"
 3. **Detect unusual validation patterns**: If analyst suddenly validates claims outside domain expertise
 
 **Detection Signal**:
-
-```plaintext
+```
 Claim Origin: unknown-source-123 (no authority)
 Validator: respected-analyst (high authority)
 Validation Pattern: ANOMALY
@@ -386,21 +364,19 @@ Validation Pattern: ANOMALY
   - Validation happened unusually fast
 
 ACTION: Reject laundering attempt, investigate analyst account
-```plaintext
+```
 
 ### Scenario 3: Sudden Source Emergence
 
 **Attack**: Adversary creates new "expert" source and attempts high-impact claim
 
 **Example**:
-
 - Create identity: "senior-security-researcher-new"
 - Issue critical alert: "Zero-day discovered, patch immediately"
 - Hope urgency overrides authority verification
 
 **Summit Defense**:
-
-```plaintext
+```
 Source Age: 0 days
 Authority Score: 0.0 (no track record)
 Claim Impact: CRITICAL
@@ -413,21 +389,19 @@ REQUIRE:
   - Manual review by security team
 
 LOG: Potential authority inflation attack
-```plaintext
+```
 
 ### Scenario 4: Gradual Authority Degradation
 
 **Attack**: Slowly compromise source reputation to mask later false claims
 
 **Example**:
-
 - Week 1-4: Compromised source makes accurate claims (building trust)
 - Week 5: Introduce subtle inaccuracies
 - Week 6: Make false high-impact claim (trading on built authority)
 
 **Summit Defense**:
-
-```plaintext
+```
 Authority Score Trajectory:
   Week 1: 0.85
   Week 2: 0.87
@@ -438,7 +412,7 @@ Authority Score Trajectory:
 
 ALERT: Unusual authority trajectory pattern
 ACTION: Increase verification requirements
-```plaintext
+```
 
 ---
 
@@ -448,22 +422,20 @@ ACTION: Increase verification requirements
 
 Under extreme time pressure, authority verification may be relaxed:
 
-```plaintext
+```
 required_authority(urgency) = base_authority - (urgency_factor × time_pressure)
 
 But never below absolute_minimum_authority
-```plaintext
+```
 
 **Example**:
-
-```plaintext
+```
 Normal: Require authority_score ≥ 0.80
 High urgency: Require authority_score ≥ 0.65
 Critical urgency: Require authority_score ≥ 0.50 (absolute minimum)
-```plaintext
+```
 
 **Guardrails**:
-
 1. Urgency must be independently validated (not just claimed)
 2. Reduced authority decisions get elevated monitoring
 3. Faster rollback procedures activated
@@ -475,7 +447,7 @@ Critical urgency: Require authority_score ≥ 0.50 (absolute minimum)
 
 **Solution**: Temporary authority grant with constraints
 
-```plaintext
+```
 IF (claim appears critical)
    AND (source is new)
    AND (cannot wait for authority building)
@@ -486,7 +458,7 @@ THEN
      - Elevated monitoring
      - Automatic expiry (24 hours)
      - Post-event validation
-```plaintext
+```
 
 ---
 
@@ -495,7 +467,6 @@ THEN
 ### Cross-Source Authority Validation
 
 Sources gain authority through:
-
 1. **Direct validation**: Their claims are verified correct
 2. **Peer validation**: Other trusted sources confirm their claims
 3. **Predictive accuracy**: They correctly predict events before others
@@ -503,16 +474,15 @@ Sources gain authority through:
 
 ### Authority Graph
 
-```plaintext
+```
 [Source A] ──validates──> [Source B]
     │                          │
     └──────contradicts─────────┘
                 │
            [Source C]
-```plaintext
+```
 
 **Authority Flow**:
-
 - If A (high authority) validates B → B's authority increases
 - If A contradicts B → B's authority decreases
 - If C contradicts both A and B, and is proven correct → C's authority increases dramatically
@@ -522,7 +492,6 @@ Sources gain authority through:
 **Attack**: Adversary creates network of fake sources that validate each other
 
 **Defense**:
-
 - Require external ground truth validation, not just peer validation
 - Detect circular validation patterns
 - Penalize closed validation loops
@@ -534,7 +503,7 @@ Sources gain authority through:
 
 ### Authority Dashboard
 
-```plaintext
+```
 ┌───────────────────────────────────────────────────────┐
 │ SOURCE: monitoring-system-alpha                       │
 ├───────────────────────────────────────────────────────┤
@@ -557,11 +526,11 @@ Sources gain authority through:
 │                                                       │
 │ [VIEW HISTORY] [ADJUST THRESHOLDS] [OVERRIDE]        │
 └───────────────────────────────────────────────────────┘
-```plaintext
+```
 
 ### Authority Anomaly Alerts
 
-```plaintext
+```
 🔴 CRITICAL: Source "exec-comms-bot" continuity failure
    └─ Linguistic drift: 0.62 (SEVERE)
    └─ Claim pattern change: Unprecedented claim type
@@ -576,29 +545,25 @@ Sources gain authority through:
    └─ Source age: 3 days
    └─ Claim impact: MEDIUM
    └─ ACTION: Requires confirmation from established source
-```plaintext
+```
 
 ---
 
 ## Integration with Other Pillars
 
 ### With Integrity Scoring
-
 - Authority Continuity feeds the Historical Adversarial Behavior (HAB) component
 - Behavioral deviation affects Source Volatility (SV) component
 
 ### With Narrative Collision
-
 - Track which authorities propose which narratives
 - Detect coordinated narrative shifts across compromised authorities
 
 ### With Temporal Truth
-
 - Time pressure may override authority requirements with explicit acknowledgment
 - Authority verification speed becomes decision factor
 
 ### With Blast Radius Containment
-
 - Compromised authority sources trigger immediate containment
 - Decisions based on questionable authority get elevated monitoring
 
@@ -609,7 +574,6 @@ Sources gain authority through:
 ### Predictive Authority Degradation
 
 Machine learning models predict:
-
 - Which sources are at risk of compromise
 - Early indicators of behavioral drift
 - Optimal intervention timing
@@ -617,7 +581,6 @@ Machine learning models predict:
 ### Authority Recovery Protocols
 
 After detected compromise:
-
 1. **Immediate**: Quarantine source
 2. **Investigation**: Forensic analysis of compromise
 3. **Remediation**: Security measures implemented
@@ -627,7 +590,6 @@ After detected compromise:
 ### Behavioral Fingerprinting
 
 Advanced techniques:
-
 - Keystroke dynamics (for human operators)
 - API call patterns (for automated systems)
 - Network traffic patterns
@@ -657,7 +619,6 @@ You must ask: "Is this **still** who they've always been?"
 Authority Continuity transforms Summit from trusting established sources to **continuously validating** them.
 
 This is critical for:
-
 - Nation-state threat environments
 - Insider threat scenarios
 - Supply chain security
