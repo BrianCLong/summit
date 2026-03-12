@@ -20,7 +20,7 @@ def test_parse_unity_package_builds_deterministic_report() -> None:
         "com.company.core": "1.0.0",
         "com.company.utils": "2.4.1",
     }
-    assert report["package"]["assembly_definitions"] == ["Analytics.asmdef"]
+    assert sorted(report["package"]["assembly_definitions"]) == sorted(["Analytics.asmdef", "Runtime.asmdef", "Runtime/Demo.asmdef"])
     assert report["dependency_dag"]["topological_order"][0] in {
         "com.company.core",
         "com.company.utils",
