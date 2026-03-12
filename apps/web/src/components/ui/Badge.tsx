@@ -1,5 +1,11 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import {
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle,
+  Info,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
@@ -55,6 +61,29 @@ function Badge({
   'data-ai-suggestion': isAiSuggestion,
   ...props
 }: BadgeProps) {
+  const getStatusIcon = () => {
+    if (icon) return icon
+    switch (variant) {
+      case 'success':
+      case 'threat-low':
+        return <CheckCircle2 className="h-3 w-3" />
+      case 'warning':
+      case 'threat-medium':
+      case 'threat-high':
+        return <AlertTriangle className="h-3 w-3" />
+      case 'error':
+      case 'threat-critical':
+      case 'destructive':
+        return <AlertCircle className="h-3 w-3" />
+      case 'info':
+        return <Info className="h-3 w-3" />
+      default:
+        return null
+    }
+  }
+
+  const finalIcon = getStatusIcon()
+
   return (
     <span
       className={cn(
@@ -64,7 +93,7 @@ function Badge({
       )}
       {...props}
     >
-      {icon && <span className="mr-1.5 flex items-center">{icon}</span>}
+      {finalIcon && <span className="mr-1 flex items-center">{finalIcon}</span>}
       {children}
     </span>
   )

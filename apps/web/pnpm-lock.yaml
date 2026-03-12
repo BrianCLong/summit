@@ -4,6 +4,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
+
 importers:
 
   .:
@@ -12,10 +14,10 @@ importers:
         specifier: 4.0.11
         version: 4.0.11(graphql-ws@6.0.6(graphql@16.12.0)(ws@8.18.3))(graphql@16.12.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(rxjs@7.8.2)
       '@emotion/react':
-        specifier: ^11.14.0
+        specifier: 11.14.0
         version: 11.14.0(@types/react@19.2.7)(react@19.2.1)
       '@emotion/styled':
-        specifier: ^11.14.1
+        specifier: 11.14.1
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.1))(@types/react@19.2.7)(react@19.2.1)
       '@headlessui/react':
         specifier: 2.2.9
@@ -27,49 +29,52 @@ importers:
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.68.0(react@19.2.1))
       '@monaco-editor/react':
-        specifier: ^4.7.0
+        specifier: 4.7.0
         version: 4.7.0(monaco-editor@0.52.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@mui/icons-material':
-        specifier: ^7.3.6
+        specifier: 7.3.6
         version: 7.3.6(@mui/material@7.3.6(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.1))(@types/react@19.2.7)(react@19.2.1))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react@19.2.7)(react@19.2.1)
       '@mui/material':
-        specifier: ^7.3.6
+        specifier: 7.3.6
         version: 7.3.6(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.1))(@types/react@19.2.7)(react@19.2.1))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@opentelemetry/api':
-        specifier: ~1.8.0
+        specifier: 1.8.0
         version: 1.8.0
       '@opentelemetry/context-zone':
-        specifier: ~1.18.1
+        specifier: 1.18.1
         version: 1.18.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/core':
-        specifier: ~1.18.1
+        specifier: 1.18.1
         version: 1.18.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/exporter-trace-otlp-http':
-        specifier: ~0.45.1
+        specifier: 0.45.1
         version: 0.45.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/instrumentation':
-        specifier: ~0.45.1
+        specifier: 0.45.1
         version: 0.45.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/instrumentation-document-load':
-        specifier: ~0.35.0
+        specifier: 0.35.0
         version: 0.35.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/instrumentation-fetch':
-        specifier: ~0.45.1
+        specifier: 0.45.1
         version: 0.45.1(@opentelemetry/api@1.8.0)
+      '@opentelemetry/instrumentation-user-interaction':
+        specifier: 0.34.0
+        version: 0.34.0(@opentelemetry/api@1.8.0)(zone.js@0.11.8)
       '@opentelemetry/instrumentation-xml-http-request':
-        specifier: ~0.45.1
+        specifier: 0.45.1
         version: 0.45.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/resources':
-        specifier: ~1.18.1
+        specifier: 1.18.1
         version: 1.18.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/sdk-trace-base':
-        specifier: ~1.18.1
+        specifier: 1.18.1
         version: 1.18.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/sdk-trace-web':
-        specifier: ~1.18.1
+        specifier: 1.18.1
         version: 1.18.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/semantic-conventions':
-        specifier: ~1.18.1
+        specifier: 1.18.1
         version: 1.18.1
       '@radix-ui/react-dialog':
         specifier: 1.1.15
@@ -78,7 +83,7 @@ importers:
         specifier: 2.1.16
         version: 2.1.16(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@radix-ui/react-scroll-area':
-        specifier: ^1.2.10
+        specifier: 1.2.10
         version: 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@radix-ui/react-select':
         specifier: 2.2.6
@@ -96,13 +101,13 @@ importers:
         specifier: 1.0.7
         version: 1.0.7(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@reduxjs/toolkit':
-        specifier: ^2.5.0
-        version: 2.11.0(react-redux@9.2.0(@types/react@19.2.7)(react@19.2.1)(redux@5.0.1))(react@19.2.1)
+        specifier: 2.5.0
+        version: 2.5.0(react-redux@9.2.0(@types/react@19.2.7)(react@19.2.1)(redux@5.0.1))(react@19.2.1)
       '@tanstack/react-query':
         specifier: 5.90.12
         version: 5.90.12(react@19.2.1)
       '@tremor/react':
-        specifier: ^3.18.7
+        specifier: 3.18.7
         version: 3.18.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@types/d3':
         specifier: 7.4.3
@@ -117,11 +122,11 @@ importers:
         specifier: 1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       crypto-hash:
-        specifier: ^3.1.0
+        specifier: 3.1.0
         version: 3.1.0
       d3:
-        specifier: ^7.8.5
-        version: 7.9.0
+        specifier: 7.8.5
+        version: 7.8.5
       d3-drag:
         specifier: 3.0.0
         version: 3.0.0
@@ -168,10 +173,10 @@ importers:
         specifier: 16.4.2
         version: 16.4.2
       mermaid:
-        specifier: ^11.12.2
+        specifier: 11.12.2
         version: 11.12.2
       monaco-editor:
-        specifier: ^0.52.2
+        specifier: 0.52.2
         version: 0.52.2
       react:
         specifier: 19.2.1
@@ -189,10 +194,10 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(leaflet@1.9.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react-monaco-editor:
-        specifier: ^0.56.2
+        specifier: 0.56.2
         version: 0.56.2(@types/react@19.2.7)(monaco-editor@0.52.2)(react@19.2.1)
       react-redux:
-        specifier: ^9.2.0
+        specifier: 9.2.0
         version: 9.2.0(@types/react@19.2.7)(react@19.2.1)(redux@5.0.1)
       react-router-dom:
         specifier: 7.13.0
@@ -213,16 +218,16 @@ importers:
         specifier: 1.0.7
         version: 1.0.7
       web-vitals:
-        specifier: ^5.1.0
+        specifier: 5.1.0
         version: 5.1.0
       y-indexeddb:
-        specifier: ^9.0.12
+        specifier: 9.0.12
         version: 9.0.12(yjs@13.6.28)
       y-websocket:
-        specifier: ^3.0.0
+        specifier: 3.0.0
         version: 3.0.0(yjs@13.6.28)
       yjs:
-        specifier: ^13.6.28
+        specifier: 13.6.28
         version: 13.6.28
       zod:
         specifier: 4.2.1
@@ -235,10 +240,10 @@ importers:
         specifier: 4.11.0
         version: 4.11.0
       '@radix-ui/react-popover':
-        specifier: ^1.1.15
+        specifier: 1.1.15
         version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rollup/rollup-linux-x64-gnu':
-        specifier: ^4.54.0
+        specifier: 4.54.0
         version: 4.54.0
       '@storybook/addon-essentials':
         specifier: 8.6.14
@@ -286,8 +291,8 @@ importers:
         specifier: 30.0.0
         version: 30.0.0
       '@types/jquery':
-        specifier: ^3.5.33
-        version: 3.5.34
+        specifier: 3.5.33
+        version: 3.5.33
       '@types/leaflet':
         specifier: 1.9.21
         version: 1.9.21
@@ -301,7 +306,7 @@ importers:
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.7)
       '@types/uuid':
-        specifier: ^11.0.0
+        specifier: 11.0.0
         version: 11.0.0
       '@typescript-eslint/eslint-plugin':
         specifier: 8.50.0
@@ -340,7 +345,7 @@ importers:
         specifier: 10.0.6
         version: 10.0.6(eslint@9.39.2(jiti@2.6.1))(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(typescript@5.9.3)
       jest-axe:
-        specifier: ^10.0.0
+        specifier: 10.0.0
         version: 10.0.0
       jsdom:
         specifier: 27.3.0
@@ -364,10 +369,10 @@ importers:
         specifier: 10.1.10
         version: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: ^7.2.6
+        specifier: 7.2.6
         version: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)
       vitest:
         specifier: 4.0.16
@@ -1448,6 +1453,13 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
 
+  '@opentelemetry/instrumentation-user-interaction@0.34.0':
+    resolution: {integrity: sha512-QN/8IwnoAjI92Mtc4vnatI3x+KSAoGOpILhVlm9dyGu9PtXJSdYpGqc9PZleJx4SKuLmVjjktSZTQllXNqgU5A==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+      zone.js: 0.11.4
+
   '@opentelemetry/instrumentation-xml-http-request@0.45.1':
     resolution: {integrity: sha512-gwX55apcB4d+2OpZsOEtct+eUAvtZ9wT8IyZVbzZyN471vSePacKNrGbQr8uFlyioPj+IAS/izv+LJyqw6PNxA==}
     engines: {node: '>=14'}
@@ -2315,8 +2327,8 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@reduxjs/toolkit@2.11.0':
-    resolution: {integrity: sha512-hBjYg0aaRL1O2Z0IqWhnTLytnjDIxekmRxm1snsHjHaKVmIF1HiImWqsq+PuEbn6zdMlkIj9WofK1vR8jjx+Xw==}
+  '@reduxjs/toolkit@2.5.0':
+    resolution: {integrity: sha512-awNe2oTodsZ6LmRqmkFhtb/KH03hUhxOamEQy411m3Njj3BbFvoBovxo4Q1cBWnV1ErprVj9MlF0UPXkng0eyg==}
     peerDependencies:
       react: ^16.9.0 || ^17.0.0 || ^18 || ^19
       react-redux: ^7.2.1 || ^8.1.3 || ^9.0.0
@@ -2420,6 +2432,7 @@ packages:
 
   '@rollup/rollup-linux-x64-gnu@4.54.0':
     resolution: {integrity: sha512-WGt5J8Ij/rvyqpFexxk3ffKqqbLf9AqrTBbWDk7ApGUzaIs6V+s2s84kAxklFwmMF/vBNGrVdYgbblCOFFezMQ==}
+    cpu: [x64]
     os: [linux]
 
   '@rollup/rollup-linux-x64-musl@4.53.3':
@@ -3041,8 +3054,8 @@ packages:
   '@types/jest@30.0.0':
     resolution: {integrity: sha512-XTYugzhuwqWjws0CVz8QpM36+T+Dz5mTEBKhNs/esGLnCIlGdRy+Dq78NRjd7ls7r8BC8ZRMOrKlkO1hU0JOwA==}
 
-  '@types/jquery@3.5.34':
-    resolution: {integrity: sha512-3m3939S3erqmTLJANS/uy0B6V7BorKx7RorcGZVjZ62dF5PAGbKEDZK1CuLtKombJkFA2T1jl8LAIIs7IV6gBQ==}
+  '@types/jquery@3.5.33':
+    resolution: {integrity: sha512-SeyVJXlCZpEki5F0ghuYe+L+PprQta6nRZqhONt9F13dWBtR/ftoaIbdRQ7cis7womE+X2LKhsDdDtkkDhJS6g==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -3786,6 +3799,10 @@ packages:
     resolution: {integrity: sha512-b8AmV3kfQaqWAuacbPuNbL6vahnOJflOhexLzMMNLga62+/nh0JzvJ0aO/5a5MVgUFGS7Hu1P9P03o3fJkDCyw==}
     engines: {node: '>=12'}
 
+  d3@7.8.5:
+    resolution: {integrity: sha512-JgoahDG51ncUfJu6wX/1vWQEqOflgXyl4MaHqlcSruTez7yhaRKR9i8VjjcQGeS2en/jnFivXuaIMnseMMt0XA==}
+    engines: {node: '>=12'}
+
   d3@7.9.0:
     resolution: {integrity: sha512-e1U46jVP+w7Iut8Jt8ri1YsPOvFpg46k+K8TpCb0P+zjCkjkPnV7WzfDJzMHy1LnA+wj5pLT1wjO901gLXeEhA==}
     engines: {node: '>=12'}
@@ -4387,9 +4404,6 @@ packages:
 
   immer@10.2.0:
     resolution: {integrity: sha512-d/+XTN3zfODyjr89gM3mPq1WNX2B8pYsu7eORitdwyA2sBubnTl3laYlBk4sXY5FUa5qTZGBDPJICVbvqzjlbw==}
-
-  immer@11.0.1:
-    resolution: {integrity: sha512-naDCyggtcBWANtIrjQEajhhBEuL9b0Zg4zmlWK2CzS6xCWSE39/vvf4LqnMjUAWHBhot4m9MHCM/Z+mfWhUkiA==}
 
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
@@ -6018,6 +6032,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -7128,6 +7143,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@opentelemetry/instrumentation-user-interaction@0.34.0(@opentelemetry/api@1.8.0)(zone.js@0.11.8)':
+    dependencies:
+      '@opentelemetry/api': 1.8.0
+      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
+      '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.8.0)
+      '@opentelemetry/sdk-trace-web': 1.18.1(@opentelemetry/api@1.8.0)
+      zone.js: 0.11.8
+    transitivePeerDependencies:
+      - supports-color
+
   '@opentelemetry/instrumentation-xml-http-request@0.45.1(@opentelemetry/api@1.8.0)':
     dependencies:
       '@opentelemetry/api': 1.8.0
@@ -8033,11 +8058,9 @@ snapshots:
     dependencies:
       react: 19.2.1
 
-  '@reduxjs/toolkit@2.11.0(react-redux@9.2.0(@types/react@19.2.7)(react@19.2.1)(redux@5.0.1))(react@19.2.1)':
+  '@reduxjs/toolkit@2.5.0(react-redux@9.2.0(@types/react@19.2.7)(react@19.2.1)(redux@5.0.1))(react@19.2.1)':
     dependencies:
-      '@standard-schema/spec': 1.0.0
-      '@standard-schema/utils': 0.3.0
-      immer: 11.0.1
+      immer: 10.2.0
       redux: 5.0.1
       redux-thunk: 3.1.0(redux@5.0.1)
       reselect: 5.1.1
@@ -8933,7 +8956,7 @@ snapshots:
       expect: 30.2.0
       pretty-format: 30.2.0
 
-  '@types/jquery@3.5.34':
+  '@types/jquery@3.5.33':
     dependencies:
       '@types/sizzle': 2.3.10
 
@@ -9777,6 +9800,39 @@ snapshots:
       d3-selection: 3.0.0
       d3-transition: 3.0.1(d3-selection@3.0.0)
 
+  d3@7.8.5:
+    dependencies:
+      d3-array: 3.2.4
+      d3-axis: 3.0.0
+      d3-brush: 3.0.0
+      d3-chord: 3.0.1
+      d3-color: 3.1.0
+      d3-contour: 4.0.2
+      d3-delaunay: 6.0.4
+      d3-dispatch: 3.0.1
+      d3-drag: 3.0.0
+      d3-dsv: 3.0.1
+      d3-ease: 3.0.1
+      d3-fetch: 3.0.1
+      d3-force: 3.0.0
+      d3-format: 3.1.0
+      d3-geo: 3.1.1
+      d3-hierarchy: 3.1.2
+      d3-interpolate: 3.0.1
+      d3-path: 3.1.0
+      d3-polygon: 3.0.1
+      d3-quadtree: 3.0.1
+      d3-random: 3.0.1
+      d3-scale: 4.0.2
+      d3-scale-chromatic: 3.1.0
+      d3-selection: 3.0.0
+      d3-shape: 3.2.0
+      d3-time: 3.1.0
+      d3-time-format: 4.1.0
+      d3-timer: 3.0.1
+      d3-transition: 3.0.1(d3-selection@3.0.0)
+      d3-zoom: 3.0.0
+
   d3@7.9.0:
     dependencies:
       d3-array: 3.2.4
@@ -10560,8 +10616,6 @@ snapshots:
   ignore@7.0.5: {}
 
   immer@10.2.0: {}
-
-  immer@11.0.1: {}
 
   import-fresh@3.3.1:
     dependencies:
@@ -11569,7 +11623,7 @@ snapshots:
 
   recharts@3.6.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react-is@19.2.3)(react@19.2.1)(redux@5.0.1):
     dependencies:
-      '@reduxjs/toolkit': 2.11.0(react-redux@9.2.0(@types/react@19.2.7)(react@19.2.1)(redux@5.0.1))(react@19.2.1)
+      '@reduxjs/toolkit': 2.5.0(react-redux@9.2.0(@types/react@19.2.7)(react@19.2.1)(redux@5.0.1))(react@19.2.1)
       clsx: 2.1.1
       decimal.js-light: 2.5.1
       es-toolkit: 1.42.0
