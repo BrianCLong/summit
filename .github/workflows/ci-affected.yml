@@ -81,7 +81,7 @@ jobs:
         run: pnpm --filter ./${{ matrix.package }} run typecheck --if-present
 
       - name: Test Package
-        run: pnpm --filter ./${{ matrix.package }} run test:unit --if-present || pnpm --filter ./${{ matrix.package }} run test --if-present
+        run: pnpm --filter ./${{ matrix.package }} run test:unit --if-present || pnpm --filter ./${{ matrix.package }} run test:unit --if-present
 
       - name: Attach evidence
         if: always()

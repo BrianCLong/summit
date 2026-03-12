@@ -4,7 +4,6 @@
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
-  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "gate:report": "node scripts/gates/enforce_report_from_claims.mjs",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
@@ -145,7 +144,8 @@
   "license": "MIT",
   "engines": {
     "node": ">=18.18",
-    "npm": ">=8.0.0"
+    "npm": ">=8.0.0",
+    "pnpm": ">=8.0.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.0",
