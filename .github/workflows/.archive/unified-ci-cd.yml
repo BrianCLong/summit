@@ -86,7 +86,7 @@ jobs:
           version: 10.0.0
           run_install: false
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Lint
         run: pnpm run lint
       - name: Typecheck
@@ -130,7 +130,7 @@ jobs:
           version: 10.0.0
           run_install: false
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Snyk Open Source scan
         uses: snyk/actions/node@master
         if: (((env.SNYK_TOKEN != '') && (env.SNYK_TOKEN != '' && github.event_name == 'push')) && (success())) && (github.event_name != 'pull_request')

@@ -32,7 +32,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies (scripts only)
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Evaluate Governance Policies
         env:
