@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install deps
@@ -22,5 +22,5 @@ jobs:
         run: |
           python ml/app/training/retrain_deception.py
       - name: Upload model
-        uses: actions/upload-artifact@v3          name: deception-model
+        uses: actions/upload-artifact@v4          name: deception-model
           path: models/deception/

@@ -29,8 +29,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -41,13 +43,13 @@ jobs:
       - name: Clean orphaned worktrees
         run: rm -rf .worktrees
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           cache: "pnpm"
           node-version-file: .nvmrc
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm run lint
 
@@ -60,13 +62,13 @@ jobs:
       - name: Clean orphaned worktrees
         run: rm -rf .worktrees
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Typecheck

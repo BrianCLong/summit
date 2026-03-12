@@ -11,5 +11,5 @@ jobs:
       - name: Generate Mock Evidence Bundle
         run: echo "Generating evidence bundle..." > evidence.log
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3          name: regulatory-evidence
+        uses: actions/upload-artifact@v4          name: regulatory-evidence
           path: evidence.log

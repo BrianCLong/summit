@@ -75,7 +75,7 @@ jobs:
         run: cd apps/mobile/android && ./gradlew bundleRelease
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release.aab
           path: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
