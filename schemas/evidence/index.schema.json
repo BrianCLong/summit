@@ -2,28 +2,57 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Index",
   "type": "object",
-  "required": ["version", "evidence"],
+  "required": [
+    "version",
+    "evidence"
+  ],
   "properties": {
-    "version": { "type": "integer" },
+    "version": {
+      "type": "integer"
+    },
     "evidence": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["evidence_id", "files"],
+        "required": [
+          "evidence_id",
+          "files"
+        ],
         "properties": {
-          "evidence_id": { "type": "string" },
+          "evidence_id": {
+            "type": "string"
+          },
           "files": {
             "type": "object",
-            "required": ["report", "metrics", "stamp"],
+            "required": [
+              "report",
+              "metrics",
+              "stamp"
+            ],
             "properties": {
-              "report": { "type": "string" },
-              "metrics": { "type": "string" },
-              "stamp": { "type": "string" }
+              "report": {
+                "type": "string"
+              },
+              "metrics": {
+                "type": "string"
+              },
+              "stamp": {
+                "type": "string"
+              }
             }
           }
         }
       }
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version for this evidence artifact"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "propertyNames": {
+    "not": {
+      "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
+    }
+  }
 }

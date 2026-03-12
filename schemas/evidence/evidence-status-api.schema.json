@@ -3,7 +3,11 @@
   "$id": "schemas/evidence/evidence-status-api.schema.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["evidence_id", "status", "details"],
+  "required": [
+    "evidence_id",
+    "status",
+    "details"
+  ],
   "propertyNames": {
     "not": {
       "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
@@ -14,10 +18,18 @@
       "type": "string"
     },
     "status": {
-      "enum": ["pass", "fail", "missing"]
+      "enum": [
+        "pass",
+        "fail",
+        "missing"
+      ]
     },
     "details": {
       "type": "string"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version for this evidence artifact"
     }
   }
 }

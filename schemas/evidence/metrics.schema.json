@@ -2,10 +2,25 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Metrics",
   "type": "object",
-  "required": ["evidence_id"],
+  "required": [
+    "evidence_id"
+  ],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "cosign_exit_code": { "type": "integer" }
+    "evidence_id": {
+      "type": "string"
+    },
+    "cosign_exit_code": {
+      "type": "integer"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version for this evidence artifact"
+    }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "propertyNames": {
+    "not": {
+      "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
+    }
+  }
 }

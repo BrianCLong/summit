@@ -3,7 +3,9 @@
   "$id": "schemas/evidence/evidence-id-consistency-patch-manifest.schema.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["patches"],
+  "required": [
+    "patches"
+  ],
   "propertyNames": {
     "not": {
       "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
@@ -15,7 +17,10 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["file", "sha256"],
+        "required": [
+          "file",
+          "sha256"
+        ],
         "properties": {
           "file": {
             "type": "string"
@@ -26,6 +31,10 @@
           }
         }
       }
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version for this evidence artifact"
     }
   }
 }
