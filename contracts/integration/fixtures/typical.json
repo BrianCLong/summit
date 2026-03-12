@@ -1,0 +1,28 @@
+{
+  "name": "typical-dataset",
+  "records": [
+    {
+      "id": "1",
+      "name": "Alice Smith",
+      "entity_type": "Person",
+      "email": "alice@example.com",
+      "phone": "+1-555-0101",
+      "role": "Security Researcher"
+    },
+    {
+      "id": "2",
+      "name": "Bob Jones",
+      "entity_type": "Person",
+      "email": "bob@example.com",
+      "phone": "+1-555-0102",
+      "role": "Threat Analyst"
+    },
+    {
+      "id": "3",
+      "name": "Cyber Defense Corp",
+      "entity_type": "Organization",
+      "website": "https://cdc.example.com",
+      "industry": "Cybersecurity"
+    }
+  ]
+}

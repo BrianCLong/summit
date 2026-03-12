@@ -1,0 +1,10 @@
+{
+  "name": "tiny-dataset",
+  "records": [
+    {
+      "id": "1",
+      "name": "Tiny Item",
+      "description": "Just a small record"
+    }
+  ]
+}

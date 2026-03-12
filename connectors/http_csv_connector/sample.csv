@@ -1,0 +1,4 @@
+id,name,description,email,phone,credit_card,entity_type
+1,Alice,Security Researcher,alice@example.com,555-0101,4111-2222-3333-4444,Person
+2,Bob,Threat Analyst,bob@example.com,555-0102,,Person
+3,Project X,Secret Project,projectx@intelgraph.dev,,,Project

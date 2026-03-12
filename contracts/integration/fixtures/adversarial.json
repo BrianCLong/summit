@@ -1,0 +1,21 @@
+{
+  "name": "adversarial-dataset",
+  "records": [
+    {
+      "id": "bad-id-!@#$%^",
+      "name": "Broken Data",
+      "missing_fields": true,
+      "unsupported_encoding": "",
+      "credit_card": "4111-2222-3333-4444",
+      "extremely_long_field": "A"
+    },
+    {
+      "invalid_record": true
+    },
+    {
+      "id": "999",
+      "name": "Injection Attempt",
+      "description": "'); DROP TABLE users; --"
+    }
+  ]
+}

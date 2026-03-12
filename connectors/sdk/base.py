@@ -24,10 +24,11 @@ class BaseConnector(ABC):
     - Lineage tracking
     """
 
-    def __init__(self, manifest_path: str):
+    def __init__(self, manifest_path: str, subject: dict[str, Any] = None):
         self.manifest_path = Path(manifest_path)
         self.manifest = self._load_manifest()
         self.connector_dir = self.manifest_path.parent
+        self.subject = subject or {"roles": ["guest"]}
 
         # Initialize SDK components
         self.rate_limiter = self._init_rate_limiter()
@@ -215,6 +216,23 @@ class BaseConnector(ABC):
             self.stats["records_failed"] += 1
             raise
 
+    def check_policy(self, action: str) -> bool:
+        """
+        Check if the current subject is allowed to perform the action.
+        (Mock OPA check for now)
+        """
+        roles = self.subject.get("roles", [])
+        if "admin" in roles:
+            return True
+
+        if action == "connector:sync" and "editor" in roles:
+            return True
+
+        if action in ["connector:view_raw", "connector:export"] and "privacy-officer" in roles:
+            return True
+
+        return False
+
     def _create_lineage_record(self, raw_data: Any) -> dict[str, Any]:
         """Create a lineage record for this data."""
         lineage_config = self.manifest.get("lineage", {})
@@ -237,6 +255,9 @@ class BaseConnector(ABC):
         Returns:
             Summary statistics
         """
+        if not self.check_policy("connector:sync"):
+            raise PermissionError(f"Subject not authorized to run sync for {self.manifest['name']}")
+
         self.stats["start_time"] = time.time()
 
         results = []
