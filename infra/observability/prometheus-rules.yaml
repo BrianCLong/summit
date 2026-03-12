@@ -15,6 +15,7 @@ spec:
           labels:
             severity: critical
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/observability'
             summary: 'OpenTelemetry Collector is unreachable'
             description: 'No healthy otel-collector pods; traces/metrics/logs are not ingesting.'
 
@@ -24,6 +25,7 @@ spec:
           labels:
             severity: critical
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/observability/high-latency'
             summary: 'High API latency detected on IntelGraph API'
             description: 'IntelGraph API p99 latency is consistently above 500ms for 5 minutes.'
 
@@ -33,6 +35,7 @@ spec:
           labels:
             severity: critical
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/graphql-high-error-rate'
             summary: 'High API error rate detected on IntelGraph API'
             description: 'IntelGraph API is returning more than 5% 5xx errors for 5 minutes.'
 
@@ -42,6 +45,7 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/performance'
             summary: 'IntelGraph API CPU saturation is high'
             description: 'IntelGraph API CPU utilization is consistently above 80% for 10 minutes, indicating potential saturation.'
 
@@ -51,6 +55,7 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/security_runbook'
             summary: 'SSL certificate for {{ $labels.instance }} expires soon'
             description: 'SSL certificate for {{ $labels.instance }} will expire in less than 7 days.'
 
@@ -60,6 +65,7 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/performance-troubleshooting'
             summary: 'HPA thrashing detected'
             description: 'Horizontal Pod Autoscaler for {{ $labels.horizontalpodautoscaler }} is thrashing (scaling more than 5 times in 15 minutes).'
 
@@ -69,6 +75,7 @@ spec:
           labels:
             severity: critical
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/agent-runaway'
             summary: 'Agent failure rate above 10%'
             description: 'Investigate agent runtime or upstream dependency issues causing elevated failures.'
 
@@ -78,6 +85,7 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/cost-alerts-budget-violations'
             summary: 'Agent runtime cost spike detected'
             description: 'Total runtime cost increased more than $50 over 30m; validate workloads and budgets.'
 
@@ -87,6 +95,7 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/agent-runaway'
             summary: 'Agent p95 latency above 1s'
             description: 'Agent runtimes are breaching latency SLO; check downstream dependencies and scaling.'
 
@@ -96,6 +105,7 @@ spec:
           labels:
             severity: critical
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/service-mesh-operations'
             summary: 'Mesh error budget burn'
             description: '5xx rate across the mesh exceeds 2% for 15m, threatening SLOs.'
 
@@ -105,6 +115,7 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/observability'
             summary: 'Correlation coverage degrading'
             description: 'More than 5% of requests missing correlation IDs; check gateways and instrumentation.'
 
@@ -114,6 +125,7 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/observability'
             summary: 'Vector is failing to ship logs'
             description: 'Vector is reporting pipeline errors; check Loki/OTLP connectivity and node health.'
 
@@ -123,6 +135,7 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/observability'
             summary: 'Continuous profiling ingestion halted'
             description: 'No profiling samples ingested for 10 minutes; check Pyroscope/Parca agents and endpoints.'
 
@@ -132,6 +145,7 @@ spec:
           labels:
             severity: critical
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/data-spine-audit-ingestion'
             summary: 'Audit events are not arriving'
             description: 'No audit trail events observed in the last 10 minutes; validate OTLP log pipeline and retention class labels.'
 
@@ -141,5 +155,6 @@ spec:
           labels:
             severity: warning
           annotations:
+            runbook_url: 'https://runbooks.intelgraph.io/observability'
             summary: 'One or more Prometheus scrape targets are down'
             description: 'Prometheus reports missing scrape targets; inspect ServiceMonitor/PodMonitor coverage and endpoints.'
