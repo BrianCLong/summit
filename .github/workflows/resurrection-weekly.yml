@@ -1,0 +1,75 @@
+name: Resurrection Weekly
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: 'Days of git history to scan'
+        required: false
+        default: '30'
+      max_commits:
+        description: 'Maximum commits to analyze'
+        required: false
+        default: '200'
+
+permissions:
+  contents: read
+
+jobs:
+  quick-resurrect:
+    name: Quick Resurrection Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0  # Full history needed for lookback
+
+      - name: Setup Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+
+      - name: Run Quick Resurrection
+        env:
+          RESURRECT_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '30' }}
+          RESURRECT_MAX_COMMITS: ${{ github.event.inputs.max_commits || '200' }}
+        run: node scripts/orchestrator/quick-resurrect.mjs
+
+      - name: Upload Resurrection Report
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        if: always()
+        with:
+          name: resurrection-report-${{ github.sha }}
+          path: artifacts/history-quick/
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Summarize Results
+        if: always()
+        run: |
+          if [ -f artifacts/history-quick/report.json ]; then
+            echo "## Resurrection Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            EVIDENCE_ID=$(node -e "const r=require('./artifacts/history-quick/report.json'); console.log(r.evidenceId)")
+            TOTAL=$(node -e "const r=require('./artifacts/history-quick/report.json'); console.log(r.summary.totalCommits)")
+            LANE_A=$(node -e "const r=require('./artifacts/history-quick/report.json'); console.log(r.summary.lanes.A.count)")
+            LANE_B=$(node -e "const r=require('./artifacts/history-quick/report.json'); console.log(r.summary.lanes.B.count)")
+            ENTROPY=$(node -e "const r=require('./artifacts/history-quick/report.json'); console.log(r.summary.entropy)")
+
+            echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Evidence ID | \`${EVIDENCE_ID}\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| Commits Analyzed | ${TOTAL} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Lane A (Merge-Ready) | **${LANE_A}** |" >> $GITHUB_STEP_SUMMARY
+            echo "| Lane B (Review) | ${LANE_B} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Concern Entropy | ${ENTROPY} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No report generated." >> $GITHUB_STEP_SUMMARY
+          fi

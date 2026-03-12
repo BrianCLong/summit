@@ -1,0 +1,206 @@
+# Frontier Entropy Policy
+# Human-readable companion to config/entropy-policy.json
+#
+# This file defines the governance-level thresholds and semantics
+# for the Frontier Entropy Monitor and Resurrection System.
+#
+# Source of truth for operator interpretation.
+# Changes require Platform Architecture Board approval.
+# See: docs/governance/ENTROPY_AND_RESURRECTION_CONTROL_SPEC.md
+
+schema_version: "1.0.0"
+policy_id: frontier-entropy-policy-v1
+
+# ---------------------------------------------------------------------------
+# Entropy velocity thresholds
+# ---------------------------------------------------------------------------
+# Velocity = d(Entropy)/dt (bits per second)
+# Assessed as the absolute magnitude of current velocity.
+velocity_thresholds:
+  stable:
+    max_velocity: 0.001
+    description: Normal operations. No intervention needed.
+    alert_level: none
+
+  watch:
+    max_velocity: 0.005
+    description: Minor fluctuations. Increase monitoring frequency.
+    alert_level: info
+
+  warning:
+    max_velocity: 0.01
+    description: >
+      Entropy velocity elevated. Consider frontier consolidation.
+      Resurrection candidates should be reviewed.
+    alert_level: warning
+
+  critical:
+    max_velocity: null  # No upper bound — any velocity above warning
+    description: >
+      Immediate intervention required.
+      Initiate emergency convergence protocol.
+    alert_level: critical
+
+# ---------------------------------------------------------------------------
+# Acceleration trigger
+# ---------------------------------------------------------------------------
+# Acceleration is detected when N consecutive velocity measurements each
+# exceed the previous. This signals a runaway entropy trend.
+acceleration:
+  consecutive_increases_threshold: 3
+  description: >
+    Detected when velocity increases for 3+ consecutive samples.
+    Triggers escalated monitoring regardless of absolute velocity level.
+
+# ---------------------------------------------------------------------------
+# Confidence bands for predictions
+# ---------------------------------------------------------------------------
+# Based on coefficient of variation (stddev/mean) of recent velocity.
+confidence_bands:
+  high:
+    coefficient_of_variation_max: 0.2
+    description: Low variance — predictions are trusted at full weight.
+    trust_factor: 1.0
+
+  medium:
+    coefficient_of_variation_max: 0.5
+    description: Moderate variance — predictions trigger review, not action.
+    trust_factor: 0.7
+
+  low:
+    coefficient_of_variation_max: null  # > 0.5 or < 5 velocity samples
+    description: >
+      High variance or insufficient history.
+      Suppress exact ETA claims. Use bands only.
+    trust_factor: 0.3
+
+# Minimum samples required before any prediction is made
+min_samples_for_prediction: 5
+
+# ---------------------------------------------------------------------------
+# ETA bands (used when confidence >= medium)
+# ---------------------------------------------------------------------------
+# Exact ETA in seconds is suppressed when confidence == low.
+eta_bands:
+  unstable:
+    description: Already past the instability threshold.
+  lt_1h:
+    label: "<1h"
+    seconds_max: 3600
+    description: Instability expected within 1 hour.
+  lt_24h:
+    label: "<24h"
+    seconds_max: 86400
+    description: Instability expected within 24 hours.
+  one_to_3d:
+    label: "1-3d"
+    seconds_max: 259200
+    description: Instability expected in 1 to 3 days.
+  gt_3d:
+    label: ">3d"
+    description: Instability beyond 3 days or insufficient data.
+
+# ---------------------------------------------------------------------------
+# Resurrection scoring
+# ---------------------------------------------------------------------------
+resurrection:
+  default_lookback_days: 30
+  default_max_commits: 200
+
+  # Lane thresholds (see ENTROPY_AND_RESURRECTION_CONTROL_SPEC.md §4.1)
+  lanes:
+    A:
+      min_score: 120
+      min_patch_size: 50
+      max_patch_size: 500
+      sla_hours: 24
+      description: High-value, merge-ready candidates.
+
+    B:
+      min_score: 80
+      max_patch_size: 2000
+      sla_days: 3
+      description: Needs synthesis or review before merge.
+
+    C:
+      min_score: 40
+      sla_days: 7
+      description: Informational, backlog. No strict SLA.
+
+    D:
+      description: Duplicate or obsolete. Archive without merge action.
+
+  # Scoring formula weights
+  scoring:
+    recency_base: 100
+    recency_decay_per_day: 10
+    patch_size_optimal_min: 50
+    patch_size_optimal_max: 500
+    patch_size_optimal_score: 50
+    patch_size_over_decay: 10  # score reduction per 10 LOC over 500
+    file_count_weight: 5
+    file_count_max_score: 30
+
+  # Duplicate detection configuration
+  duplicate_detection:
+    method: subject_normalization_plus_file_signature
+    file_signature_max_files: 5
+    description: >
+      Normalizes commit subject (strips PR numbers, port tags, brackets),
+      creates a sorted file signature from top-5 files, and hashes them
+      together. Matches indicate duplicate work.
+
+# ---------------------------------------------------------------------------
+# Evidence artifacts
+# ---------------------------------------------------------------------------
+artifacts:
+  entropy:
+    report: artifacts/repoos/frontier-entropy/report.json
+    stamp: artifacts/repoos/frontier-entropy/stamp.json
+    state: artifacts/repoos/frontier-entropy/state.json
+    schema: schemas/evidence/entropy-report.schema.json
+    schema_version: "1.0.0"
+
+  resurrection:
+    report: artifacts/history-quick/report.json
+    stamp: artifacts/history-quick/stamp.json
+    schema: schemas/evidence/resurrection-report.schema.json
+    schema_version: "1.0.0"
+
+# ---------------------------------------------------------------------------
+# Actuation governance
+# ---------------------------------------------------------------------------
+# The JSON policy (config/entropy-policy.json) controls actual actuation.
+# This section documents the governance intent.
+actuation:
+  status: observe_only
+  description: >
+    Actuation is DISABLED by default (config/entropy-policy.json: actuation.enabled=false).
+    Calibration F1 must reach >= 0.75 before actuation is enabled.
+    Platform Architecture Board approval required.
+
+  hard_controls_gate:
+    required_f1_score: 0.75
+    required_calibration_label: good  # good | excellent
+    approval_body: Platform Architecture Board
+
+  actions_requiring_manual_approval:
+    - freeze_frontier
+
+# ---------------------------------------------------------------------------
+# Calibration requirements
+# ---------------------------------------------------------------------------
+calibration:
+  entropy_predictor:
+    frequency: weekly
+    acceptance_threshold:
+      f1_min: 0.75
+      label: good
+    trigger_on: policy_threshold_change
+
+  resurrection_scorer:
+    frequency: biweekly
+    acceptance_threshold:
+      overall_accuracy_min: 0.75
+      label: good
+    trigger_on: scoring_formula_change
