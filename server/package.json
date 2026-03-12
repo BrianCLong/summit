@@ -39,20 +39,10 @@
     "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts"
   },
   "dependencies": {
-<<<<<<< HEAD
-    @apollo/server: "5.4.0",
-=======
-<<<<<<< HEAD
-    "@intelgraph/outreach": "workspace:*",
-    @apollo/server: "5.4.0",
-=======
-<<<<<<< HEAD
     "@apollo/server": "5.4.0",
-=======
-    "@apollo/server": "4.11.3",
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
+    "@intelgraph/outreach": "workspace:*",
+    "@apollo/server": "5.4.0",
+    "@apollo/server": "5.4.0",
     "@as-integrations/express4": "1.1.2",
     "@aws-sdk/client-s3": "3.962.0",
     "@bull-board/api": "6.12.0",
@@ -63,37 +53,15 @@
     "@intelgraph/observability": "workspace:^",
     "@intelgraph/provenance": "workspace:*",
     "@intelgraph/telemetry-config": "file:../packages/telemetry-config",
-<<<<<<< HEAD
 
-    @node-saml/node-saml: "5.1.0",
-=======
-<<<<<<< HEAD
-    @node-saml/node-saml: "5.1.0",
-=======
-<<<<<<< HEAD
-    @node-saml/node-saml: "5.1.0",
-=======
-<<<<<<< HEAD
-    @node-saml/node-saml: "5.1.0",
-=======
-<<<<<<< HEAD
-    @node-saml/node-saml: "5.1.0",
-=======
-<<<<<<< HEAD
-    @node-saml/node-saml: "5.1.0",
-=======
-<<<<<<< HEAD
+    "@node-saml/node-saml": "5.1.0",
+    "@node-saml/node-saml": "5.1.0",
+    "@node-saml/node-saml": "5.1.0",
+    "@node-saml/node-saml": "5.1.0",
+    "@node-saml/node-saml": "5.1.0",
+    "@node-saml/node-saml": "5.1.0",
     "@intelgraph/context-shell": "workspace:*",
     "@node-saml/node-saml": "5.1.0",
-=======
-    @node-saml/node-saml: "5.1.0",
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.39.0",
     "@opentelemetry/exporter-jaeger": "1.30.1",
@@ -243,21 +211,14 @@
     "babel-jest": "30.2.0",
     "cookie-parser": "1.4.7",
     "cross-env": "7.0.3",
-<<<<<<< HEAD
     "csurf": "1.11.0",
     "dataloader": "2.2.3",
-=======
-    csurf: "1.11.0",
-    dataloader: "2.2.3",
-    esbuild: "0.24.0",
->>>>>>> origin/main
     "eslint": "9.39.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-jest": "29.1.0",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-react-refresh": "0.4.26",
-<<<<<<< HEAD
     "esbuild": "0.24.0",
     "exif-reader": "2.0.3",
     "fast-check": "4.5.3",
@@ -265,14 +226,6 @@
     "graphql-depth-limit": "1.1.0",
     "graphql-redis-subscriptions": "2.7.0",
     "hpp": "0.2.3",
-=======
-    exif-reader: "2.0.3",
-    fast-check: "4.5.3",
-    globals: "16.5.0",
-    graphql-depth-limit: "1.1.0",
-    graphql-redis-subscriptions: "2.7.0",
-    hpp: "0.2.3",
->>>>>>> origin/main
     "jest": "29.7.0",
     "jest-environment-node": "30.2.0",
     "jest-extended": "4.0.2",
