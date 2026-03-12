@@ -400,7 +400,7 @@ jobs:
           echo "✅ E2E tests passed"
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report-v040
           path: playwright-report/
@@ -440,7 +440,7 @@ jobs:
           echo "✅ Performance benchmarks completed"
 
       - name: Upload performance results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: performance-results-v040
           path: performance-results/
