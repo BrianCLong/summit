@@ -1,0 +1,52 @@
+{
+  "name": "@intelgraph/provenance-visualizer",
+  "version": "4.2.3",
+  "description": "React components for visualizing provenance chains, Merkle trees, and chain-of-custody",
+  "main": "dist/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@emotion/react": "11.11.1",
+    "@emotion/styled": "11.11.0",
+    "@mui/icons-material": "5.15.0",
+    "@mui/lab": "6.0.0-dev.240424162023-9968b4889d",
+    "@mui/material": "5.15.0",
+    "axios": "1.7.9",
+    "crypto-js": "4.2.0",
+    "d3": "7.8.5",
+    "date-fns": "3.0.0",
+    "react": "18.2.0",
+    "react-d3-tree": "3.6.1",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "4.2.0",
+    "@types/d3": "7.4.3",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "@typescript-eslint/eslint-plugin": "8.46.4",
+    "@typescript-eslint/parser": "8.46.4",
+    "@vitejs/plugin-react": "4.2.0",
+    "eslint": "9.39.2",
+    "typescript": "5.9.3",
+    "vite": "5.0.0",
+    "vitest": "1.0.0"
+  },
+  "peerDependencies": {
+    "react": "18.0.0",
+    "react-dom": "18.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

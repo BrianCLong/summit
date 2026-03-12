@@ -1,0 +1,7 @@
+{
+  "name": "@intelgraph/signing-js",
+  "version": "4.2.3",
+  "private": true,
+  "type": "module",
+  "main": "index.js"
+}

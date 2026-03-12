@@ -1,0 +1,41 @@
+{
+  "name": "@intelgraph/mlops-platform",
+  "version": "4.2.3",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "Comprehensive MLOps platform for model lifecycle management",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "zod": "4.1.12",
+    "redis": "5.8.1",
+    "pg": "8.16.3",
+    "uuid": "13.0.0",
+    "winston": "3.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.27",
+    "@types/uuid": "11.0.0",
+    "typescript": "5.9.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "mlops",
+    "machine-learning",
+    "model-management",
+    "ml-lifecycle"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}

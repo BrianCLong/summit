@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/audio-intelligence",
+  "version": "4.2.3",
+  "description": "Audio event detection and acoustic intelligence",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/audio-processing": "workspace:*",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "20.19.27"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

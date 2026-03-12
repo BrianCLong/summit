@@ -1,0 +1,23 @@
+{
+  "name": "@intelgraph/prov-ledger-client",
+  "version": "4.2.3",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "ig-prov": "dist/bin/ig-prov.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "pnpm run build",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "axios": "1.7.9",
+    "axios-retry": "3.8.0",
+    "commander": "11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.10.0",
+    "typescript": "5.3.3"
+  }
+}

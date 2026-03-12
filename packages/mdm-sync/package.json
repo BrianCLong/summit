@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/mdm-sync",
+  "version": "4.2.3",
+  "description": "Multi-source data synchronization with conflict resolution",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "synchronization",
+    "multi-source",
+    "conflict-resolution",
+    "mdm"
+  ],
+  "dependencies": {
+    "@intelgraph/mdm-core": "workspace:*",
+    "zod": "3.22.4",
+    "uuid": "11.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.27",
+    "@types/uuid": "10.0.0",
+    "typescript": "5.9.3"
+  }
+}

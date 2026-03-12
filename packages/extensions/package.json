@@ -1,0 +1,21 @@
+{
+  "name": "@intelgraph/extensions",
+  "version": "4.2.3",
+  "description": "Unified extension framework for IntelGraph",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "20.16.5",
+    "ts-node": "10.9.2",
+    "typescript": "5.9.3",
+    "vitest": "2.1.1"
+  },
+  "dependencies": {
+    "semver": "7.6.3"
+  }
+}

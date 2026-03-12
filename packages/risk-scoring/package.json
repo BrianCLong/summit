@@ -1,0 +1,18 @@
+{
+  "name": "@intelgraph/risk-scoring",
+  "version": "4.2.3",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.27",
+    "typescript": "5.9.3"
+  }
+}

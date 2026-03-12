@@ -1,0 +1,24 @@
+{
+  "name": "@intelgraph/network-threat-detection",
+  "version": "4.2.3",
+  "description": "Network threat detection (DDoS, C2, exfiltration, port scans)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/threat-detection-core": "workspace:*",
+    "@intelgraph/anomaly-detection": "workspace:*",
+    "uuid": "9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.10.0",
+    "@types/uuid": "9.0.8",
+    "typescript": "5.3.3"
+  },
+  "author": "IntelGraph",
+  "license": "PROPRIETARY"
+}
