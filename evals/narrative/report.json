@@ -1,0 +1,64 @@
+{
+  "benchmark_aggregate": {
+    "logical_flow": 0.77,
+    "entity_consistency": 0.8,
+    "temporal_ordering": 0.75,
+    "absence_of_contradictions": 0.75,
+    "readability": 1.0,
+    "overall_coherence": 0.81
+  },
+  "results": [
+    {
+      "id": "res-001",
+      "query": "Summarize the events of the cyberattack on CorpX.",
+      "expected_coherence": "high",
+      "scores": {
+        "logical_flow": 1.0,
+        "entity_consistency": 1.0,
+        "temporal_ordering": 0.9,
+        "absence_of_contradictions": 1.0,
+        "readability": 1.0,
+        "overall_coherence": 0.98
+      }
+    },
+    {
+      "id": "res-002",
+      "query": "What is the relationship between Alice and Bob?",
+      "expected_coherence": "low",
+      "scores": {
+        "logical_flow": 0.5,
+        "entity_consistency": 0.2,
+        "temporal_ordering": 0.9,
+        "absence_of_contradictions": 1.0,
+        "readability": 1.0,
+        "overall_coherence": 0.72
+      }
+    },
+    {
+      "id": "res-003",
+      "query": "Explain the timeline of the Apollo 11 mission.",
+      "expected_coherence": "low",
+      "scores": {
+        "logical_flow": 0.9,
+        "entity_consistency": 1.0,
+        "temporal_ordering": 0.3,
+        "absence_of_contradictions": 0.0,
+        "readability": 1.0,
+        "overall_coherence": 0.64
+      }
+    },
+    {
+      "id": "res-004",
+      "query": "Describe the architecture of the new system.",
+      "expected_coherence": "high",
+      "scores": {
+        "logical_flow": 0.7,
+        "entity_consistency": 1.0,
+        "temporal_ordering": 0.9,
+        "absence_of_contradictions": 1.0,
+        "readability": 1.0,
+        "overall_coherence": 0.92
+      }
+    }
+  ]
+}
