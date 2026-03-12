@@ -19,7 +19,8 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: release-ga-${{ github.ref_name || inputs.tag }}
+  # Distinct group from release-ga-pipeline.yml to prevent queue collision on the same tag
+  group: release-ga-simple-${{ github.ref_name || inputs.tag }}
   cancel-in-progress: false
 
 jobs:

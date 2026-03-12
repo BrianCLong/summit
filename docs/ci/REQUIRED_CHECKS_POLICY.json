@@ -1,23 +1,40 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "2.0.0",
-  "description": "Canonical policy for release gate requirements",
-  "last_updated": "2026-02-01",
+  "version": "2.1.0",
+  "description": "Legacy JSON fallback for release gate requirements (canonical: REQUIRED_CHECKS_POLICY.yml)",
+  "last_updated": "2026-03-11",
   "owner": "Platform Engineering",
 
+  "_note": "LEGACY FALLBACK - canonical source is docs/ci/REQUIRED_CHECKS_POLICY.yml. Kept in sync for verify-green-for-tag.sh JSON fallback path (no yq). Check names MUST match actual GitHub status check names (workflow name + job name).",
+
   "always_required": [
+    {
+      "name": "meta-gate",
+      "workflow": "governance-meta-gate.yml",
+      "rationale": "Unified governance verification (drift, determinism, policy)"
+    },
+    {
+      "name": "CI Core Gate \u2705",
+      "workflow": "ci-core.yml",
+      "rationale": "Primary blocking gate - lint, typecheck, tests, build"
+    },
+    {
+      "name": "Unit Tests",
+      "workflow": "ci-pr.yml",
+      "rationale": "Primary PR test gate status required by branch protection"
+    },
+    {
+      "name": "gate",
+      "workflow": "ga-gate.yml",
+      "rationale": "Official GA gate job required by branch protection"
+    },
     {
       "name": "Release Readiness Gate",
       "workflow": "release-readiness.yml",
       "rationale": "Comprehensive release readiness verification - runs on every change"
     },
     {
-      "name": "GA Gate",
-      "workflow": "ga-gate.yml",
-      "rationale": "Official GA verification entrypoint with make ga"
-    },
-    {
-      "name": "Unit Tests & Coverage",
+      "name": "test (20.x)",
       "workflow": "unit-test-coverage.yml",
       "rationale": "Test suite and coverage gates must pass for all code changes"
     },
@@ -27,9 +44,9 @@
       "rationale": "SOC control verification is required for audit readiness"
     },
     {
-      "name": "CI Core (Primary Gate)",
-      "workflow": "ci-core.yml",
-      "rationale": "Primary blocking gate - lint, typecheck, tests, build"
+      "name": "Workflow Validity Check",
+      "workflow": "workflow-validity.yml",
+      "rationale": "Workflow syntax validity is required by protected-branch checks"
     }
   ],
 
