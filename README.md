@@ -15,6 +15,28 @@
 - **📈 CompanyOS SDK**: Enterprise intelligence APIs
 - **🔒 Security Hardened**: Production-ready CORS, Helmet, observability
 
+
+## ⚡ See It In Action (The 90-Second Wow Demo)
+
+Watch me go from zero to full OSINT report on any company in 47 seconds — fully local, provenance guaranteed.
+
+![Summit Wow Demo](https://via.placeholder.com/800x450.png?text=90-second+Loom/GIF+showing+the+wow+demo+end-to-end)
+
+### Run the Demo Locally
+
+```bash
+pnpm demo:company
+# Or directly: ./scripts/wow.sh
+```
+
+This single command:
+1. Auto-ingests the MIT Sloan Startups 2026 dataset via Switchboard
+2. Triggers semantic chunking and GraphRAG multi-hop traversal
+3. Deploys the Maestro swarm (Jules + Codex + Observer)
+4. Outputs a full provenance report with confidence scores and source links
+
+---
+
 ## 🚀 Quickstart
 
 ### Prerequisites
