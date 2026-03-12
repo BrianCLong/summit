@@ -2,7 +2,7 @@ import * as crypto from 'node:crypto';
 import { test, describe, before } from 'node:test';
 import * as assert from 'node:assert';
 import { signResultBundle, ResultBundlePayload } from '../../evaluation/leaderboard/sign-result';
-import { verifyResultBundle } from '../../evaluation/security/verify-result';
+import { verifyResultBundle } from '../../evaluation/leaderboard/verify-result';
 
 describe('Benchmark Result Signature Protocol', () => {
   let publicKeyHex: string;
