@@ -1,5 +1,4 @@
 import { describe, it, expect } from '@jest/globals';
-import { NarrativeAnalysisService } from '../../services/NarrativeAnalysisService.js';
 import { SignalClassificationService } from '../../sigint/SignalClassificationService.js';
 import { Signal } from '../../sigint/types.js';
 import { SITREPSchema } from '../schemas.js';

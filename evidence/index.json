@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "evidence": {
+  "mappings": {
     "EVD-nato-cogwar-techfamilies-ai-001": {
       "report": "EVD-nato-cogwar-techfamilies-ai-001/report.json",
       "metrics": "EVD-nato-cogwar-techfamilies-ai-001/metrics.json",

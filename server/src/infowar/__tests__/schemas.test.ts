@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { NarrativeSchema, ClaimSchema, ConnectivityStateSchema, SITREPSchema } from '../schemas.js';
+import { NarrativeSchema, ClaimSchema, SITREPSchema } from '../schemas.js';
 
 describe('InfoWar SITREP Schemas', () => {
   describe('NarrativeSchema', () => {
