@@ -400,7 +400,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: "v3.0.5"
+          cosign-release: "v3.2.4"
 
       - name: Sign Provenance (Keyless)
         run: |
@@ -454,7 +454,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: "v3.0.5"
+          cosign-release: "v3.2.4"
 
       - name: Verify Policy Bundle and Governance Approvals
         run: |
