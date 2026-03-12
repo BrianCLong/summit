@@ -4,6 +4,8 @@ packages:
   - 'services/*/*'
   - 'apps/*'
   - 'libs/*/*'
+  - 'libs/*'
+  - 'libs/*/*'
   - 'tools/*'
   - 'platform/*'
   - 'agents/*'

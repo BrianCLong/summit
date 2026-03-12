@@ -2,83 +2,141 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-function getAffectedPackages() {
-  const isMain = process.env.GITHUB_REF === 'refs/heads/main' || process.env.GITHUB_REF === 'refs/heads/master';
-
-  if (isMain) {
-    return getAllPackages();
-  }
-
+// Parse simple YAML arrays since we don't have js-yaml
+function getWorkspacePackages() {
   try {
-    const baseRef = process.env.GITHUB_BASE_REF || 'main';
+    const content = fs.readFileSync('pnpm-workspace.yaml', 'utf8');
+    const lines = content.split('\n');
+    const packages = [];
+    let inPackagesSection = false;
 
-    // Check if origin/main exists, if not use just main
-    let diffCmd = `git diff --name-only origin/${baseRef}...HEAD`;
-    try {
-      execSync(diffCmd, { stdio: 'ignore' });
-    } catch (e) {
-      diffCmd = `git diff --name-only ${baseRef}...HEAD`;
-    }
+    for (const line of lines) {
+      if (line.trim().startsWith('packages:')) {
+        inPackagesSection = true;
+        continue;
+      }
 
-    const output = execSync(diffCmd).toString();
-    const changedFiles = output.split('\n').filter(Boolean);
-
-    const affectedPackages = new Set();
-
-    for (const file of changedFiles) {
-      // Avoid matching files that aren't actually part of package source
-      if (file.startsWith('packages/')) {
-        const parts = file.split('/');
-        if (parts.length > 2) {
-          affectedPackages.add(`packages/${parts[1]}`);
+      if (inPackagesSection) {
+        if (line.trim().startsWith('-')) {
+          let pkg = line.trim().substring(1).trim();
+          // Remove quotes
+          pkg = pkg.replace(/^['"]|['"]$/g, '');
+          packages.push(pkg);
+        } else if (line.trim() !== '' && !line.trim().startsWith('#')) {
+          inPackagesSection = false;
         }
-      } else if (file.startsWith('apps/')) {
-        const parts = file.split('/');
-        if (parts.length > 2) {
-          affectedPackages.add(`apps/${parts[1]}`);
-        }
-      } else if (file.startsWith('client/')) {
-        affectedPackages.add('client');
-      } else if (file.startsWith('server/')) {
-        affectedPackages.add('server');
       }
     }
-
-    // Check if critical files changed that affect everything
-    const criticalFiles = ['package.json', 'pnpm-workspace.yaml', 'pnpm-lock.yaml', '.nvmrc'];
-    if (changedFiles.some(f => criticalFiles.includes(f) || f.startsWith('.github/workflows/ci-affected.yml') || f.startsWith('.github/scripts/get-affected-packages'))) {
-      return getAllPackages();
-    }
-
-    return Array.from(affectedPackages);
-
+    return packages;
   } catch (error) {
-    console.error('Error determining affected packages:', error.message);
-    // Fallback to all packages on error
-    return getAllPackages();
+    console.error('Error reading pnpm-workspace.yaml:', error);
+    return [];
   }
+}
+
+function expandGlobToDirectories(globPattern) {
+  // A simple implementation of expanding glob patterns to directory paths
+  // E.g., 'packages/*' -> ['packages/pkg1', 'packages/pkg2']
+  const dirs = [];
+  const parts = globPattern.split('/');
+
+  if (parts.length === 1) {
+    if (!parts[0].includes('*') && fs.existsSync(parts[0]) && fs.statSync(parts[0]).isDirectory()) {
+      dirs.push(parts[0]);
+    }
+  } else if (parts.length === 2 && parts[1] === '*') {
+    const baseDir = parts[0];
+    if (fs.existsSync(baseDir)) {
+      const subdirs = fs.readdirSync(baseDir).filter(name => {
+        const fullPath = path.join(baseDir, name);
+        return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'package.json'));
+      });
+      for (const subdir of subdirs) {
+        dirs.push(path.join(baseDir, subdir));
+      }
+    }
+  } else if (parts.length === 3 && parts[1] === '*' && parts[2] === '*') {
+    const baseDir = parts[0];
+    if (fs.existsSync(baseDir)) {
+      const firstLevelSubdirs = fs.readdirSync(baseDir).filter(name => fs.statSync(path.join(baseDir, name)).isDirectory());
+      for (const subdir1 of firstLevelSubdirs) {
+        const firstLevelPath = path.join(baseDir, subdir1);
+        const secondLevelSubdirs = fs.readdirSync(firstLevelPath).filter(name => {
+          const fullPath = path.join(firstLevelPath, name);
+          return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'package.json'));
+        });
+        for (const subdir2 of secondLevelSubdirs) {
+          dirs.push(path.join(firstLevelPath, subdir2));
+        }
+      }
+    }
+  }
+
+  return dirs;
 }
 
 function getAllPackages() {
-  const packages = [];
-  const dirsToScan = ['packages', 'apps'];
+  const workspacePackages = getWorkspacePackages();
+  const allDirs = new Set();
 
-  for (const dir of dirsToScan) {
-    if (fs.existsSync(dir)) {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory() && fs.existsSync(path.join(dir, entry.name, 'package.json'))) {
-          packages.push(`${dir}/${entry.name}`);
-        }
+  for (const glob of workspacePackages) {
+    const expanded = expandGlobToDirectories(glob);
+    for (const dir of expanded) {
+      allDirs.add(dir);
+    }
+  }
+
+  return Array.from(allDirs);
+}
+
+function getChangedFiles(baseRef) {
+  try {
+    const output = execSync(`git diff --name-only origin/main...HEAD`, { encoding: 'utf-8' });
+    return output.split('\n').filter(Boolean);
+  } catch (error) {
+    console.error('Error getting changed files from git:', error);
+    return [];
+  }
+}
+
+function main() {
+  const baseRef = process.env.BASE_REF || 'origin/main';
+  const isPr = process.env.GITHUB_EVENT_NAME === 'pull_request';
+
+  // On main branch or when not a PR, we run all packages
+  if (!isPr) {
+    const allPackages = getAllPackages();
+    console.log(JSON.stringify(allPackages));
+    return;
+  }
+
+  const changedFiles = getChangedFiles(baseRef);
+
+  if (changedFiles.length === 0) {
+    console.log(JSON.stringify([]));
+    return;
+  }
+
+  const allPackages = getAllPackages();
+  const affectedPackages = new Set();
+
+  for (const file of changedFiles) {
+    // If root files like package.json or pnpm-workspace.yaml changed, build everything
+    if (!file.includes('/')) {
+      console.log(JSON.stringify(allPackages));
+      return;
+    }
+
+    // Find which package this file belongs to
+    for (const pkg of allPackages) {
+      if (file.startsWith(`${pkg}/`)) {
+        affectedPackages.add(pkg);
+        break; // Only need to match one package
       }
     }
   }
 
-  if (fs.existsSync('client') && fs.existsSync('client/package.json')) packages.push('client');
-  if (fs.existsSync('server') && fs.existsSync('server/package.json')) packages.push('server');
-
-  return packages;
+  console.log(JSON.stringify(Array.from(affectedPackages)));
 }
 
-const affected = getAffectedPackages();
-console.log(JSON.stringify(affected));
+main();
