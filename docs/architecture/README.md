@@ -12,6 +12,7 @@ This document is the single entry point for the Summit/IntelGraph architecture c
 
 Use these documents as the canonical references when implementing or reviewing changes:
 
+- **System Overview:** [`docs/architecture/SUMMIT_SYSTEM_ARCHITECTURE.md`](./SUMMIT_SYSTEM_ARCHITECTURE.md)
 - **Topology & platform shape:** [`docs/architecture/day1-topology.md`](./day1-topology.md), [`docs/architecture/system-map.png`](./system-map.png), [`docs/architecture/service-dependency-map.md`](./service-dependency-map.md)
 - **Cross-cutting concerns:** [`docs/architecture/zero-trust.md`](./zero-trust.md), [`docs/architecture/service-mesh-architecture.md`](./service-mesh-architecture.md), [`docs/architecture/dead-code-policy.md`](./dead-code-policy.md)
 - **Data & provenance:** [`docs/architecture/prov-ledger.md`](./prov-ledger.md), [`docs/architecture/provenance-ledger-beta.md`](./provenance-ledger-beta.md), [`docs/architecture/event-schemas.md`](./event-schemas.md)

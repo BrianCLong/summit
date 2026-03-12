@@ -1,5 +1,7 @@
 # Summit Intelligence OS - Architecture
 
+> **Canonical Reference**: See [Summit System Architecture](./SUMMIT_SYSTEM_ARCHITECTURE.md) for the comprehensive system-level view.
+
 ## Parity Kernel + Proof Moat
 
 Summit is built on the thesis of "coverage + actionability + trust" with an evidence-first wedge, operating as a GA-ready, audit-grade Intelligence OS. It combines graph-first identity resolution, continuous diffs, case workflows, and deterministic signed evidence bundles.
