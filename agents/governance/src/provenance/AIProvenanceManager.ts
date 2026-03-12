@@ -242,7 +242,8 @@ export class AIProvenanceManager {
       },
       buildDefinition: {
         buildType: 'https://summit.intelgraph.io/ai-decision/v1',
-        externalParameters: {
+        externalParameters: {},
+        internalParameters: {
           decisionId: params.decisionId,
         },
         resolvedDependencies: params.outputProvenanceIds.map((id, i) => ({

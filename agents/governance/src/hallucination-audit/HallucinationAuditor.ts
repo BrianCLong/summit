@@ -239,7 +239,7 @@ export class HallucinationAuditor {
         // Check for contradicting numbers in same context
         for (const prev of previousFacts) {
           const contradictingNumbers = currentFacts.numbers.filter(
-            (n) => prev.numbers.includes(n) === false && prev.numbers.length > 0,
+            (n: string) => prev.numbers.includes(n) === false && prev.numbers.length > 0,
           );
 
           if (contradictingNumbers.length > 0 && prev.numbers.length > 0) {
