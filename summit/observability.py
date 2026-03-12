@@ -13,6 +13,8 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 from prometheus_fastapi_instrumentator import Instrumentator
 from prometheus_client import Counter, Histogram, Gauge
+from server.src.observability.prometheus import PrometheusMiddleware
+from server.src.observability.logging_middleware import LoggingMiddleware, correlation_id_processor
 
 class Metrics:
     """
@@ -93,6 +95,7 @@ def setup_observability(app: FastAPI):
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
+            correlation_id_processor, # Inject Correlation IDs
             add_open_telemetry_spans, # Inject Trace IDs
             structlog.processors.JSONRenderer(),
         ],
@@ -132,6 +135,10 @@ def setup_observability(app: FastAPI):
 
     # Instrument FastAPI for distributed tracing
     FastAPIInstrumentor.instrument_app(app, tracer_provider=tracer_provider)
+
+    # Add custom middlewares
+    app.add_middleware(LoggingMiddleware)
+    app.add_middleware(PrometheusMiddleware)
 
     # Instrument Logging to inject trace IDs
     # set_logging_format=False because we handle formatting via structlog
