@@ -1,15 +1,15 @@
 import pytest
 import datetime
 from unittest.mock import patch, MagicMock
-from summit.registry.service import RegistryService
+from summit.registry.registry_service import RegistryService
 from summit.registry.model import AgentDefinition, RegistryDocument, RiskTier
 
 @pytest.fixture
 def mock_store():
     # We patch at the place where RegistryService imports them or uses them
-    with patch("summit.registry.service.load_registry") as mock_load, \
-         patch("summit.registry.service.save_registry") as mock_save, \
-         patch("summit.registry.service.emit") as mock_emit:
+    with patch("summit.registry.registry_service.load_registry") as mock_load, \
+         patch("summit.registry.registry_service.save_registry") as mock_save, \
+         patch("summit.registry.registry_service.emit") as mock_emit:
         yield mock_load, mock_save, mock_emit
 
 def test_create_agent(mock_store):
