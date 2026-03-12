@@ -14,6 +14,9 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4 # v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - name: Generate SBOM (SPDX)
         uses: anchore/sbom-action@v0 # v0
         with:
@@ -40,6 +43,7 @@ jobs:
       - uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
+          fetch-tags: true
       - uses: trufflesecurity/trufflehog@v3
         with: { path: '.', base: 'origin/main', head: '${{ github.sha }}' }
 
@@ -47,6 +51,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pilosus/action-pip-license-checker@cc7a461bfa27b44ad187b8578c881ef5138c13fd # v2
         with: { requirements: 'requirements.txt', fail: 'strong' }
       - uses: pilosus/action-licensefinder@v2
@@ -56,8 +63,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-node@v4 # v4
-        with: { node-version: ${{ inputs.node_version }}, cache: 'pnpm' }
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: 'pnpm'
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with: { version: 10.0.0 }
       - run: pnpm install --no-frozen-lockfile
