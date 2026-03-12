@@ -1,0 +1,39 @@
+name: strategic-growth
+
+on:
+  schedule:
+    - cron: '0 4 1 */3 *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  strategic-growth:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Aggregate ecosystem signals
+        run: node scripts/repoos/strategic-growth.mjs
+
+      - name: Compute strategic insights
+        run: |
+          test -f .repoos/growth/strategic-signals.json
+          test -f .repoos/growth/expansion-opportunities.json
+          test -f .repoos/growth/expansion-models.json
+          test -f .repoos/growth/strategic-roadmap.json
+
+      - name: Publish growth artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: strategic-growth-artifacts
+          path: |
+            .repoos/growth/*.json
+            .repoos/evidence/strategic-growth-report.json

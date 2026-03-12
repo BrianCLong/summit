@@ -1,0 +1,5 @@
+[
+  {"signal_type":"plugin-demand","category":"security-automation","demand_score":0.94,"growth_score":0.88,"geography":"north-america","technology":"agent-security","partner_vertical":"finserv"},
+  {"signal_type":"plugin-demand","category":"workflow-automation","demand_score":0.87,"growth_score":0.82,"geography":"europe","technology":"agent-orchestration","partner_vertical":"healthcare"},
+  {"signal_type":"integration-demand","category":"data-quality","demand_score":0.84,"growth_score":0.79,"geography":"apac","technology":"stream-analytics","partner_vertical":"manufacturing"}
+]
