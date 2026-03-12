@@ -12,9 +12,9 @@ def mock_redis():
     mock_redis = fakeredis.FakeRedis(server=server, decode_responses=True)
     with patch("summit.cache.redis_client.redis.Redis.from_url", return_value=mock_redis):
         # Reset singleton to ensure it uses the mock
-        RedisClient._instance = None
+        RedisClient._instances = {}
         yield mock_redis
-        RedisClient._instance = None
+        RedisClient._instances = {}
 
 @pytest.fixture
 def client():

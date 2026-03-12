@@ -129,9 +129,69 @@ class RedisClient:
 
     def pipeline(self):
         if not self.enabled:
-            return None
+            class DummyPipeline:
+                def __init__(self):
+                    self.commands = []
+                def __enter__(self):
+                    return self
+                def __exit__(self, exc_type, exc_val, exc_tb):
+                    pass
+                def set(self, *args, **kwargs):
+                    pass
+                def execute(self):
+                    return []
+            return DummyPipeline()
         try:
             return self.client.pipeline()
         except redis.RedisError as e:
             logger.error(f"Redis pipeline error: {e}")
             return None
+
+    def mget(self, keys: list[str]) -> list[Optional[Any]]:
+        if not self.enabled:
+            return [None] * len(keys)
+        try:
+            values = self.client.mget(keys)
+            results = []
+            for value in values:
+                if value:
+                    try:
+                        results.append(json.loads(value))
+                    except json.JSONDecodeError:
+                        results.append(value)
+                else:
+                    results.append(None)
+            return results
+        except redis.RedisError as e:
+            logger.error(f"Redis mget error: {e}")
+            return [None] * len(keys)
+
+    def mset(self, mapping: dict[str, Any], ttl: Optional[int] = None) -> bool:
+        if not self.enabled:
+            return False
+        try:
+            pipe = self.client.pipeline()
+            serialized_mapping = {}
+            for k, v in mapping.items():
+                if isinstance(v, (dict, list)):
+                    serialized_mapping[k] = json.dumps(v)
+                else:
+                    serialized_mapping[k] = v
+            pipe.mset(serialized_mapping)
+            if ttl:
+                for k in mapping.keys():
+                    pipe.expire(k, ttl)
+            pipe.execute()
+            return True
+        except redis.RedisError as e:
+            logger.error(f"Redis mset error: {e}")
+            return False
+
+    def ttl(self, key: str) -> int:
+        if not self.enabled:
+            return -2
+        try:
+            return self.client.ttl(key)
+        except redis.RedisError as e:
+            logger.error(f"Redis ttl error for key {key}: {e}")
+            return -2
