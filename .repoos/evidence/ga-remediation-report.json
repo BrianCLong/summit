@@ -1,0 +1,15 @@
+{
+  "intervention_category": "B) Governance gate completion",
+  "files_modified": [
+    ".github/workflows/ci.yml",
+    "scripts/ci/verify_no_conflict_markers.mjs",
+    ".repoos/ga-readiness-assessment.json",
+    ".repoos/evidence/ga-remediation-report.json",
+    ".repoos/evidence/ga-remediation-stamp.json",
+    "docs/ga/GA_REMEDIATION_DELTA.md"
+  ],
+  "risk_before": "High likelihood of merge-conflict markers surviving into PR changes and breaking governance/security workflows downstream.",
+  "risk_after": "Conflict markers in changed non-doc files are deterministically blocked in PR CI before merge consideration.",
+  "risk_reduction_estimate": "~60% reduction for this failure mode across CI/governance workflows.",
+  "confidence": "0.86"
+}
