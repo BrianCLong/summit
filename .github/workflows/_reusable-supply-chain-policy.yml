@@ -63,7 +63,7 @@ jobs:
           jq -e '(.packages // []) | length > 0' artifacts/sbom.spdx.json >/dev/null
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3.8.1
         with:
           cosign-release: "v3.0.5"
 

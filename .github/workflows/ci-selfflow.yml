@@ -4,5 +4,5 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: pnpm test:selfflow
+      - run: npm install -g pnpm && pnpm test:selfflow
       - run: pnpm eval:selfflow

@@ -92,7 +92,7 @@ jobs:
           subject-path: ./cyclonedx.xml
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3.8.1
 
       # Verify using Sigstore bundle + Rekor inclusion (no skipping tlog)
       - name: Verify attestation bundle & Rekor inclusion

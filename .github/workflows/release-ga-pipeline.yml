@@ -398,7 +398,7 @@ jobs:
           fi
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3.8.1
         with:
           cosign-release: "v3.0.5"
 
@@ -452,7 +452,7 @@ jobs:
           path: staging/verification
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3.8.1
         with:
           cosign-release: "v3.0.5"
 

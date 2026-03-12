@@ -83,7 +83,7 @@ jobs:
           echo "build=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> manifests/repro-${{ matrix.image.id }}.txt
           echo "deterministic=true" >> manifests/repro-${{ matrix.image.id }}.txt
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3.8.1
       - name: Attest SBOMs
         env:
           COSIGN_EXPERIMENTAL: '1'
