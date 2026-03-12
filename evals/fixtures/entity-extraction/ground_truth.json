@@ -1,0 +1,39 @@
+{
+  "docs": [
+    {
+      "id": "doc1",
+      "text": "CEO Alice Johnson and CFO Bob Smith met at the Acme Corp headquarters in New York on January 15, 2024 to discuss the $50M acquisition of TechStart.",
+      "language": "en",
+      "expected_entities": [
+        {"entityType": "PERSON", "extractedText": "Alice Johnson", "confidence_min": 0.8},
+        {"entityType": "PERSON", "extractedText": "Bob Smith", "confidence_min": 0.8},
+        {"entityType": "ORGANIZATION", "extractedText": "Acme Corp", "confidence_min": 0.8},
+        {"entityType": "ORGANIZATION", "extractedText": "TechStart", "confidence_min": 0.7},
+        {"entityType": "LOCATION", "extractedText": "New York", "confidence_min": 0.8},
+        {"entityType": "DATE", "extractedText": "January 15, 2024", "confidence_min": 0.9},
+        {"entityType": "NUMERIC", "extractedText": "$50M", "confidence_min": 0.8}
+      ]
+    },
+    {
+      "id": "doc2",
+      "text": "La presidenta Maria Garcia visitó las oficinas de GlobalTech en Madrid el martes. She announced a new initiative.",
+      "language": "mixed",
+      "expected_entities": [
+        {"entityType": "PERSON", "extractedText": "Maria Garcia", "confidence_min": 0.8},
+        {"entityType": "ORGANIZATION", "extractedText": "GlobalTech", "confidence_min": 0.8},
+        {"entityType": "LOCATION", "extractedText": "Madrid", "confidence_min": 0.8}
+      ]
+    },
+    {
+      "id": "doc3",
+      "text": "The apple fell from the tree. Apple Inc. reported record profits.",
+      "language": "en",
+      "expected_entities": [
+        {"entityType": "ORGANIZATION", "extractedText": "Apple Inc.", "confidence_min": 0.8}
+      ],
+      "not_expected_entities": [
+        {"entityType": "ORGANIZATION", "extractedText": "apple"}
+      ]
+    }
+  ]
+}
