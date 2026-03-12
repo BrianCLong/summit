@@ -2,90 +2,153 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Summit Design System — Global CSS ──────────────────────────────────────
+   Dark-first, enterprise intelligence platform.
+   CSS custom properties are used by Tailwind utility classes and shared
+   components. The MUI theme (intelgraphTheme.js) governs all MUI components.
+   ─────────────────────────────────────────────────────────────────────────── */
+
 @layer base {
+  /* Light mode (explicit opt-in via .light class or prefers-color-scheme) */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --background:         220 25% 97%;
+    --foreground:         222 47% 11%;
+    --card:               0   0%  100%;
+    --card-foreground:    222 47% 11%;
+    --popover:            0   0%  100%;
+    --popover-foreground: 222 47% 11%;
+    --primary:            221 83% 53%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary:          173 58% 39%;
+    --secondary-foreground: 0 0% 100%;
+    --muted:              210 40% 96%;
+    --muted-foreground:   215 16% 47%;
+    --accent:             173 58% 39%;
+    --accent-foreground:  0   0%  100%;
+    --destructive:        0   84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --surface-elevated: 0 0% 100%;
-    --surface-subtle: 210 40% 98%;
-    --stroke-strong: 214.3 31.8% 85%;
-    --success-strong: 142.1 71% 35%;
-    --warning-strong: 37 92% 50%;
-    --info-strong: 221 83% 53%;
-    --danger-strong: 340 82% 52%;
-    --radius: 0.5rem;
+    --border:             214 32% 91%;
+    --input:              214 32% 91%;
+    --ring:               221 83% 53%;
+    --surface-elevated:   0   0%  100%;
+    --surface-subtle:     210 40% 98%;
+    --stroke-strong:      214 32% 85%;
+    --success-strong:     142 72% 39%;
+    --warning-strong:     37  92% 50%;
+    --info-strong:        221 83% 53%;
+    --danger-strong:      0   72% 51%;
+    --radius:             0.5rem;
+    --sidebar-width:      220px;
+    --topbar-height:      48px;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+  /* Dark mode — default experience */
+  .dark, :root {
+    --background:         224 53% 5%;
+    --foreground:         216 33% 93%;
+    --card:               222 47% 11%;
+    --card-foreground:    216 33% 93%;
+    --popover:            222 47% 11%;
+    --popover-foreground: 216 33% 93%;
+    --primary:            221 100% 62%;
+    --primary-foreground: 224 53% 5%;
+    --secondary:          172 100% 40%;
+    --secondary-foreground: 224 53% 5%;
+    --muted:              220 32% 18%;
+    --muted-foreground:   215 20% 65%;
+    --accent:             172 100% 40%;
+    --accent-foreground:  224 53% 5%;
+    --destructive:        0   63% 60%;
+    --destructive-foreground: 216 33% 93%;
+    --border:             220 28% 13%;
+    --input:              220 28% 13%;
+    --ring:               221 100% 62%;
+    --surface-elevated:   222 38% 15%;
+    --surface-subtle:     224 45% 8%;
+    --stroke-strong:      220 24% 20%;
+    --success-strong:     142 71% 45%;
+    --warning-strong:     38  92% 50%;
+    --info-strong:        221 100% 62%;
+    --danger-strong:      0   84% 60%;
+  }
+
+  .light {
+    --background:         220 25% 97%;
+    --foreground:         222 47% 11%;
+    --card:               0   0%  100%;
+    --card-foreground:    222 47% 11%;
+    --popover:            0   0%  100%;
+    --popover-foreground: 222 47% 11%;
+    --primary:            221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary:          173 58% 39%;
+    --secondary-foreground: 0 0% 100%;
+    --muted:              210 40% 96%;
+    --muted-foreground:   215 16% 47%;
+    --accent:             173 58% 39%;
+    --accent-foreground:  0   0%  100%;
+    --destructive:        0   84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border:             214 32% 91%;
+    --input:              214 32% 91%;
+    --ring:               221 83% 53%;
+    --surface-elevated:   0   0%  100%;
+    --surface-subtle:     210 40% 98%;
+    --stroke-strong:      214 32% 85%;
+    --success-strong:     142 72% 39%;
+    --warning-strong:     37  92% 50%;
+    --info-strong:        221 83% 53%;
+    --danger-strong:      0   72% 51%;
   }
 }
 
-* {
+/* ─── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
 body {
   font-family:
+    "Inter",
     ui-sans-serif,
     -apple-system,
-    Segoe UI,
+    "Segoe UI",
     Roboto,
-    Inter,
     Helvetica,
     Arial,
     sans-serif;
+  font-size: 15px;
   line-height: 1.55;
-  color: #0c0d0e;
-  background-color: #fafbfc;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-#root {
-  min-height: 100vh;
+/* ─── Scrollbars ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  {
+  background: hsl(var(--stroke-strong));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+* { scrollbar-width: thin; scrollbar-color: hsl(var(--stroke-strong)) transparent; }
+
+/* ─── Focus ring — consistent across all interactive elements ─────────────── */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
+/* ─── Graph canvas ────────────────────────────────────────────────────────── */
 .graph-container {
   width: 100%;
   height: 100%;
@@ -95,9 +158,85 @@ body {
 .graph-canvas {
   width: 100%;
   height: 100%;
-  background-color: #fafafa;
+  background-color: hsl(var(--background));
 }
 
+/* ─── Utility classes ─────────────────────────────────────────────────────── */
+
+/* Screen-reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.sr-only.focus\:not-sr-only:focus,
+.sr-only:focus-visible {
+  position: fixed;
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  top: 12px;
+  left: 12px;
+  z-index: 10001;
+  background: hsl(var(--card));
+  color: hsl(var(--primary));
+  border: 1.5px solid hsl(var(--primary));
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+/* Hairline dividers */
+.hairline { border-color: hsl(var(--border)) !important; }
+
+/* Semantic text utilities */
+.text-muted     { color: hsl(var(--muted-foreground)); }
+.text-secondary { color: hsl(var(--muted-foreground)); }
+
+/* Section labels — all-caps micro labels */
+.label-caps {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Tabular numbers for data displays */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Status dot */
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.live    { background-color: hsl(var(--success-strong)); }
+.status-dot.warn    { background-color: hsl(var(--warning-strong)); }
+.status-dot.danger  { background-color: hsl(var(--danger-strong)); }
+.status-dot.neutral { background-color: hsl(var(--muted-foreground)); }
+
+/* Panel surface */
+.surface-panel {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 10px;
+}
+
+/* Loading placeholder */
 .loading-spinner {
   display: flex;
   justify-content: center;
@@ -105,37 +244,9 @@ body {
   height: 200px;
 }
 
+/* Error state */
 .error-message {
-  color: #d32f2f;
+  color: hsl(var(--danger-strong));
   text-align: center;
   padding: 20px;
-}
-
-/* Tufte/Wright-inspired refinements */
-:root {
-  --hairline: rgba(12, 13, 14, 0.08);
-}
-.hairline {
-  border-color: var(--hairline) !important;
-}
-.muted {
-  color: rgba(12, 13, 14, 0.56);
-}
-.smallcaps {
-  font-variant-caps: small-caps;
-  letter-spacing: 0.06em;
-}
-.note {
-  color: rgba(12, 13, 14, 0.56);
-  font-size: 0.85rem;
-}
-.section-title {
-  font-weight: 600;
-  letter-spacing: 0.12rem;
-  text-transform: none;
-}
-.panel {
-  border: 1px solid var(--hairline);
-  border-radius: 6px;
-  background: #fff;
 }
