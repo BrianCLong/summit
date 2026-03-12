@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/Tooltip'
 import { useAuth } from '@/contexts/AuthContext'
 import { renderMarkdown } from '@/lib/markdown'
-import { formatDate, getRiskColor, capitalizeFirst } from '@/lib/utils'
+import { cn, formatDate, getRiskColor, capitalizeFirst } from '@/lib/utils'
 import type { Entity, EntityComment, Relationship, PanelProps } from '@/types'
 
 interface EntityDrawerProps extends PanelProps<Entity[]> {
@@ -230,9 +230,50 @@ export function EntityDrawer({
             <div className="flex items-center justify-between px-6 py-2 bg-muted/30 border-b border-border">
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Entity Dossier // {selectedEntity.id}</span>
               <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="h-6 w-6 border border-border" onClick={() => onAction?.('edit', selectedEntity)}><Edit3 className="h-3 w-3" /></Button>
-                <Button variant="ghost" size="icon" className="h-6 w-6 border border-border" onClick={() => onAction?.('export', selectedEntity)}><ExternalLink className="h-3 w-3" /></Button>
-                <Button variant="ghost" size="icon" className="h-6 w-6 border border-destructive/50 text-destructive" onClick={() => onAction?.('delete', selectedEntity)}><Trash2 className="h-3 w-3" /></Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 border border-border"
+                      onClick={() => onAction?.('edit', selectedEntity)}
+                      aria-label="Edit Entity"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit Entity</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 border border-border"
+                      onClick={() => onAction?.('export', selectedEntity)}
+                      aria-label="Export Entity"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Export Entity</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 border border-destructive/50 text-destructive"
+                      onClick={() => onAction?.('delete', selectedEntity)}
+                      aria-label="Delete Entity"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Delete Entity</TooltipContent>
+                </Tooltip>
               </div>
             </div>
             
