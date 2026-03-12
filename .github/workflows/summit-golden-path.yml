@@ -28,7 +28,6 @@ jobs:
         with:
 <<<<<<< HEAD
 =======
-          version: 10.0.0
 >>>>>>> origin/main
 
       - name: Install dependencies
