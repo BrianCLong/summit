@@ -6,20 +6,16 @@
     "evidence_id": {
       "type": "string"
     },
-    "type": {
+    "run_id": {
       "type": "string"
     },
-    "content": {
+    "content_hash": {
+      "type": "string"
+    },
+    "metadata": {
       "type": "object"
-    },
-    "hash": {
-      "type": "string"
     }
   },
-  "required": [
-    "evidence_id",
-    "type",
-    "content",
-    "hash"
-  ]
+  "required": ["evidence_id", "run_id", "content_hash", "metadata"],
+  "additionalProperties": false
 }

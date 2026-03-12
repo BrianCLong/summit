@@ -1,7 +1,7 @@
 {
-  "run_id": "run-123",
-  "inputs": {"query": "Find malicious actors"},
-  "scope": {"time": "2024"},
-  "tools_invoked": ["search", "analyze"],
-  "outputs_summary": {"findings": 5}
+  "run_id": "run-001",
+  "inputs": {"query": "Find malicious IPs"},
+  "scope": "network-intel",
+  "tools_invoked": ["ip-lookup", "dns-query"],
+  "outputs_summary": "Found 3 malicious IPs"
 }

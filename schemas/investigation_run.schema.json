@@ -10,7 +10,7 @@
       "type": "object"
     },
     "scope": {
-      "type": "object"
+      "type": "string"
     },
     "tools_invoked": {
       "type": "array",
@@ -19,14 +19,9 @@
       }
     },
     "outputs_summary": {
-      "type": "object"
+      "type": "string"
     }
   },
-  "required": [
-    "run_id",
-    "inputs",
-    "scope",
-    "tools_invoked",
-    "outputs_summary"
-  ]
+  "required": ["run_id", "inputs", "scope", "tools_invoked", "outputs_summary"],
+  "additionalProperties": false
 }
