@@ -1,0 +1,192 @@
+{
+  "total_queries": 20,
+  "passed_queries": 20,
+  "failed_queries": 0,
+  "metrics": {
+    "accuracy": 1.0,
+    "ordering_accuracy": 1.0,
+    "uncertainty_accuracy": 1.0
+  },
+  "details": [
+    {
+      "id": "t1",
+      "query": "What event happened on October 15, 2023?",
+      "type": "exact_date",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t2",
+      "query": "What happened immediately after the Project Alpha launch?",
+      "type": "sequence_after",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": true,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t3",
+      "query": "What events occurred before the Q3 earnings report?",
+      "type": "sequence_before",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": true,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t4",
+      "query": "Who is the current CEO?",
+      "type": "current_state",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t5",
+      "query": "Who was the CEO in 2021?",
+      "type": "historical_state",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t6",
+      "query": "What is the most recent status of the beta testing?",
+      "type": "recency",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t7",
+      "query": "What was the latest update on the lawsuit?",
+      "type": "recency",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t8",
+      "query": "When exactly did the database migration complete?",
+      "type": "ambiguous_date",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": true
+    },
+    {
+      "id": "t9",
+      "query": "List all product releases in chronological order.",
+      "type": "sequence_full",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": true,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t10",
+      "query": "Did the security audit happen before or after the data breach?",
+      "type": "sequence_comparison",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": true,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t11",
+      "query": "What happened on February 29, 2024?",
+      "type": "exact_date",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t12",
+      "query": "What happened during the week of July 4th, 2023?",
+      "type": "date_range",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": true,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t13",
+      "query": "Who were the board members during the acquisition?",
+      "type": "historical_state_event",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t14",
+      "query": "Is the system currently under maintenance?",
+      "type": "current_state_boolean",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t15",
+      "query": "What was the first feature implemented?",
+      "type": "sequence_first",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t16",
+      "query": "When did the CEO step down?",
+      "type": "event_date",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t17",
+      "query": "How long was the server down on New Year's Eve?",
+      "type": "duration",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t18",
+      "query": "Were there any active alerts when the backup failed?",
+      "type": "concurrent_events",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": null
+    },
+    {
+      "id": "t19",
+      "query": "What time did the market open on Black Friday?",
+      "type": "ambiguous_time",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": null,
+      "uncertainty_correct": true
+    },
+    {
+      "id": "t20",
+      "query": "Order these events: v1 launch, v2 launch, beta testing, alpha testing.",
+      "type": "sequence_custom",
+      "passed": true,
+      "answer_correct": true,
+      "ordering_correct": true,
+      "uncertainty_correct": null
+    }
+  ]
+}
