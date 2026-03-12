@@ -1,0 +1,47 @@
+name: CI Release Validation
+
+on:
+  pull_request:
+    paths:
+      - "scripts/release/**"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/ci-release.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-scripts:
+    name: Validate Release Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Dry-run Changelog Generation
+        run: |
+          mkdir -p artifacts
+          chmod +x scripts/release/generate_changelog.sh
+          # Use HEAD as to_ref for dry-run validation
+          ./scripts/release/generate_changelog.sh --to HEAD --dry-run
+
+      - name: Dry-run Release CLI
+        run: |
+          # The release.mjs script requires a GA verify stamp by default unless --force is used
+          # We'll use --dry-run and --force to check basic execution
+          node scripts/release/release.mjs --version 0.0.0-dryrun --dry-run --force --skip-tag --skip-gh-release
