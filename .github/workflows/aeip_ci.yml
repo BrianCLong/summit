@@ -10,7 +10,7 @@ jobs:
   check-context-determinism:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run context validation
         run: |
           python3 -c "
@@ -21,7 +21,7 @@ assert cv.validate_recency({'last_updated': '2023-01-01'}), 'Failed recency vali
   check-policy-binding:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run policy enforcement validation
         run: |
           python3 -c "
@@ -32,7 +32,7 @@ assert pe.enforce({'agent_id': 'agent-1', 'action_type': 'read'}, {'clearance': 
   check-entity-reconciliation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run entity reconciliation
         run: |
           python3 -c "
@@ -43,7 +43,7 @@ assert re.reconcile({'id': '123'}, {'entity_id': '123'}), 'Failed entity reconci
   check-evidence-id-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Validate evidence ID
         run: |
           python3 -c "
@@ -62,7 +62,7 @@ for dir_name in os.listdir('evidence/aeip'):
   check-stamp-determinism:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Validate determinism in stamp
         run: |
           python3 -c "
@@ -78,7 +78,7 @@ with open('evidence/aeip/AEIP-TEST-CONTROL-002/stamp.json', 'r') as f:
   check-performance-budget:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Profile AEIP
         run: |
           ./scripts/profile_aeip.py
