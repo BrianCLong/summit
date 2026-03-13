@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import * as assert from 'node:assert/strict';
 const expect = (actual) => ({ toBe: (expected) => assert.equal(actual, expected), toBeTrue: () => assert.equal(actual, true), toBeFalse: () => assert.equal(actual, false), toContain: (expected) => assert.ok(actual.includes(expected)), toBeCloseTo: (expected) => assert.ok(Math.abs(actual - expected) < 0.001), toMatch: (expected) => assert.match(actual, expected), toBeTruthy: () => assert.ok(actual) });
-import { computeDivergenceMetrics } from '../pipeline/computeMetrics';
+import { computeDivergenceMetrics } from '../pipeline/computeMetrics.ts';
 
 
   test('emits divergence score when type is contradicts', () => {

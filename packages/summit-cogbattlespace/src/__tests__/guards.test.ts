@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
 const expect = (actual) => ({ toBe: (expected) => assert.equal(actual, expected) });
-import { enforceAnalyticOnly } from '../governance/guards';
+import { enforceAnalyticOnly } from '../governance/guards.ts';
 
 test("blocks manipulation prompts", () => {
   const result = enforceAnalyticOnly("best message to convince a target audience");
