@@ -27,4 +27,24 @@ describe('Badge Component', () => {
     // 'bg-destructive' is part of the destructive variant
     expect(container.firstChild?.className).toContain('bg-destructive')
   })
+
+  it('renders default icon for status variants', () => {
+    const { container } = render(<Badge variant="success">Success</Badge>)
+    const icon = container.querySelector('svg')
+    expect(icon).toBeDefined()
+    expect(container.textContent).toContain('Success')
+  })
+
+  it('allows overriding default status icon', () => {
+    const CustomIcon = () => <span data-testid="custom-icon">custom</span>
+    render(
+      <Badge variant="success" icon={<CustomIcon />}>
+        Success
+      </Badge>
+    )
+    expect(screen.getByTestId('custom-icon')).toBeDefined()
+    // It should not render the default success icon (svg) if custom icon is provided
+    const svg = document.querySelector('svg')
+    expect(svg).toBeNull()
+  })
 })

@@ -8,5 +8,5 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
-      - run: pnpm test:cos
+      - run: pnpm test:web
       - run: pnpm eval:cos
