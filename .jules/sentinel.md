@@ -85,6 +85,12 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** Several sensitive endpoints (e.g., `/dr/*`, `/airgap/*`, and `/analytics/*`) were mounted directly at the root in `server/src/app.ts` without authentication or role-based access control middleware. This exposed disaster recovery, data export/import, and graph analytics capabilities to unauthenticated users.
 **Learning:** Routes mounted outside the global `/api` protection block are easily overlooked. Relying on internal router protection is less secure than a "deny-by-default" posture at the application entry point.
 **Prevention:** Apply consistent authentication (`authenticateToken`) and role-based (`ensureRole`) middleware to all routes at the time of mounting in the main application file. Regularly audit root-level route definitions for missing security wrappers.
+
+## 2026-03-13 - [CRITICAL] Broken Access Control via Header Spoofing in API Gateway
+**Vulnerability:** The API Gateway's search routes and authorization middleware directly trusted unverified HTTP headers (e.g., `x-tenant-id`, `x-roles`) for identity and tenancy context, allowing any user to spoof their identity and access cross-tenant data.
+**Learning:** Relying on request headers for security context at the gateway level is a major vulnerability if those headers are not first validated against a trusted source (like a JWT signed by a known secret).
+**Prevention:** Always implement a dedicated authentication layer (e.g., JWT validation) that populates a verified internal user object (`req.user`). Ensure all downstream middleware and route handlers source identity information exclusively from this verified object.
+
 ## 2023-10-27 - Command Injection via shell=True in symphony.py
 **Vulnerability:** Command injection vulnerability in `tools/symphony.py` due to using string interpolation and `shell=True` in `subprocess.run()`.
 **Learning:** `subprocess.run(f"just {justfile} {target} {args}", shell=True)` allows an attacker to inject shell metacharacters via `args`. The vulnerability pattern `INJ-CRIT-004` appears in multiple files across the repository. It is a critical risk if input originates from an untrusted source.
