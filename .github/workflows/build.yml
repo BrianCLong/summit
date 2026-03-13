@@ -41,10 +41,13 @@ jobs:
       - name: Build Project
         run: pnpm build
 
+      - name: Install libpcsclite1 for older cosign
+        run: sudo apt-get update && sudo apt-get install -y libpcsclite1
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: "v3.0.5"
+          cosign-release: "v3.1.1"
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@6c5cb5bd7dcd9b7f5fe6d7c7e21ed2f6b3f5ab7b # v0.18.0
