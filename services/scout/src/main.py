@@ -47,7 +47,13 @@ FLAGSMITH_API_URL = os.getenv("FLAGSMITH_API_URL", "https://edge.api.flagsmith.c
 
 def is_enabled(flag: str) -> bool:
     """Check a Flagsmith feature flag."""
+    # Emergency kill-switch override
+    if os.getenv("SCOUT_SEARCH_FORCE_DISABLE", "false").lower() == "true":
+        logger.info("event:feature_flag.evaluated flag=%s result=False reason=force_disable_killswitch", flag)
+        return False
+
     if not FLAGSMITH_ENV_KEY:
+        logger.info("event:feature_flag.evaluated flag=%s result=False reason=missing_env_key", flag)
         return False
     try:
         resp = requests.get(
@@ -58,9 +64,13 @@ def is_enabled(flag: str) -> bool:
         resp.raise_for_status()
         for item in resp.json():
             if item.get("feature", {}).get("name") == flag:
-                return item.get("enabled", False)
+                is_on = item.get("enabled", False)
+                logger.info("event:feature_flag.evaluated flag=%s result=%s reason=flagsmith", flag, is_on)
+                return is_on
     except Exception as err:  # pragma: no cover - logging only
         logger.error("Flagsmith check failed", exc_info=err)
+
+    logger.info("event:feature_flag.evaluated flag=%s result=False reason=default_fallback", flag)
     return False
 
 
