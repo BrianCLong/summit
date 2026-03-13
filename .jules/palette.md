@@ -53,3 +53,7 @@
 **Learning:** UI components intended for inline usage (like Badges) must utilize semantic `<span>` tags rather than `<div>` to avoid invalid HTML nesting when used inside typographic elements (e.g., `<p>`, `<h1>`). A mismatch between implementation (`div`) and test expectations (`span`) often indicates a regression in accessibility and structural integrity.
 
 **Action:** Ensure all atomic inline components default to `<span>` and support flexible icon insertion to reinforce semantic meaning.
+
+## 2024-03-13 - [Link labels to inputs in forms]
+**Learning:** React labels should use the htmlFor attribute linked to the corresponding input's id. Without this, screen readers do not properly announce the input, and clicking the label will not focus the input.
+**Action:** Always ensure any `<label>` in a React form specifies `htmlFor` and matches the `id` of the respective `<input>`, `<select>`, or `<textarea>`.
