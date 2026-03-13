@@ -74,3 +74,16 @@ We utilize the **MAESTRO Threat Modeling Framework** to secure our agentic AI en
 - Physical security of data centers (managed by Cloud Provider).
 - Personnel security (background checks, HR policies).
 - Third-party audits (SOC2/ISO certification reports are available upon request but not stored in this repo).
+
+
+### Provenance Verification
+
+To verify the provenance of a build artifact, download the artifact and its corresponding `provenance.json` file. Then, use the `slsa-verifier` tool:
+
+```bash
+curl -sL https://github.com/slsa-framework/slsa-verifier/releases/download/v2.4.1/slsa-verifier-linux-amd64 -o slsa-verifier
+chmod +x slsa-verifier
+./slsa-verifier verify-artifact <artifact> \
+  --provenance-path provenance.json \
+  --source-uri "github.com/$GITHUB_REPOSITORY"
+```
