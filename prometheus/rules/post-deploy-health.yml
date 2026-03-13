@@ -1,0 +1,43 @@
+groups:
+  - name: post_deploy_health_rules
+    interval: 30s
+    rules:
+      # Pre-calculate HTTP error rate
+      - record: global:job:http_errors:rate5m
+        expr: |
+          sum by (job) (rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          sum by (job) (rate(http_requests_total[5m]))
+
+      # Pre-calculate HTTP latency quantiles
+      - record: global:job:http_request_duration_seconds:p50
+        expr: |
+          histogram_quantile(0.50, sum by (job, le) (rate(http_request_duration_seconds_bucket[5m])))
+
+      - record: global:job:http_request_duration_seconds:p95
+        expr: |
+          histogram_quantile(0.95, sum by (job, le) (rate(http_request_duration_seconds_bucket[5m])))
+
+      - record: global:job:http_request_duration_seconds:p99
+        expr: |
+          histogram_quantile(0.99, sum by (job, le) (rate(http_request_duration_seconds_bucket[5m])))
+
+  - name: post_deploy_alerts
+    rules:
+      - alert: HighErrorRatePostDeploy
+        expr: global:job:http_errors:rate5m > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP error rate detected for job {{ $labels.job }}"
+          description: "Error rate is above 5% (current value: {{ $value }}). This may indicate a post-deploy regression."
+
+      - alert: HighLatencyPostDeploy
+        expr: global:job:http_request_duration_seconds:p95 > 2.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 latency detected for job {{ $labels.job }}"
+          description: "p95 latency is above 2.0s (current value: {{ $value }}s). This may indicate a performance regression."
