@@ -8,16 +8,6 @@ from typing import Any, Dict, Iterable, Optional
 
 # Minimal, dependency-light emitter (can swap to official client later if desired)
 # Expected OTEL span format (dict-like) with attributes under "attributes".
-# Reads:
-#  - openlineage.run_id (else generates stable UUIDv5 from trace_id)
-#  - db.system/db.name/db.operation/db.statement
-#  - messaging.system/messaging.destination
-#  - file.path/file.name
-#
-# Emits OpenLineage events (START, COMPLETE) with:
-#  - run: { runId }
-#  - job:  { namespace, name }
-#  - inputs/outputs datasets with dataset facets (schema minimal) and datasetVersion (if available)
 
 OL_NAMESPACE = os.getenv("OPENLINEAGE_NAMESPACE", "summit://local")
 OL_PRODUCER  = os.getenv("OPENLINEAGE_PRODUCER",  "https://summit.local/otel-openlineage/1")
@@ -34,18 +24,11 @@ def _job_name(span: dict[str, Any]) -> str:
 
 def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
     # db → dataset
-<<<<<<< HEAD
-    if attrs.get("db.system") and (attrs.get("db.name") or attrs.get("db.statement")):
-        name = attrs.get("db.name") or "adhoc"
-        ns   = f"{OL_NAMESPACE}/db/{attrs.get('db.system')}"
-=======
     db_system = attrs.get("db.system.name") or attrs.get("db.system")
     db_name = attrs.get("db.namespace") or attrs.get("db.name")
     if db_system and (db_name or attrs.get("db.statement")):
         name = db_name or "adhoc"
         ns   = f"{OL_NAMESPACE}/db/{db_system}"
-
->>>>>>> origin/main
         ver  = attrs.get("db.statement_hash") or attrs.get("db.sql.hash")
         return {
             "namespace": ns,
@@ -58,18 +41,11 @@ def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
         }
 
     # messaging → dataset
-<<<<<<< HEAD
-    if attrs.get("messaging.system") and attrs.get("messaging.destination"):
-        ns  = f"{OL_NAMESPACE}/msg/{attrs.get('messaging.system')}"
-        name = attrs.get("messaging.destination")
-=======
     msg_system = attrs.get("messaging.system.name") or attrs.get("messaging.system")
     msg_dest = attrs.get("messaging.destination.name") or attrs.get("messaging.destination")
     if msg_system and msg_dest:
         ns  = f"{OL_NAMESPACE}/msg/{msg_system}"
         name = msg_dest
-
->>>>>>> origin/main
         return {
             "namespace": ns,
             "name": name,
