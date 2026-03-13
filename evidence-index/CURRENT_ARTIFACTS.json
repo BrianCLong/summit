@@ -1,0 +1,4066 @@
+[
+  {
+    "evidence_id": "DISINFO-NEWS-ECOSYSTEM-2026",
+    "type": "report",
+    "path": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "DISINFO-NEWS-ECOSYSTEM-2026",
+    "type": "metrics",
+    "path": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "DISINFO-NEWS-ECOSYSTEM-2026",
+    "type": "stamp",
+    "path": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-2601-20245-SKILL-001",
+    "type": "report",
+    "path": "evidence/EVD-2601-20245-SKILL-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-2601-20245-SKILL-001",
+    "type": "metrics",
+    "path": "evidence/EVD-2601-20245-SKILL-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-2601-20245-SKILL-001",
+    "type": "stamp",
+    "path": "evidence/EVD-2601-20245-SKILL-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-AUTH-004",
+    "type": "report",
+    "path": "evidence/EVD-ACPREGISTRY-AUTH-004/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-AUTH-004",
+    "type": "metrics",
+    "path": "evidence/EVD-ACPREGISTRY-AUTH-004/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-AUTH-004",
+    "type": "stamp",
+    "path": "evidence/EVD-ACPREGISTRY-AUTH-004/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-DIST-002",
+    "type": "report",
+    "path": "evidence/EVD-ACPREGISTRY-DIST-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-DIST-002",
+    "type": "metrics",
+    "path": "evidence/EVD-ACPREGISTRY-DIST-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-DIST-002",
+    "type": "stamp",
+    "path": "evidence/EVD-ACPREGISTRY-DIST-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-INGEST-001",
+    "type": "report",
+    "path": "evidence/EVD-ACPREGISTRY-INGEST-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-INGEST-001",
+    "type": "metrics",
+    "path": "evidence/EVD-ACPREGISTRY-INGEST-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-INGEST-001",
+    "type": "stamp",
+    "path": "evidence/EVD-ACPREGISTRY-INGEST-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-INSTALL-005",
+    "type": "report",
+    "path": "evidence/EVD-ACPREGISTRY-INSTALL-005/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-INSTALL-005",
+    "type": "metrics",
+    "path": "evidence/EVD-ACPREGISTRY-INSTALL-005/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-INSTALL-005",
+    "type": "stamp",
+    "path": "evidence/EVD-ACPREGISTRY-INSTALL-005/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-POLICY-003",
+    "type": "report",
+    "path": "evidence/EVD-ACPREGISTRY-POLICY-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-POLICY-003",
+    "type": "metrics",
+    "path": "evidence/EVD-ACPREGISTRY-POLICY-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ACPREGISTRY-POLICY-003",
+    "type": "stamp",
+    "path": "evidence/EVD-ACPREGISTRY-POLICY-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-EVAL-003",
+    "type": "report",
+    "path": "evidence/EVD-APPLEQAI-EVAL-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-EVAL-003",
+    "type": "metrics",
+    "path": "evidence/EVD-APPLEQAI-EVAL-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-EVAL-003",
+    "type": "stamp",
+    "path": "evidence/EVD-APPLEQAI-EVAL-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-HCI-001",
+    "type": "report",
+    "path": "evidence/EVD-APPLEQAI-HCI-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-HCI-001",
+    "type": "metrics",
+    "path": "evidence/EVD-APPLEQAI-HCI-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-HCI-001",
+    "type": "stamp",
+    "path": "evidence/EVD-APPLEQAI-HCI-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-PRIV-002",
+    "type": "report",
+    "path": "evidence/EVD-APPLEQAI-PRIV-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-PRIV-002",
+    "type": "metrics",
+    "path": "evidence/EVD-APPLEQAI-PRIV-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-APPLEQAI-PRIV-002",
+    "type": "stamp",
+    "path": "evidence/EVD-APPLEQAI-PRIV-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHIMYST-SIM-001",
+    "type": "report",
+    "path": "evidence/EVD-ARCHIMYST-SIM-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHIMYST-SIM-001",
+    "type": "metrics",
+    "path": "evidence/EVD-ARCHIMYST-SIM-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHIMYST-SIM-001",
+    "type": "stamp",
+    "path": "evidence/EVD-ARCHIMYST-SIM-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHROT-CPLX-001",
+    "type": "report",
+    "path": "evidence/EVD-ARCHROT-CPLX-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHROT-CPLX-001",
+    "type": "metrics",
+    "path": "evidence/EVD-ARCHROT-CPLX-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHROT-CPLX-001",
+    "type": "stamp",
+    "path": "evidence/EVD-ARCHROT-CPLX-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHROT-CTX-001",
+    "type": "report",
+    "path": "evidence/EVD-ARCHROT-CTX-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHROT-CTX-001",
+    "type": "metrics",
+    "path": "evidence/EVD-ARCHROT-CTX-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ARCHROT-CTX-001",
+    "type": "stamp",
+    "path": "evidence/EVD-ARCHROT-CTX-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-FEED-001",
+    "type": "report",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-FEED-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-FEED-001",
+    "type": "metrics",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-FEED-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-FEED-001",
+    "type": "stamp",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-FEED-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-HITL-001",
+    "type": "report",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-HITL-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-HITL-001",
+    "type": "metrics",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-HITL-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-HITL-001",
+    "type": "stamp",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-HITL-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-LLM-001",
+    "type": "report",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-LLM-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-LLM-001",
+    "type": "metrics",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-LLM-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-LLM-001",
+    "type": "stamp",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-LLM-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-NEXT-001",
+    "type": "report",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-NEXT-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-NEXT-001",
+    "type": "metrics",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-NEXT-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-NEXT-001",
+    "type": "stamp",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-NEXT-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-REP-001",
+    "type": "report",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-REP-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-REP-001",
+    "type": "metrics",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-REP-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-BLACKBIRD-RAV3N-EXEC-REP-001",
+    "type": "stamp",
+    "path": "evidence/EVD-BLACKBIRD-RAV3N-EXEC-REP-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-CAPTURE-003",
+    "type": "report",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-CAPTURE-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-CAPTURE-003",
+    "type": "metrics",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-CAPTURE-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-CAPTURE-003",
+    "type": "stamp",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-CAPTURE-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-CONTRACT-002",
+    "type": "report",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-CONTRACT-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-CONTRACT-002",
+    "type": "metrics",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-CONTRACT-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-CONTRACT-002",
+    "type": "stamp",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-CONTRACT-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-FOUNDATION-001",
+    "type": "report",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-FOUNDATION-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-FOUNDATION-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-FOUNDATION-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-FOUNDATION-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-FOUNDATION-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-INDEX-005",
+    "type": "report",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-INDEX-005/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-INDEX-005",
+    "type": "metrics",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-INDEX-005/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-INDEX-005",
+    "type": "stamp",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-INDEX-005/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-INJECT-004",
+    "type": "report",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-INJECT-004/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-INJECT-004",
+    "type": "metrics",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-INJECT-004/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-INJECT-004",
+    "type": "stamp",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-INJECT-004/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-LANE2-006",
+    "type": "report",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-LANE2-006/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-LANE2-006",
+    "type": "metrics",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-LANE2-006/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CLAUDE-SUPERMEMORY-LANE2-006",
+    "type": "stamp",
+    "path": "evidence/EVD-CLAUDE-SUPERMEMORY-LANE2-006/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CODEX-AUTOMATIONS-SCHEMA-001",
+    "type": "report",
+    "path": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CODEX-AUTOMATIONS-SCHEMA-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CODEX-AUTOMATIONS-SCHEMA-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-DRILL-001",
+    "type": "report",
+    "path": "evidence/EVD-COGSEC-DRILL-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-DRILL-001",
+    "type": "metrics",
+    "path": "evidence/EVD-COGSEC-DRILL-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-DRILL-001",
+    "type": "stamp",
+    "path": "evidence/EVD-COGSEC-DRILL-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-GATE-001",
+    "type": "report",
+    "path": "evidence/EVD-COGSEC-GATE-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-GATE-001",
+    "type": "metrics",
+    "path": "evidence/EVD-COGSEC-GATE-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-GATE-001",
+    "type": "stamp",
+    "path": "evidence/EVD-COGSEC-GATE-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-GOV-001",
+    "type": "report",
+    "path": "evidence/EVD-COGSEC-GOV-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-GOV-001",
+    "type": "metrics",
+    "path": "evidence/EVD-COGSEC-GOV-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-GOV-001",
+    "type": "stamp",
+    "path": "evidence/EVD-COGSEC-GOV-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-SOP-001",
+    "type": "report",
+    "path": "evidence/EVD-COGSEC-SOP-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-SOP-001",
+    "type": "metrics",
+    "path": "evidence/EVD-COGSEC-SOP-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGSEC-SOP-001",
+    "type": "stamp",
+    "path": "evidence/EVD-COGSEC-SOP-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-001",
+    "type": "report",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-001",
+    "type": "metrics",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-001",
+    "type": "stamp",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-002",
+    "type": "report",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-002",
+    "type": "metrics",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-002",
+    "type": "stamp",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-003",
+    "type": "report",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-003",
+    "type": "metrics",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-COGWAR-2026-EVENT-003",
+    "type": "stamp",
+    "path": "evidence/EVD-COGWAR-2026-EVENT-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CTA-LEADERS-2026-01-INGEST-001",
+    "type": "report",
+    "path": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CTA-LEADERS-2026-01-INGEST-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CTA-LEADERS-2026-01-INGEST-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-CACHE-001",
+    "type": "report",
+    "path": "evidence/EVD-CURSOR-INDEXING-CACHE-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-CACHE-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CURSOR-INDEXING-CACHE-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-CACHE-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CURSOR-INDEXING-CACHE-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-CHUNK-001",
+    "type": "report",
+    "path": "evidence/EVD-CURSOR-INDEXING-CHUNK-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-CHUNK-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CURSOR-INDEXING-CHUNK-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-CHUNK-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CURSOR-INDEXING-CHUNK-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-DIFF-001",
+    "type": "report",
+    "path": "evidence/EVD-CURSOR-INDEXING-DIFF-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-DIFF-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CURSOR-INDEXING-DIFF-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-DIFF-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CURSOR-INDEXING-DIFF-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-HYBRID-001",
+    "type": "report",
+    "path": "evidence/EVD-CURSOR-INDEXING-HYBRID-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-HYBRID-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CURSOR-INDEXING-HYBRID-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-HYBRID-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CURSOR-INDEXING-HYBRID-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-MERKLE-001",
+    "type": "report",
+    "path": "evidence/EVD-CURSOR-INDEXING-MERKLE-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-MERKLE-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CURSOR-INDEXING-MERKLE-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-MERKLE-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CURSOR-INDEXING-MERKLE-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-PROOF-001",
+    "type": "report",
+    "path": "evidence/EVD-CURSOR-INDEXING-PROOF-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-PROOF-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CURSOR-INDEXING-PROOF-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-PROOF-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CURSOR-INDEXING-PROOF-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-SIMHASH-001",
+    "type": "report",
+    "path": "evidence/EVD-CURSOR-INDEXING-SIMHASH-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-SIMHASH-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CURSOR-INDEXING-SIMHASH-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-INDEXING-SIMHASH-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CURSOR-INDEXING-SIMHASH-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-SECURE-INDEXING-PERF-001",
+    "type": "report",
+    "path": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-SECURE-INDEXING-PERF-001",
+    "type": "metrics",
+    "path": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-CURSOR-SECURE-INDEXING-PERF-001",
+    "type": "stamp",
+    "path": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-DEEPAGENTS-CONTEXT-001",
+    "type": "report",
+    "path": "evidence/EVD-DEEPAGENTS-CONTEXT-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-DEEPAGENTS-CONTEXT-001",
+    "type": "metrics",
+    "path": "evidence/EVD-DEEPAGENTS-CONTEXT-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-DEEPAGENTS-CONTEXT-001",
+    "type": "stamp",
+    "path": "evidence/EVD-DEEPAGENTS-CONTEXT-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001",
+    "type": "report",
+    "path": "evidence/EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001",
+    "type": "metrics",
+    "path": "evidence/EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001",
+    "type": "stamp",
+    "path": "evidence/EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:35:52Z"
+  }
+,
+  {
+    "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-INGEST-001",
+    "type": "report",
+    "path": "evidence/EVD-FLATTEN-STRUCTURED-VS-INGEST-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-INGEST-001",
+    "type": "metrics",
+    "path": "evidence/EVD-FLATTEN-STRUCTURED-VS-INGEST-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-INGEST-001",
+    "type": "stamp",
+    "path": "evidence/EVD-FLATTEN-STRUCTURED-VS-INGEST-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-SEC-001",
+    "type": "report",
+    "path": "evidence/EVD-FLATTEN-STRUCTURED-VS-SEC-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-SEC-001",
+    "type": "metrics",
+    "path": "evidence/EVD-FLATTEN-STRUCTURED-VS-SEC-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-SEC-001",
+    "type": "stamp",
+    "path": "evidence/EVD-FLATTEN-STRUCTURED-VS-SEC-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-GRAPHRAGBENCH-EVAL-001",
+    "type": "report",
+    "path": "evidence/EVD-GRAPHRAGBENCH-EVAL-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-GRAPHRAGBENCH-EVAL-001",
+    "type": "metrics",
+    "path": "evidence/EVD-GRAPHRAGBENCH-EVAL-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-GRAPHRAGBENCH-EVAL-001",
+    "type": "stamp",
+    "path": "evidence/EVD-GRAPHRAGBENCH-EVAL-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-HBR-AI-COORD-001",
+    "type": "report",
+    "path": "evidence/EVD-HBR-AI-COORD-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-HBR-AI-COORD-001",
+    "type": "metrics",
+    "path": "evidence/EVD-HBR-AI-COORD-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-HBR-AI-COORD-001",
+    "type": "stamp",
+    "path": "evidence/EVD-HBR-AI-COORD-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-INTSUM-2026-THREAT-HORIZON-001",
+    "type": "report",
+    "path": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-INTSUM-2026-THREAT-HORIZON-001",
+    "type": "metrics",
+    "path": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-INTSUM-2026-THREAT-HORIZON-001",
+    "type": "stamp",
+    "path": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-AIAGENT-001",
+    "type": "report",
+    "path": "evidence/EVD-IOB20260202-AIAGENT-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-AIAGENT-001",
+    "type": "metrics",
+    "path": "evidence/EVD-IOB20260202-AIAGENT-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-AIAGENT-001",
+    "type": "stamp",
+    "path": "evidence/EVD-IOB20260202-AIAGENT-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-ALLYRISK-001",
+    "type": "report",
+    "path": "evidence/EVD-IOB20260202-ALLYRISK-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-ALLYRISK-001",
+    "type": "metrics",
+    "path": "evidence/EVD-IOB20260202-ALLYRISK-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-ALLYRISK-001",
+    "type": "stamp",
+    "path": "evidence/EVD-IOB20260202-ALLYRISK-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-CAPACITY-001",
+    "type": "report",
+    "path": "evidence/EVD-IOB20260202-CAPACITY-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-CAPACITY-001",
+    "type": "metrics",
+    "path": "evidence/EVD-IOB20260202-CAPACITY-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-CAPACITY-001",
+    "type": "stamp",
+    "path": "evidence/EVD-IOB20260202-CAPACITY-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-ECONESP-001",
+    "type": "report",
+    "path": "evidence/EVD-IOB20260202-ECONESP-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-ECONESP-001",
+    "type": "metrics",
+    "path": "evidence/EVD-IOB20260202-ECONESP-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-ECONESP-001",
+    "type": "stamp",
+    "path": "evidence/EVD-IOB20260202-ECONESP-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-FIMI-001",
+    "type": "report",
+    "path": "evidence/EVD-IOB20260202-FIMI-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-FIMI-001",
+    "type": "metrics",
+    "path": "evidence/EVD-IOB20260202-FIMI-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-FIMI-001",
+    "type": "stamp",
+    "path": "evidence/EVD-IOB20260202-FIMI-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-HUMINT-001",
+    "type": "report",
+    "path": "evidence/EVD-IOB20260202-HUMINT-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-HUMINT-001",
+    "type": "metrics",
+    "path": "evidence/EVD-IOB20260202-HUMINT-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-HUMINT-001",
+    "type": "stamp",
+    "path": "evidence/EVD-IOB20260202-HUMINT-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-SUPPLYCHAIN-001",
+    "type": "report",
+    "path": "evidence/EVD-IOB20260202-SUPPLYCHAIN-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-SUPPLYCHAIN-001",
+    "type": "metrics",
+    "path": "evidence/EVD-IOB20260202-SUPPLYCHAIN-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-SUPPLYCHAIN-001",
+    "type": "stamp",
+    "path": "evidence/EVD-IOB20260202-SUPPLYCHAIN-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-WIRELESS-001",
+    "type": "report",
+    "path": "evidence/EVD-IOB20260202-WIRELESS-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-WIRELESS-001",
+    "type": "metrics",
+    "path": "evidence/EVD-IOB20260202-WIRELESS-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-IOB20260202-WIRELESS-001",
+    "type": "stamp",
+    "path": "evidence/EVD-IOB20260202-WIRELESS-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-CHAINTRUST-001",
+    "type": "report",
+    "path": "evidence/EVD-KIMI-K25-CHAINTRUST-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-CHAINTRUST-001",
+    "type": "metrics",
+    "path": "evidence/EVD-KIMI-K25-CHAINTRUST-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-CHAINTRUST-001",
+    "type": "stamp",
+    "path": "evidence/EVD-KIMI-K25-CHAINTRUST-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-MM-004",
+    "type": "report",
+    "path": "evidence/EVD-KIMI-K25-MM-004/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-MM-004",
+    "type": "metrics",
+    "path": "evidence/EVD-KIMI-K25-MM-004/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-MM-004",
+    "type": "stamp",
+    "path": "evidence/EVD-KIMI-K25-MM-004/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-REPRO-005",
+    "type": "report",
+    "path": "evidence/EVD-KIMI-K25-REPRO-005/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-REPRO-005",
+    "type": "metrics",
+    "path": "evidence/EVD-KIMI-K25-REPRO-005/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-REPRO-005",
+    "type": "stamp",
+    "path": "evidence/EVD-KIMI-K25-REPRO-005/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-SWARM-003",
+    "type": "report",
+    "path": "evidence/EVD-KIMI-K25-SWARM-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-SWARM-003",
+    "type": "metrics",
+    "path": "evidence/EVD-KIMI-K25-SWARM-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-SWARM-003",
+    "type": "stamp",
+    "path": "evidence/EVD-KIMI-K25-SWARM-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-TOOLCALL-002",
+    "type": "report",
+    "path": "evidence/EVD-KIMI-K25-TOOLCALL-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-TOOLCALL-002",
+    "type": "metrics",
+    "path": "evidence/EVD-KIMI-K25-TOOLCALL-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-KIMI-K25-TOOLCALL-002",
+    "type": "stamp",
+    "path": "evidence/EVD-KIMI-K25-TOOLCALL-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LEARN-SNOWFLAKE-DE-OPER-001",
+    "type": "report",
+    "path": "evidence/EVD-LEARN-SNOWFLAKE-DE-OPER-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LEARN-SNOWFLAKE-DE-OPER-001",
+    "type": "metrics",
+    "path": "evidence/EVD-LEARN-SNOWFLAKE-DE-OPER-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LEARN-SNOWFLAKE-DE-OPER-001",
+    "type": "stamp",
+    "path": "evidence/EVD-LEARN-SNOWFLAKE-DE-OPER-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-COLLECT-003",
+    "type": "report",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-COLLECT-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-COLLECT-003",
+    "type": "metrics",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-COLLECT-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-COLLECT-003",
+    "type": "stamp",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-COLLECT-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-METRICS-004",
+    "type": "report",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-METRICS-004/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-METRICS-004",
+    "type": "metrics",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-METRICS-004/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-METRICS-004",
+    "type": "stamp",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-METRICS-004/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-PRIVACY-002",
+    "type": "report",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-PRIVACY-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-PRIVACY-002",
+    "type": "metrics",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-PRIVACY-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-PRIVACY-002",
+    "type": "stamp",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-PRIVACY-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-SCHEMA-001",
+    "type": "report",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-SCHEMA-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-SCHEMA-001",
+    "type": "metrics",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-SCHEMA-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-LIMY-AGENTICWEB-SCHEMA-001",
+    "type": "stamp",
+    "path": "evidence/EVD-LIMY-AGENTICWEB-SCHEMA-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-DSAR-004",
+    "type": "report",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-DSAR-004",
+    "type": "metrics",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-DSAR-004",
+    "type": "stamp",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-EGRESS-005",
+    "type": "report",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-EGRESS-005",
+    "type": "metrics",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-EGRESS-005",
+    "type": "stamp",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-LEAK-003",
+    "type": "report",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-LEAK-003",
+    "type": "metrics",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-LEAK-003",
+    "type": "stamp",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-MODEL-001",
+    "type": "report",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-MODEL-001",
+    "type": "metrics",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-MODEL-001",
+    "type": "stamp",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-POLICY-002",
+    "type": "report",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-POLICY-002",
+    "type": "metrics",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-MITTR-AIMEM-PRIV-POLICY-002",
+    "type": "stamp",
+    "path": "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRATIVE_IOPS_20260129-FRAMES-001",
+    "type": "report",
+    "path": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRATIVE_IOPS_20260129-FRAMES-001",
+    "type": "metrics",
+    "path": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRATIVE_IOPS_20260129-FRAMES-001",
+    "type": "stamp",
+    "path": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-AUD-001",
+    "type": "report",
+    "path": "evidence/EVD-NARRDOM-AUD-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-AUD-001",
+    "type": "metrics",
+    "path": "evidence/EVD-NARRDOM-AUD-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-AUD-001",
+    "type": "stamp",
+    "path": "evidence/EVD-NARRDOM-AUD-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-GOV-001",
+    "type": "report",
+    "path": "evidence/EVD-NARRDOM-GOV-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-GOV-001",
+    "type": "metrics",
+    "path": "evidence/EVD-NARRDOM-GOV-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-GOV-001",
+    "type": "stamp",
+    "path": "evidence/EVD-NARRDOM-GOV-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-NOG-001",
+    "type": "report",
+    "path": "evidence/EVD-NARRDOM-NOG-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-NOG-001",
+    "type": "metrics",
+    "path": "evidence/EVD-NARRDOM-NOG-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-NOG-001",
+    "type": "stamp",
+    "path": "evidence/EVD-NARRDOM-NOG-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-SIM-001",
+    "type": "report",
+    "path": "evidence/EVD-NARRDOM-SIM-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-SIM-001",
+    "type": "metrics",
+    "path": "evidence/EVD-NARRDOM-SIM-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-NARRDOM-SIM-001",
+    "type": "stamp",
+    "path": "evidence/EVD-NARRDOM-SIM-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PAPERTRAIL-REDACT-002",
+    "type": "report",
+    "path": "evidence/EVD-PAPERTRAIL-REDACT-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PAPERTRAIL-REDACT-002",
+    "type": "metrics",
+    "path": "evidence/EVD-PAPERTRAIL-REDACT-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PAPERTRAIL-REDACT-002",
+    "type": "stamp",
+    "path": "evidence/EVD-PAPERTRAIL-REDACT-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PAPERTRAIL-SCHEMA-001",
+    "type": "report",
+    "path": "evidence/EVD-PAPERTRAIL-SCHEMA-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PAPERTRAIL-SCHEMA-001",
+    "type": "metrics",
+    "path": "evidence/EVD-PAPERTRAIL-SCHEMA-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PAPERTRAIL-SCHEMA-001",
+    "type": "stamp",
+    "path": "evidence/EVD-PAPERTRAIL-SCHEMA-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PLANNER-TASKCHAT-REFRESH-2024-COLLAB-001",
+    "type": "report",
+    "path": "evidence/EVD-PLANNER-TASKCHAT-REFRESH-2024-COLLAB-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PLANNER-TASKCHAT-REFRESH-2024-COLLAB-001",
+    "type": "metrics",
+    "path": "evidence/EVD-PLANNER-TASKCHAT-REFRESH-2024-COLLAB-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-PLANNER-TASKCHAT-REFRESH-2024-COLLAB-001",
+    "type": "stamp",
+    "path": "evidence/EVD-PLANNER-TASKCHAT-REFRESH-2024-COLLAB-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-COMPLY-002",
+    "type": "report",
+    "path": "evidence/EVD-POSTIZ-COMPLY-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-COMPLY-002",
+    "type": "metrics",
+    "path": "evidence/EVD-POSTIZ-COMPLY-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-COMPLY-002",
+    "type": "stamp",
+    "path": "evidence/EVD-POSTIZ-COMPLY-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-GATE-004",
+    "type": "report",
+    "path": "evidence/EVD-POSTIZ-GATE-004/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-GATE-004",
+    "type": "metrics",
+    "path": "evidence/EVD-POSTIZ-GATE-004/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-GATE-004",
+    "type": "stamp",
+    "path": "evidence/EVD-POSTIZ-GATE-004/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-GROWTH-001",
+    "type": "report",
+    "path": "evidence/EVD-POSTIZ-GROWTH-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-GROWTH-001",
+    "type": "metrics",
+    "path": "evidence/EVD-POSTIZ-GROWTH-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-GROWTH-001",
+    "type": "stamp",
+    "path": "evidence/EVD-POSTIZ-GROWTH-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-PROD-003",
+    "type": "report",
+    "path": "evidence/EVD-POSTIZ-PROD-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-PROD-003",
+    "type": "metrics",
+    "path": "evidence/EVD-POSTIZ-PROD-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-POSTIZ-PROD-003",
+    "type": "stamp",
+    "path": "evidence/EVD-POSTIZ-PROD-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-AUTO-001",
+    "type": "report",
+    "path": "evidence/EVD-REPLITAGENT-AUTO-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-AUTO-001",
+    "type": "metrics",
+    "path": "evidence/EVD-REPLITAGENT-AUTO-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-AUTO-001",
+    "type": "stamp",
+    "path": "evidence/EVD-REPLITAGENT-AUTO-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-AUTOM-001",
+    "type": "report",
+    "path": "evidence/EVD-REPLITAGENT-AUTOM-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-AUTOM-001",
+    "type": "metrics",
+    "path": "evidence/EVD-REPLITAGENT-AUTOM-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-AUTOM-001",
+    "type": "stamp",
+    "path": "evidence/EVD-REPLITAGENT-AUTOM-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-FOUND-001",
+    "type": "report",
+    "path": "evidence/EVD-REPLITAGENT-FOUND-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-FOUND-001",
+    "type": "metrics",
+    "path": "evidence/EVD-REPLITAGENT-FOUND-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-FOUND-001",
+    "type": "stamp",
+    "path": "evidence/EVD-REPLITAGENT-FOUND-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-INTEG-001",
+    "type": "report",
+    "path": "evidence/EVD-REPLITAGENT-INTEG-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-INTEG-001",
+    "type": "metrics",
+    "path": "evidence/EVD-REPLITAGENT-INTEG-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-INTEG-001",
+    "type": "stamp",
+    "path": "evidence/EVD-REPLITAGENT-INTEG-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-POLICY-001",
+    "type": "report",
+    "path": "evidence/EVD-REPLITAGENT-POLICY-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-POLICY-001",
+    "type": "metrics",
+    "path": "evidence/EVD-REPLITAGENT-POLICY-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-POLICY-001",
+    "type": "stamp",
+    "path": "evidence/EVD-REPLITAGENT-POLICY-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-REPAIR-001",
+    "type": "report",
+    "path": "evidence/EVD-REPLITAGENT-REPAIR-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-REPAIR-001",
+    "type": "metrics",
+    "path": "evidence/EVD-REPLITAGENT-REPAIR-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-REPAIR-001",
+    "type": "stamp",
+    "path": "evidence/EVD-REPLITAGENT-REPAIR-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-SCAFF-001",
+    "type": "report",
+    "path": "evidence/EVD-REPLITAGENT-SCAFF-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-SCAFF-001",
+    "type": "metrics",
+    "path": "evidence/EVD-REPLITAGENT-SCAFF-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-REPLITAGENT-SCAFF-001",
+    "type": "stamp",
+    "path": "evidence/EVD-REPLITAGENT-SCAFF-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SCHEMARETR-ABLAT-001",
+    "type": "report",
+    "path": "evidence/EVD-SCHEMARETR-ABLAT-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SCHEMARETR-ABLAT-001",
+    "type": "metrics",
+    "path": "evidence/EVD-SCHEMARETR-ABLAT-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SCHEMARETR-ABLAT-001",
+    "type": "stamp",
+    "path": "evidence/EVD-SCHEMARETR-ABLAT-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SDSBC-CODEGEN-001",
+    "type": "report",
+    "path": "evidence/EVD-SDSBC-CODEGEN-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SDSBC-CODEGEN-001",
+    "type": "metrics",
+    "path": "evidence/EVD-SDSBC-CODEGEN-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SDSBC-CODEGEN-001",
+    "type": "stamp",
+    "path": "evidence/EVD-SDSBC-CODEGEN-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SDSBC-FOUNDATION-001",
+    "type": "report",
+    "path": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SDSBC-FOUNDATION-001",
+    "type": "metrics",
+    "path": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SDSBC-FOUNDATION-001",
+    "type": "stamp",
+    "path": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SKETCHDYNAMICS-CLARIFY-001",
+    "type": "report",
+    "path": "evidence/EVD-SKETCHDYNAMICS-CLARIFY-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SKETCHDYNAMICS-CLARIFY-001",
+    "type": "metrics",
+    "path": "evidence/EVD-SKETCHDYNAMICS-CLARIFY-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SKETCHDYNAMICS-CLARIFY-001",
+    "type": "stamp",
+    "path": "evidence/EVD-SKETCHDYNAMICS-CLARIFY-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SOT-EVAL-001",
+    "type": "report",
+    "path": "evidence/EVD-SOT-EVAL-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SOT-EVAL-001",
+    "type": "metrics",
+    "path": "evidence/EVD-SOT-EVAL-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SOT-EVAL-001",
+    "type": "stamp",
+    "path": "evidence/EVD-SOT-EVAL-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SOT-EVID-001",
+    "type": "report",
+    "path": "evidence/EVD-SOT-EVID-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SOT-EVID-001",
+    "type": "metrics",
+    "path": "evidence/EVD-SOT-EVID-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SOT-EVID-001",
+    "type": "stamp",
+    "path": "evidence/EVD-SOT-EVID-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SYNTHDATA-COV-001",
+    "type": "report",
+    "path": "evidence/EVD-SYNTHDATA-COV-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SYNTHDATA-COV-001",
+    "type": "metrics",
+    "path": "evidence/EVD-SYNTHDATA-COV-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-SYNTHDATA-COV-001",
+    "type": "stamp",
+    "path": "evidence/EVD-SYNTHDATA-COV-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-TEXT2CYPHER-EXEC-001",
+    "type": "report",
+    "path": "evidence/EVD-TEXT2CYPHER-EXEC-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-TEXT2CYPHER-EXEC-001",
+    "type": "metrics",
+    "path": "evidence/EVD-TEXT2CYPHER-EXEC-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-TEXT2CYPHER-EXEC-001",
+    "type": "stamp",
+    "path": "evidence/EVD-TEXT2CYPHER-EXEC-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001",
+    "type": "report",
+    "path": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001",
+    "type": "metrics",
+    "path": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001",
+    "type": "stamp",
+    "path": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WEBMCP-MWS-0001",
+    "type": "report",
+    "path": "evidence/EVD-WEBMCP-MWS-0001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WEBMCP-MWS-0001",
+    "type": "metrics",
+    "path": "evidence/EVD-WEBMCP-MWS-0001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WEBMCP-MWS-0001",
+    "type": "stamp",
+    "path": "evidence/EVD-WEBMCP-MWS-0001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WEBMCP-MWS-0002",
+    "type": "report",
+    "path": "evidence/EVD-WEBMCP-MWS-0002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WEBMCP-MWS-0002",
+    "type": "metrics",
+    "path": "evidence/EVD-WEBMCP-MWS-0002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WEBMCP-MWS-0002",
+    "type": "stamp",
+    "path": "evidence/EVD-WEBMCP-MWS-0002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-ARCH-001",
+    "type": "report",
+    "path": "evidence/EVD-WORLD_MODEL-ARCH-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-ARCH-001",
+    "type": "metrics",
+    "path": "evidence/EVD-WORLD_MODEL-ARCH-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-ARCH-001",
+    "type": "stamp",
+    "path": "evidence/EVD-WORLD_MODEL-ARCH-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-PLAN-003",
+    "type": "report",
+    "path": "evidence/EVD-WORLD_MODEL-PLAN-003/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-PLAN-003",
+    "type": "metrics",
+    "path": "evidence/EVD-WORLD_MODEL-PLAN-003/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-PLAN-003",
+    "type": "stamp",
+    "path": "evidence/EVD-WORLD_MODEL-PLAN-003/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-PRED-002",
+    "type": "report",
+    "path": "evidence/EVD-WORLD_MODEL-PRED-002/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-PRED-002",
+    "type": "metrics",
+    "path": "evidence/EVD-WORLD_MODEL-PRED-002/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-WORLD_MODEL-PRED-002",
+    "type": "stamp",
+    "path": "evidence/EVD-WORLD_MODEL-PRED-002/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ai-coding-tools-senior-foundation-001",
+    "type": "report",
+    "path": "evidence/EVD-ai-coding-tools-senior-foundation-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ai-coding-tools-senior-foundation-001",
+    "type": "metrics",
+    "path": "evidence/EVD-ai-coding-tools-senior-foundation-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-ai-coding-tools-senior-foundation-001",
+    "type": "stamp",
+    "path": "evidence/EVD-ai-coding-tools-senior-foundation-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-mcp-a2a-mental-model-interop-001",
+    "type": "report",
+    "path": "evidence/EVD-mcp-a2a-mental-model-interop-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-mcp-a2a-mental-model-interop-001",
+    "type": "metrics",
+    "path": "evidence/EVD-mcp-a2a-mental-model-interop-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-mcp-a2a-mental-model-interop-001",
+    "type": "stamp",
+    "path": "evidence/EVD-mcp-a2a-mental-model-interop-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-DETECT-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogsec-stack-DETECT-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-DETECT-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogsec-stack-DETECT-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-DETECT-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogsec-stack-DETECT-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-EVAL-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogsec-stack-EVAL-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-EVAL-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogsec-stack-EVAL-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-EVAL-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogsec-stack-EVAL-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-GOV-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogsec-stack-GOV-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-GOV-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogsec-stack-GOV-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-GOV-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogsec-stack-GOV-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-INGEST-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogsec-stack-INGEST-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-INGEST-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogsec-stack-INGEST-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-INGEST-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogsec-stack-INGEST-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-PROV-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogsec-stack-PROV-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-PROV-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogsec-stack-PROV-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogsec-stack-PROV-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogsec-stack-PROV-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-ai-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-ai-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-ai-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-ai-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-ai-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-ai-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-gov-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-gov-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-gov-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-gov-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-gov-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-gov-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-iw-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-iw-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-iw-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-iw-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-iw-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-iw-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-neuro-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-neuro-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-neuro-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-neuro-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-neuro-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-neuro-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-synth-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-synth-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-synth-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-synth-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-synth-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-synth-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-xr-001",
+    "type": "report",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-xr-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-xr-001",
+    "type": "metrics",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-xr-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-nato-cogwar-techfamilies-xr-001",
+    "type": "stamp",
+    "path": "evidence/EVD-nato-cogwar-techfamilies-xr-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-shared-memory-orch-001",
+    "type": "report",
+    "path": "evidence/EVD-shared-memory-orch-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-shared-memory-orch-001",
+    "type": "metrics",
+    "path": "evidence/EVD-shared-memory-orch-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-shared-memory-orch-001",
+    "type": "stamp",
+    "path": "evidence/EVD-shared-memory-orch-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-youtu-vl-4b-instruct-LIC-001",
+    "type": "report",
+    "path": "evidence/EVD-youtu-vl-4b-instruct-LIC-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-youtu-vl-4b-instruct-LIC-001",
+    "type": "metrics",
+    "path": "evidence/EVD-youtu-vl-4b-instruct-LIC-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVD-youtu-vl-4b-instruct-LIC-001",
+    "type": "stamp",
+    "path": "evidence/EVD-youtu-vl-4b-instruct-LIC-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-20260131-foundry-evals",
+    "type": "report",
+    "path": "evidence/EVID-20260131-foundry-evals/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-20260131-foundry-evals",
+    "type": "metrics",
+    "path": "evidence/EVID-20260131-foundry-evals/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-20260131-foundry-evals",
+    "type": "stamp",
+    "path": "evidence/EVID-20260131-foundry-evals/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-20260131-ufar-0001",
+    "type": "report",
+    "path": "evidence/EVID-20260131-ufar-0001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-20260131-ufar-0001",
+    "type": "metrics",
+    "path": "evidence/EVID-20260131-ufar-0001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-20260131-ufar-0001",
+    "type": "stamp",
+    "path": "evidence/EVID-20260131-ufar-0001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-COGSEC-20260208-0001",
+    "type": "report",
+    "path": "evidence/EVID-COGSEC-20260208-0001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-COGSEC-20260208-0001",
+    "type": "metrics",
+    "path": "evidence/EVID-COGSEC-20260208-0001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-COGSEC-20260208-0001",
+    "type": "stamp",
+    "path": "evidence/EVID-COGSEC-20260208-0001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-COGSEC-20260212-0001",
+    "type": "report",
+    "path": "evidence/EVID-COGSEC-20260212-0001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-COGSEC-20260212-0001",
+    "type": "metrics",
+    "path": "evidence/EVID-COGSEC-20260212-0001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-COGSEC-20260212-0001",
+    "type": "stamp",
+    "path": "evidence/EVID-COGSEC-20260212-0001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-NARINT-SMOKE",
+    "type": "report",
+    "path": "evidence/EVID-NARINT-SMOKE/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "EVID-NARINT-SMOKE",
+    "type": "stamp",
+    "path": "evidence/EVID-NARINT-SMOKE/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "FORBES-AGENTIC-AI-2026",
+    "type": "report",
+    "path": "evidence/FORBES-AGENTIC-AI-2026/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "FORBES-AGENTIC-AI-2026",
+    "type": "metrics",
+    "path": "evidence/FORBES-AGENTIC-AI-2026/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "FORBES-AGENTIC-AI-2026",
+    "type": "stamp",
+    "path": "evidence/FORBES-AGENTIC-AI-2026/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "HONO-ERRBOUNDARY-XSS",
+    "type": "report",
+    "path": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "HONO-ERRBOUNDARY-XSS",
+    "type": "metrics",
+    "path": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "HONO-ERRBOUNDARY-XSS",
+    "type": "stamp",
+    "path": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "INFOWAR",
+    "type": "report",
+    "path": "evidence/INFOWAR/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "INFOWAR",
+    "type": "metrics",
+    "path": "evidence/INFOWAR/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "INFOWAR",
+    "type": "stamp",
+    "path": "evidence/INFOWAR/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "MITTR-AGENTIC-WORKFORCE",
+    "type": "report",
+    "path": "evidence/MITTR-AGENTIC-WORKFORCE/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "MITTR-AGENTIC-WORKFORCE",
+    "type": "metrics",
+    "path": "evidence/MITTR-AGENTIC-WORKFORCE/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "MITTR-AGENTIC-WORKFORCE",
+    "type": "stamp",
+    "path": "evidence/MITTR-AGENTIC-WORKFORCE/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "TELETOK-2025",
+    "type": "report",
+    "path": "evidence/TELETOK-2025/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "TELETOK-2025",
+    "type": "metrics",
+    "path": "evidence/TELETOK-2025/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "TELETOK-2025",
+    "type": "stamp",
+    "path": "evidence/TELETOK-2025/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "WSJ-AI-FUNDRAISING-FRENZY",
+    "type": "report",
+    "path": "evidence/WSJ-AI-FUNDRAISING-FRENZY/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "WSJ-AI-FUNDRAISING-FRENZY",
+    "type": "metrics",
+    "path": "evidence/WSJ-AI-FUNDRAISING-FRENZY/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "WSJ-AI-FUNDRAISING-FRENZY",
+    "type": "stamp",
+    "path": "evidence/WSJ-AI-FUNDRAISING-FRENZY/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-fleet-control-plane-2027",
+    "type": "report",
+    "path": "evidence/agent-fleet-control-plane-2027/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-fleet-control-plane-2027",
+    "type": "metrics",
+    "path": "evidence/agent-fleet-control-plane-2027/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-fleet-control-plane-2027",
+    "type": "stamp",
+    "path": "evidence/agent-fleet-control-plane-2027/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-orchestration-tools-2026",
+    "type": "report",
+    "path": "evidence/agent-orchestration-tools-2026/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-orchestration-tools-2026",
+    "type": "metrics",
+    "path": "evidence/agent-orchestration-tools-2026/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-orchestration-tools-2026",
+    "type": "stamp",
+    "path": "evidence/agent-orchestration-tools-2026/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-skills",
+    "type": "report",
+    "path": "evidence/agent-skills/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-skills",
+    "type": "metrics",
+    "path": "evidence/agent-skills/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent-skills",
+    "type": "stamp",
+    "path": "evidence/agent-skills/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent_trace",
+    "type": "report",
+    "path": "evidence/agent_trace/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent_trace",
+    "type": "metrics",
+    "path": "evidence/agent_trace/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "agent_trace",
+    "type": "stamp",
+    "path": "evidence/agent_trace/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-dependency-firewall",
+    "type": "report",
+    "path": "evidence/ai-dependency-firewall/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-dependency-firewall",
+    "type": "metrics",
+    "path": "evidence/ai-dependency-firewall/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-dependency-firewall",
+    "type": "stamp",
+    "path": "evidence/ai-dependency-firewall/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-firewall",
+    "type": "report",
+    "path": "evidence/ai-firewall/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-firewall",
+    "type": "stamp",
+    "path": "evidence/ai-firewall/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:35:52Z"
+  }
+,
+  {
+    "evidence_id": "ai-influence-ops",
+    "type": "report",
+    "path": "evidence/ai-influence-ops/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-influence-ops",
+    "type": "metrics",
+    "path": "evidence/ai-influence-ops/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-influence-ops",
+    "type": "stamp",
+    "path": "evidence/ai-influence-ops/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-supply-chain",
+    "type": "report",
+    "path": "evidence/ai-supply-chain/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-supply-chain",
+    "type": "metrics",
+    "path": "evidence/ai-supply-chain/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-supply-chain",
+    "type": "stamp",
+    "path": "evidence/ai-supply-chain/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-supply-chain-firewall",
+    "type": "report",
+    "path": "evidence/ai-supply-chain-firewall/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-supply-chain-firewall",
+    "type": "metrics",
+    "path": "evidence/ai-supply-chain-firewall/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "ai-supply-chain-firewall",
+    "type": "stamp",
+    "path": "evidence/ai-supply-chain-firewall/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "audit",
+    "type": "report",
+    "path": "evidence/audit/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "audit",
+    "type": "stamp",
+    "path": "evidence/audit/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "brand_story",
+    "type": "report",
+    "path": "evidence/brand_story/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "brand_story",
+    "type": "metrics",
+    "path": "evidence/brand_story/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "brand_story",
+    "type": "stamp",
+    "path": "evidence/brand_story/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "copilot_pr_metrics",
+    "type": "report",
+    "path": "evidence/copilot_pr_metrics/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "copilot_pr_metrics",
+    "type": "metrics",
+    "path": "evidence/copilot_pr_metrics/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "copilot_pr_metrics",
+    "type": "stamp",
+    "path": "evidence/copilot_pr_metrics/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "cos",
+    "type": "report",
+    "path": "evidence/cos/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "cos",
+    "type": "metrics",
+    "path": "evidence/cos/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "cos",
+    "type": "stamp",
+    "path": "evidence/cos/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "cosmos-server",
+    "type": "report",
+    "path": "evidence/cosmos-server/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "cosmos-server",
+    "type": "metrics",
+    "path": "evidence/cosmos-server/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "cosmos-server",
+    "type": "stamp",
+    "path": "evidence/cosmos-server/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "deepsearchqa-run",
+    "type": "report",
+    "path": "evidence/deepsearchqa-run/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "deepsearchqa-run",
+    "type": "metrics",
+    "path": "evidence/deepsearchqa-run/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "deepsearchqa-run",
+    "type": "stamp",
+    "path": "evidence/deepsearchqa-run/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "forbes-2026-trends",
+    "type": "report",
+    "path": "evidence/forbes-2026-trends/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "forbes-2026-trends",
+    "type": "metrics",
+    "path": "evidence/forbes-2026-trends/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "forbes-2026-trends",
+    "type": "stamp",
+    "path": "evidence/forbes-2026-trends/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "gemini_enterprise",
+    "type": "report",
+    "path": "evidence/gemini_enterprise/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "gemini_enterprise",
+    "type": "metrics",
+    "path": "evidence/gemini_enterprise/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "gemini_enterprise",
+    "type": "stamp",
+    "path": "evidence/gemini_enterprise/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "infra",
+    "type": "report",
+    "path": "evidence/infra/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "infra",
+    "type": "metrics",
+    "path": "evidence/infra/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "infra",
+    "type": "stamp",
+    "path": "evidence/infra/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "item-unknown",
+    "type": "report",
+    "path": "evidence/item-unknown/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "item-unknown",
+    "type": "metrics",
+    "path": "evidence/item-unknown/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "item-unknown",
+    "type": "stamp",
+    "path": "evidence/item-unknown/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "mcp-apps",
+    "type": "report",
+    "path": "evidence/mcp-apps/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "mcp-apps",
+    "type": "metrics",
+    "path": "evidence/mcp-apps/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "mcp-apps",
+    "type": "stamp",
+    "path": "evidence/mcp-apps/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "moltbook-relay-surface-001",
+    "type": "report",
+    "path": "evidence/moltbook-relay-surface-001/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "moltbook-relay-surface-001",
+    "type": "metrics",
+    "path": "evidence/moltbook-relay-surface-001/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "moltbook-relay-surface-001",
+    "type": "stamp",
+    "path": "evidence/moltbook-relay-surface-001/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "moltworker",
+    "type": "report",
+    "path": "evidence/moltworker/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "moltworker",
+    "type": "metrics",
+    "path": "evidence/moltworker/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "moltworker",
+    "type": "stamp",
+    "path": "evidence/moltworker/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "narrative_intel",
+    "type": "report",
+    "path": "evidence/narrative_intel/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "narrative_intel",
+    "type": "metrics",
+    "path": "evidence/narrative_intel/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "narrative_intel",
+    "type": "stamp",
+    "path": "evidence/narrative_intel/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "osintplatint_20260201_transform_search_ea8aba4",
+    "type": "report",
+    "path": "evidence/osintplatint_20260201_transform_search_ea8aba4/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "osintplatint_20260201_transform_search_ea8aba4",
+    "type": "metrics",
+    "path": "evidence/osintplatint_20260201_transform_search_ea8aba4/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "osintplatint_20260201_transform_search_ea8aba4",
+    "type": "stamp",
+    "path": "evidence/osintplatint_20260201_transform_search_ea8aba4/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "personal-intelligence",
+    "type": "report",
+    "path": "evidence/personal-intelligence/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "personal-intelligence",
+    "type": "metrics",
+    "path": "evidence/personal-intelligence/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "personal-intelligence",
+    "type": "stamp",
+    "path": "evidence/personal-intelligence/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "pipelines",
+    "type": "report",
+    "path": "evidence/pipelines/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "pipelines",
+    "type": "metrics",
+    "path": "evidence/pipelines/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "pipelines",
+    "type": "stamp",
+    "path": "evidence/pipelines/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "policy",
+    "type": "report",
+    "path": "evidence/policy/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "policy",
+    "type": "metrics",
+    "path": "evidence/policy/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "policy",
+    "type": "stamp",
+    "path": "evidence/policy/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "pppt-501608",
+    "type": "report",
+    "path": "evidence/pppt-501608/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "pppt-501608",
+    "type": "metrics",
+    "path": "evidence/pppt-501608/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "pppt-501608",
+    "type": "stamp",
+    "path": "evidence/pppt-501608/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "privtel",
+    "type": "report",
+    "path": "evidence/privtel/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "privtel",
+    "type": "metrics",
+    "path": "evidence/privtel/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "privtel",
+    "type": "stamp",
+    "path": "evidence/privtel/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "project19",
+    "type": "report",
+    "path": "evidence/project19/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "project19",
+    "type": "stamp",
+    "path": "evidence/project19/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "qwen3_5_medium",
+    "type": "report",
+    "path": "evidence/qwen3_5_medium/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "qwen3_5_medium",
+    "type": "stamp",
+    "path": "evidence/qwen3_5_medium/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "regulatory-early-warning",
+    "type": "report",
+    "path": "evidence/regulatory-early-warning/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "regulatory-early-warning",
+    "type": "metrics",
+    "path": "evidence/regulatory-early-warning/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "regulatory-early-warning",
+    "type": "stamp",
+    "path": "evidence/regulatory-early-warning/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "sc-ea8aba46d-local-build",
+    "type": "report",
+    "path": "evidence/sc-ea8aba46d-local-build/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "sc-ea8aba46d-local-build",
+    "type": "metrics",
+    "path": "evidence/sc-ea8aba46d-local-build/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "sc-ea8aba46d-local-build",
+    "type": "stamp",
+    "path": "evidence/sc-ea8aba46d-local-build/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "scaffolder",
+    "type": "report",
+    "path": "evidence/scaffolder/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "scaffolder",
+    "type": "metrics",
+    "path": "evidence/scaffolder/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "scaffolder",
+    "type": "stamp",
+    "path": "evidence/scaffolder/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "self_flow",
+    "type": "report",
+    "path": "evidence/self_flow/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "self_flow",
+    "type": "metrics",
+    "path": "evidence/self_flow/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "self_flow",
+    "type": "stamp",
+    "path": "evidence/self_flow/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "spatialgeneval",
+    "type": "report",
+    "path": "evidence/spatialgeneval/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "spatialgeneval",
+    "type": "metrics",
+    "path": "evidence/spatialgeneval/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "spatialgeneval",
+    "type": "stamp",
+    "path": "evidence/spatialgeneval/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "templates",
+    "type": "report",
+    "path": "evidence/templates/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "templates",
+    "type": "metrics",
+    "path": "evidence/templates/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "templates",
+    "type": "stamp",
+    "path": "evidence/templates/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "tidemark-temporal-communities",
+    "type": "report",
+    "path": "evidence/tidemark-temporal-communities/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "tidemark-temporal-communities",
+    "type": "metrics",
+    "path": "evidence/tidemark-temporal-communities/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "tidemark-temporal-communities",
+    "type": "stamp",
+    "path": "evidence/tidemark-temporal-communities/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "trustparadox",
+    "type": "report",
+    "path": "evidence/trustparadox/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "trustparadox",
+    "type": "metrics",
+    "path": "evidence/trustparadox/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "trustparadox",
+    "type": "stamp",
+    "path": "evidence/trustparadox/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "workflow-graphs",
+    "type": "report",
+    "path": "evidence/workflow-graphs/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "workflow-graphs",
+    "type": "metrics",
+    "path": "evidence/workflow-graphs/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "workflow-graphs",
+    "type": "stamp",
+    "path": "evidence/workflow-graphs/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "world_model",
+    "type": "report",
+    "path": "evidence/world_model/report.json",
+    "schema_ref": "schemas/evidence/report.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "world_model",
+    "type": "metrics",
+    "path": "evidence/world_model/metrics.json",
+    "schema_ref": "schemas/evidence/metrics.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+,
+  {
+    "evidence_id": "world_model",
+    "type": "stamp",
+    "path": "evidence/world_model/stamp.json",
+    "schema_ref": "schemas/evidence/stamp.schema.json",
+    "last_modified": "2026-03-11T08:31:41Z"
+  }
+
+]
