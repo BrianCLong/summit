@@ -1,5 +1,5 @@
 import * as crypto from 'node:crypto';
-import { SignedResultBundle } from '../leaderboard/sign-result';
+import { SignedResultBundle } from './sign-result';
 
 /**
  * Verifies the ed25519 signature of a signed benchmark result bundle.
