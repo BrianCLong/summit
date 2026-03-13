@@ -16,92 +16,92 @@
   },
   "dependencies": {
 <<<<<<< HEAD
-    @apollo/gateway: "2.8.3",
-    @apollo/server: "4.11.3",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@apollo/gateway": "2.8.3",
+    "@apollo/server": "4.11.3",
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 =======
 <<<<<<< HEAD
-    @apollo/gateway: "2.8.3",
-    @apollo/server: "4.11.0",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@apollo/gateway": "2.8.3",
+    "@apollo/server": "4.11.0",
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 =======
 <<<<<<< HEAD
-    @apollo/gateway: "2.8.3",
-    @apollo/server: "4.13.0",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@apollo/gateway": "2.8.3",
+    "@apollo/server": "4.13.0",
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 =======
 <<<<<<< HEAD
-    @apollo/gateway: "2.8.3",
-    @apollo/server: "4.13.0",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@apollo/gateway": "2.8.3",
+    "@apollo/server": "4.13.0",
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 =======
 <<<<<<< HEAD
-    @apollo/gateway: "2.8.3",
-    @apollo/server: "4.11.3",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@apollo/gateway": "2.8.3",
+    "@apollo/server": "4.11.3",
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 =======
 <<<<<<< HEAD
-    @apollo/gateway: "2.8.3",
-    @apollo/server: "4.11.0",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@apollo/gateway": "2.8.3",
+    "@apollo/server": "4.11.0",
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 =======
 <<<<<<< HEAD
-    @apollo/gateway: "2.8.3",
-    @apollo/server: "4.11.0",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@apollo/gateway": "2.8.3",
+    "@apollo/server": "4.11.0",
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 =======
 <<<<<<< HEAD
-    @apollo/gateway: "2.8.3",
-    @apollo/server: "4.11.3",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@apollo/gateway": "2.8.3",
+    "@apollo/server": "4.11.3",
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 =======
 <<<<<<< HEAD
     "@apollo/gateway": "2.8.3",
@@ -114,15 +114,15 @@
     "graphql-validation-complexity": "0.4.2",
     "yaml": "2.7.0"
 =======
-    @apollo/gateway: "2.8.3",
+    "@apollo/gateway": "2.8.3",
     "@apollo/server": "4.11.3",
-    @opentelemetry/api: "1.9.0",
-    express: "4.21.1",
-    express-rate-limit: "7.1.5",
-    graphql: "16.8.1",
-    graphql-depth-limit: "1.1.0",
-    graphql-validation-complexity: "0.4.2",
-    yaml: "2.7.0"
+    "@opentelemetry/api": "1.9.0",
+    "express": "4.21.1",
+    "express-rate-limit": "7.1.5",
+    "graphql": "16.8.1",
+    "graphql-depth-limit": "1.1.0",
+    "graphql-validation-complexity": "0.4.2",
+    "yaml": "2.7.0"
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
