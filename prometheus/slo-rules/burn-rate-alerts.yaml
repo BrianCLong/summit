@@ -1,0 +1,119 @@
+groups:
+  - name: slo_burn_rate_alerts
+    rules:
+      # API Availability SLO Alerts (99.9% target, 0.1% budget)
+      - alert: APIAvailabilityFastBurn
+        expr: (
+                (job:http_requests_errors:rate1h / job:http_requests_total:rate1h) > (36 * 0.001)
+              and
+                (job:http_requests_errors:rate5m / job:http_requests_total:rate5m) > (36 * 0.001)
+              )
+        labels:
+          severity: critical
+        annotations:
+          summary: "API Availability Fast Burn"
+          description: "API Availability is burning 5% of monthly error budget in 1 hour (36x burn rate)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
+
+      - alert: APIAvailabilitySlowBurn
+        expr: (
+                (job:http_requests_errors:rate6h / job:http_requests_total:rate6h) > (12 * 0.001)
+              and
+                (job:http_requests_errors:rate3d / job:http_requests_total:rate3d) > (12 * 0.001)
+              )
+        labels:
+          severity: warning
+        annotations:
+          summary: "API Availability Slow Burn"
+          description: "API Availability is burning 10% of monthly error budget in 6 hours (12x burn rate)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
+
+      - alert: APIAvailabilityCriticalExhaustion
+        expr: slo:api_availability:ratio_rate30d < 0.999
+        labels:
+          severity: critical
+        annotations:
+          summary: "API Availability Error Budget Exhausted"
+          description: "API Availability error budget is exhausted (<0% remaining for 30d window)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
+
+      # Evidence Pipeline Success Rate SLO Alerts (99.5% target, 0.5% budget)
+      - alert: EvidencePipelineFastBurn
+        expr: (
+                (job:evidence_pipeline_errors:rate1h / job:evidence_pipeline_total:rate1h) > (36 * 0.005)
+              and
+                (job:evidence_pipeline_errors:rate5m / job:evidence_pipeline_total:rate5m) > (36 * 0.005)
+              )
+        labels:
+          severity: critical
+        annotations:
+          summary: "Evidence Pipeline Fast Burn"
+          description: "Evidence Pipeline is burning 5% of monthly error budget in 1 hour (36x burn rate)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
+
+      - alert: EvidencePipelineSlowBurn
+        expr: (
+                (job:evidence_pipeline_errors:rate6h / job:evidence_pipeline_total:rate6h) > (12 * 0.005)
+              and
+                (job:evidence_pipeline_errors:rate3d / job:evidence_pipeline_total:rate3d) > (12 * 0.005)
+              )
+        labels:
+          severity: warning
+        annotations:
+          summary: "Evidence Pipeline Slow Burn"
+          description: "Evidence Pipeline is burning 10% of monthly error budget in 6 hours (12x burn rate)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
+
+      # CI Gate Pass Rate SLO Alerts (98.0% target, 2.0% budget)
+      - alert: CIGatePassRateFastBurn
+        expr: (
+                (job:ci_pipeline_runs_errors:rate1h / job:ci_pipeline_runs_total:rate1h) > (36 * 0.02)
+              and
+                (job:ci_pipeline_runs_errors:rate5m / job:ci_pipeline_runs_total:rate5m) > (36 * 0.02)
+              )
+        labels:
+          severity: critical
+        annotations:
+          summary: "CI Gate Pass Rate Fast Burn"
+          description: "CI Gate Pass Rate is burning 5% of monthly error budget in 1 hour (36x burn rate)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
+
+      - alert: CIGatePassRateSlowBurn
+        expr: (
+                (job:ci_pipeline_runs_errors:rate6h / job:ci_pipeline_runs_total:rate6h) > (12 * 0.02)
+              and
+                (job:ci_pipeline_runs_errors:rate3d / job:ci_pipeline_runs_total:rate3d) > (12 * 0.02)
+              )
+        labels:
+          severity: warning
+        annotations:
+          summary: "CI Gate Pass Rate Slow Burn"
+          description: "CI Gate Pass Rate is burning 10% of monthly error budget in 6 hours (12x burn rate)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
+
+      # Deploy Success Rate SLO Alerts (99.0% target, 1.0% budget)
+      - alert: DeploySuccessRateFastBurn
+        expr: (
+                (job:deployments_errors:rate1h / job:deployments_total:rate1h) > (36 * 0.01)
+              and
+                (job:deployments_errors:rate5m / job:deployments_total:rate5m) > (36 * 0.01)
+              )
+        labels:
+          severity: critical
+        annotations:
+          summary: "Deploy Success Rate Fast Burn"
+          description: "Deploy Success Rate is burning 5% of monthly error budget in 1 hour (36x burn rate)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
+
+      - alert: DeploySuccessRateSlowBurn
+        expr: (
+                (job:deployments_errors:rate6h / job:deployments_total:rate6h) > (12 * 0.01)
+              and
+                (job:deployments_errors:rate3d / job:deployments_total:rate3d) > (12 * 0.01)
+              )
+        labels:
+          severity: warning
+        annotations:
+          summary: "Deploy Success Rate Slow Burn"
+          description: "Deploy Success Rate is burning 10% of monthly error budget in 6 hours (12x burn rate)."
+          runbook_url: "https://github.com/Summit/docs/runbooks/slo-alerts.md"
