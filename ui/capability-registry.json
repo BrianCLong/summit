@@ -1,0 +1,492 @@
+[
+  {
+    "id": "intelgraph-exploration",
+    "name": "IntelGraph Graph Exploration",
+    "category": "IntelGraph",
+    "description": "Interactive graph exploration with entity navigation, relationship traversal, and visual analytics powered by Neo4j",
+    "backendEndpoints": ["/api/intelgraph/query", "/api/intelgraph/traverse", "/api/intelgraph/entities"],
+    "requiredPermissions": ["viewer", "analyst"],
+    "uiSurface": "IntelGraph > GraphWorkspace",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "intelgraph-pattern-mining",
+    "name": "Pattern Mining",
+    "category": "IntelGraph",
+    "description": "Automated discovery of recurring patterns, anomalies, and structural motifs within the intelligence graph",
+    "backendEndpoints": ["/api/intelgraph/patterns", "/api/intelgraph/anomalies"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "IntelGraph > PatternMiner",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "intelgraph-entity-search",
+    "name": "Entity Search",
+    "category": "IntelGraph",
+    "description": "Full-text and semantic search across all graph entities with faceted filtering and relevance ranking",
+    "backendEndpoints": ["/api/intelgraph/search", "/api/intelgraph/entities"],
+    "requiredPermissions": ["viewer", "analyst"],
+    "uiSurface": "IntelGraph > GraphSearch",
+    "visualizationType": "table"
+  },
+  {
+    "id": "intelgraph-relationship-analysis",
+    "name": "Relationship Analysis",
+    "category": "IntelGraph",
+    "description": "Deep analysis of entity relationships including shortest paths, community detection, and influence scoring",
+    "backendEndpoints": ["/api/intelgraph/relationships", "/api/intelgraph/communities"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "IntelGraph > EntityPanel",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "intelgraph-timeline",
+    "name": "Timeline Visualization",
+    "category": "IntelGraph",
+    "description": "Temporal visualization of entity activities, events, and relationship evolution over time",
+    "backendEndpoints": ["/api/intelgraph/timeline", "/api/intelgraph/events"],
+    "requiredPermissions": ["viewer", "analyst"],
+    "uiSurface": "IntelGraph > TimelineView",
+    "visualizationType": "timeline"
+  },
+  {
+    "id": "repoos-dashboard",
+    "name": "RepoOS Dashboard",
+    "category": "RepoOS",
+    "description": "Repository governance overview with health metrics, compliance status, and operational telemetry",
+    "backendEndpoints": ["/api/repoos/status", "/api/repoos/metrics", "/api/repoos/health"],
+    "requiredPermissions": ["viewer", "operator"],
+    "uiSurface": "Repositories > RepoDashboard",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "repoos-pr-analytics",
+    "name": "PR Analytics & Inspector",
+    "category": "RepoOS",
+    "description": "Pull request analysis with risk scoring, merge simulation, and automated review insights",
+    "backendEndpoints": ["/api/repoos/prs", "/api/repoos/pr-risk", "/api/repoos/merge-sim"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Repositories > PRInspector",
+    "visualizationType": "table"
+  },
+  {
+    "id": "repoos-dependency-impact",
+    "name": "Dependency Impact Analysis",
+    "category": "RepoOS",
+    "description": "Dependency graph visualization with impact analysis, vulnerability scoring, and upgrade path planning",
+    "backendEndpoints": ["/api/repoos/dependencies", "/api/repoos/impact"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Repositories > DependencyImpactGraph",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "repoos-policy-engine",
+    "name": "Policy Decision Engine",
+    "category": "RepoOS",
+    "description": "Policy rule management, decision logging, and governance enforcement configuration",
+    "backendEndpoints": ["/api/repoos/policies", "/api/repoos/decisions"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Repositories > PolicyDecisionPanel",
+    "visualizationType": "table"
+  },
+  {
+    "id": "repoos-entropy-monitor",
+    "name": "Entropy Monitor",
+    "category": "RepoOS",
+    "description": "Real-time monitoring of repository entropy, code complexity drift, and architectural degradation signals",
+    "backendEndpoints": ["/api/repoos/entropy", "/api/repoos/complexity"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Repositories > EntropyMonitor",
+    "visualizationType": "heatmap"
+  },
+  {
+    "id": "repoos-batch-optimizer",
+    "name": "Batch Optimizer",
+    "category": "RepoOS",
+    "description": "Intelligent batch processing optimization for CI/CD pipelines with cost-aware scheduling",
+    "backendEndpoints": ["/api/repoos/batch", "/api/repoos/optimize"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Repositories > BatchOptimizerUI",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "repoos-risk-forecasting",
+    "name": "Risk Forecasting",
+    "category": "RepoOS",
+    "description": "Predictive risk models for repository health using historical trends and anomaly detection",
+    "backendEndpoints": ["/api/repoos/risk-forecast", "/api/repoos/trends"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Repositories > RepoDashboard",
+    "visualizationType": "timeline"
+  },
+  {
+    "id": "evolution-ledger",
+    "name": "Evolution Ledger",
+    "category": "Architecture Intelligence",
+    "description": "Immutable ledger tracking all architectural decisions, migrations, and evolution events with provenance",
+    "backendEndpoints": ["/api/evolution/ledger", "/api/provenance/entries"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Architecture Intelligence > EvolutionLedgerView",
+    "visualizationType": "timeline"
+  },
+  {
+    "id": "architecture-discovery",
+    "name": "Architecture Discovery Engine",
+    "category": "Architecture Intelligence",
+    "description": "Automated discovery and mapping of system architecture including dependencies, boundaries, and patterns",
+    "backendEndpoints": ["/api/architecture/discover", "/api/architecture/map"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Architecture Intelligence > ArchitectureTimeline",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "innovation-discovery",
+    "name": "Innovation Discovery",
+    "category": "Architecture Intelligence",
+    "description": "Detection of novel patterns, emerging technologies, and innovation signals across the codebase",
+    "backendEndpoints": ["/api/evolution/innovations", "/api/evolution/signals"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Architecture Intelligence > InnovationDiscoveryPanel",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "technology-radar",
+    "name": "Technology Radar & Early Warning",
+    "category": "Architecture Intelligence",
+    "description": "Technology adoption tracking, deprecation warnings, and strategic alignment scoring",
+    "backendEndpoints": ["/api/evolution/radar", "/api/evolution/warnings"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Architecture Intelligence > TechnologyRadar",
+    "visualizationType": "radar"
+  },
+  {
+    "id": "timemachine-lineage",
+    "name": "Code Lineage Explorer",
+    "category": "Software Time Machine",
+    "description": "Historical code lineage tracking with ancestry graphs, author attribution, and migration history",
+    "backendEndpoints": ["/api/timemachine/lineage", "/api/archaeology/history"],
+    "requiredPermissions": ["viewer", "analyst"],
+    "uiSurface": "Software Time Machine > RepoTimeline",
+    "visualizationType": "timeline"
+  },
+  {
+    "id": "timemachine-architecture-diff",
+    "name": "Architecture Diff View",
+    "category": "Software Time Machine",
+    "description": "Side-by-side comparison of architectural states across time with drift detection and impact analysis",
+    "backendEndpoints": ["/api/timemachine/diff", "/api/timemachine/snapshots"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Software Time Machine > ArchitectureDiffView",
+    "visualizationType": "diff"
+  },
+  {
+    "id": "timemachine-innovation-recovery",
+    "name": "Innovation Recovery",
+    "category": "Software Time Machine",
+    "description": "Discovery and recovery of lost innovations, abandoned features, and deleted code with restoration capabilities",
+    "backendEndpoints": ["/api/timemachine/lost", "/api/archaeology/recovery"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Software Time Machine > InnovationRecoveryPanel",
+    "visualizationType": "table"
+  },
+  {
+    "id": "simulation-scenario-builder",
+    "name": "Scenario Builder",
+    "category": "Simulations",
+    "description": "Visual scenario construction for technology evolution, market shifts, and strategic planning simulations",
+    "backendEndpoints": ["/api/simulation/scenarios", "/api/simulation/build"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Simulations > ScenarioBuilder",
+    "visualizationType": "form"
+  },
+  {
+    "id": "simulation-runner",
+    "name": "Simulation Runner",
+    "category": "Simulations",
+    "description": "Execute and monitor simulations with real-time progress tracking and resource utilization",
+    "backendEndpoints": ["/api/simulation/run", "/api/simulation/status"],
+    "requiredPermissions": ["operator"],
+    "uiSurface": "Simulations > SimulationRunner",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "simulation-outcomes",
+    "name": "Outcome Explorer",
+    "category": "Simulations",
+    "description": "Interactive exploration of simulation outcomes with probability distributions and sensitivity analysis",
+    "backendEndpoints": ["/api/simulation/outcomes", "/api/simulation/analysis"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Simulations > OutcomeExplorer",
+    "visualizationType": "scenario-tree"
+  },
+  {
+    "id": "simulation-trajectory",
+    "name": "Trajectory Visualization",
+    "category": "Simulations",
+    "description": "Multi-dimensional trajectory visualization for simulation paths with branching and convergence analysis",
+    "backendEndpoints": ["/api/simulation/trajectories"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Simulations > TrajectoryGraph",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "agent-dashboard",
+    "name": "Agent Dashboard",
+    "category": "Agents",
+    "description": "Centralized agent monitoring with performance metrics, health status, and orchestration controls",
+    "backendEndpoints": ["/api/agents/list", "/api/agents/metrics", "/api/agents/health"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Agents > AgentDashboard",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "agent-benchmarks",
+    "name": "Agent Benchmarks",
+    "category": "Agents",
+    "description": "Benchmark results visualization with comparison charts, regression detection, and performance trends",
+    "backendEndpoints": ["/api/agents/benchmarks", "/api/evaluation/results"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Agents > BenchmarkViewer",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "agent-trajectory-inspector",
+    "name": "Trajectory Inspector",
+    "category": "Agents",
+    "description": "Step-by-step inspection of agent execution trajectories with decision analysis and replay capabilities",
+    "backendEndpoints": ["/api/agents/trajectories", "/api/agents/replay"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Agents > TrajectoryInspector",
+    "visualizationType": "timeline"
+  },
+  {
+    "id": "agent-evaluation",
+    "name": "Evaluation Results",
+    "category": "Agents",
+    "description": "Agent evaluation results with scoring breakdowns, error analysis, and improvement recommendations",
+    "backendEndpoints": ["/api/evaluation/results", "/api/evaluation/scores"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Agents > EvaluationResults",
+    "visualizationType": "table"
+  },
+  {
+    "id": "threat-actor-graph",
+    "name": "Threat Actor Graph",
+    "category": "Threat Intelligence",
+    "description": "Visual threat actor mapping with TTPs, attribution chains, and campaign linkage analysis",
+    "backendEndpoints": ["/api/threat/actors", "/api/threat/graph", "/api/threat/ttps"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Threat Intelligence > ThreatGraph",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "threat-indicators",
+    "name": "Indicator Library",
+    "category": "Threat Intelligence",
+    "description": "Comprehensive indicator of compromise library with enrichment, scoring, and lifecycle management",
+    "backendEndpoints": ["/api/threat/indicators", "/api/threat/iocs"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Threat Intelligence > IndicatorLibrary",
+    "visualizationType": "table"
+  },
+  {
+    "id": "threat-campaigns",
+    "name": "Campaign Timeline",
+    "category": "Threat Intelligence",
+    "description": "Temporal visualization of threat campaigns with phase tracking, impact assessment, and response coordination",
+    "backendEndpoints": ["/api/threat/campaigns", "/api/threat/timeline"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Threat Intelligence > CampaignTimeline",
+    "visualizationType": "timeline"
+  },
+  {
+    "id": "threat-risk-model",
+    "name": "Risk Model Panel",
+    "category": "Threat Intelligence",
+    "description": "Quantitative risk modeling with threat probability assessment, impact scoring, and mitigation tracking",
+    "backendEndpoints": ["/api/threat/risk", "/api/threat/models"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Threat Intelligence > RiskModelPanel",
+    "visualizationType": "heatmap"
+  },
+  {
+    "id": "osint-aggregator",
+    "name": "OSINT Aggregator",
+    "category": "Data Sources",
+    "description": "Open-source intelligence collection with multi-source aggregation, deduplication, and relevance scoring",
+    "backendEndpoints": ["/api/osint/aggregate", "/api/osint/sources"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Data Sources > OSINTDashboard",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "investigation-workspace",
+    "name": "Investigation Workspace",
+    "category": "Investigations",
+    "description": "Collaborative investigation workspace with evidence boards, hypothesis tracking, and analyst assignments",
+    "backendEndpoints": ["/api/investigations", "/api/investigations/evidence"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Investigations > InvestigationWorkspace",
+    "visualizationType": "workspace"
+  },
+  {
+    "id": "experiment-tracking",
+    "name": "Experiment Tracking",
+    "category": "Experiments",
+    "description": "ML experiment lifecycle management with parameter tracking, metric comparison, and artifact storage",
+    "backendEndpoints": ["/api/experiments", "/api/experiments/runs"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Experiments > ExperimentDashboard",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "governance-policies",
+    "name": "Governance Policies",
+    "category": "Governance",
+    "description": "Policy management with OPA integration, compliance monitoring, and enforcement audit trails",
+    "backendEndpoints": ["/api/governance/policies", "/api/governance/audit"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Governance > PolicyManager",
+    "visualizationType": "table"
+  },
+  {
+    "id": "governance-compliance",
+    "name": "Compliance Dashboard",
+    "category": "Governance",
+    "description": "Regulatory compliance tracking with HIPAA, SOC2, and custom framework support",
+    "backendEndpoints": ["/api/governance/compliance", "/api/governance/frameworks"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Governance > ComplianceDashboard",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "operations-cost-ledger",
+    "name": "Cost Ledger",
+    "category": "Operations",
+    "description": "Operational cost tracking with budget allocation, spend forecasting, and cost optimization recommendations",
+    "backendEndpoints": ["/api/operations/costs", "/api/operations/budget"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Operations > CostLedger",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "operations-telemetry",
+    "name": "System Telemetry",
+    "category": "Operations",
+    "description": "Real-time system telemetry with service health, resource utilization, and performance monitoring",
+    "backendEndpoints": ["/api/operations/telemetry", "/api/operations/health"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Operations > TelemetryDashboard",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "operations-ci-analytics",
+    "name": "CI/CD Analytics",
+    "category": "Operations",
+    "description": "CI/CD pipeline analytics with build times, failure rates, and deployment frequency tracking",
+    "backendEndpoints": ["/api/operations/ci", "/api/operations/deployments"],
+    "requiredPermissions": ["operator"],
+    "uiSurface": "Operations > CIPipelineView",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "driftlens",
+    "name": "DriftLens",
+    "category": "Architecture Intelligence",
+    "description": "Architecture drift detection and monitoring with automated alerts and remediation suggestions",
+    "backendEndpoints": ["/api/drift/detect", "/api/drift/alerts"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Architecture Intelligence > DriftLensView",
+    "visualizationType": "heatmap"
+  },
+  {
+    "id": "cascade-detection",
+    "name": "Cascade Detection",
+    "category": "Architecture Intelligence",
+    "description": "Cascade failure detection and propagation analysis with containment recommendations",
+    "backendEndpoints": ["/api/cascade/detect", "/api/cascade/propagation"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Architecture Intelligence > CascadeView",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "playbook-orchestration",
+    "name": "Playbook Orchestration",
+    "category": "Operations",
+    "description": "SOAR playbook management with visual workflow builder, execution tracking, and automated response",
+    "backendEndpoints": ["/api/playbooks", "/api/playbooks/execute"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Operations > PlaybookManager",
+    "visualizationType": "workflow"
+  },
+  {
+    "id": "vtii-index",
+    "name": "Vector-Temporal Intelligence Index",
+    "category": "IntelGraph",
+    "description": "Vector-temporal indexing for high-dimensional intelligence queries with temporal windowing",
+    "backendEndpoints": ["/api/vtii/query", "/api/vtii/index"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "IntelGraph > VTIIExplorer",
+    "visualizationType": "timeline"
+  },
+  {
+    "id": "cwmi-index",
+    "name": "Continuous World Model Index",
+    "category": "Simulations",
+    "description": "Continuously updated world model with entity state tracking and predictive modeling",
+    "backendEndpoints": ["/api/cwmi/state", "/api/cwmi/predict"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "Simulations > WorldModelView",
+    "visualizationType": "network-graph"
+  },
+  {
+    "id": "sandbox-agents",
+    "name": "Agent Sandbox",
+    "category": "Agents",
+    "description": "Isolated agent execution environment with resource limits, monitoring, and safety guardrails",
+    "backendEndpoints": ["/api/sandbox/create", "/api/sandbox/status"],
+    "requiredPermissions": ["operator", "admin"],
+    "uiSurface": "Agents > SandboxManager",
+    "visualizationType": "dashboard"
+  },
+  {
+    "id": "datasets-management",
+    "name": "Dataset Management",
+    "category": "Data Sources",
+    "description": "Dataset lifecycle management with versioning, quality assessment, and lineage tracking",
+    "backendEndpoints": ["/api/datasets", "/api/datasets/versions"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Data Sources > DatasetManager",
+    "visualizationType": "table"
+  },
+  {
+    "id": "graphrag-query",
+    "name": "GraphRAG Query Interface",
+    "category": "IntelGraph",
+    "description": "Natural language to graph query interface with retrieval-augmented generation capabilities",
+    "backendEndpoints": ["/api/graphrag/query", "/api/graphrag/nl2cypher"],
+    "requiredPermissions": ["analyst"],
+    "uiSurface": "IntelGraph > GraphRAGQuery",
+    "visualizationType": "workspace"
+  },
+  {
+    "id": "regulatory-early-warning",
+    "name": "Regulatory Early Warning",
+    "category": "Governance",
+    "description": "Regulatory enforcement forecasting with complaint velocity, narrative convergence, and risk signals",
+    "backendEndpoints": ["/api/regulatory/warnings", "/api/regulatory/forecast"],
+    "requiredPermissions": ["analyst", "operator"],
+    "uiSurface": "Governance > RegulatoryWarnings",
+    "visualizationType": "timeline"
+  },
+  {
+    "id": "settings-platform",
+    "name": "Platform Settings",
+    "category": "Settings",
+    "description": "Platform-wide configuration management including integrations, notifications, and system preferences",
+    "backendEndpoints": ["/api/settings", "/api/settings/integrations"],
+    "requiredPermissions": ["admin"],
+    "uiSurface": "Settings > PlatformSettings",
+    "visualizationType": "form"
+  }
+]
