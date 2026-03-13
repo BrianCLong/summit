@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Validation Report Schema",
+  "type": "object",
+  "required": ["timestamp", "overall_status", "summary", "details"],
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "overall_status": { "enum": ["PASS", "FAIL", "WARNING"] },
+    "summary": {
+      "type": "object",
+      "required": ["total_checked", "total_passed", "total_failed"],
+      "properties": {
+        "total_checked": { "type": "integer" },
+        "total_passed": { "type": "integer" },
+        "total_failed": { "type": "integer" },
+        "total_warnings": { "type": "integer" }
+      }
+    },
+    "details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "status"],
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "status": { "enum": ["PASS", "FAIL", "WARNING"] },
+          "checks": {
+            "type": "object",
+            "properties": {
+              "schema_compliance": { "type": "boolean" },
+              "confidence_bounds": { "type": "boolean" },
+              "cross_reference": { "type": "boolean" },
+              "chain_completeness": { "type": "boolean" },
+              "duplicate_detection": { "type": "boolean" }
+            }
+          },
+          "errors": { "type": "array", "items": { "type": "string" } },
+          "warnings": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

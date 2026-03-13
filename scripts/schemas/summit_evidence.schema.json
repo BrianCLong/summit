@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Object Schema",
+  "description": "Schema for Summit evidence objects used in validation.",
+  "type": "object",
+  "required": ["evidence_id", "item_slug"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-[A-Z0-9_\\-]+$"
+    },
+    "item_slug": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "patterns": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "confidence"],
+        "properties": {
+          "text": { "type": "string" },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "supported_by": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": { "type": "string", "format": "uri" },
+                "publisher": { "type": "string" },
+                "evidence_id": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "references": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "citations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}
