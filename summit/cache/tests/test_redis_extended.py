@@ -8,7 +8,7 @@ from summit.cache.redis_client import RedisClient
 class TestRedisClientExtended(unittest.TestCase):
     def setUp(self):
         # Reset singleton instance
-        RedisClient._instance = None
+        RedisClient._instances = {}
 
     @patch('summit.cache.redis_client.redis.Redis.from_url')
     @patch('summit.cache.redis_client.REDIS_CACHE_ENABLED', True)
