@@ -28,6 +28,8 @@ class IngestJobRequest(BaseModel):
         default_factory=dict, alias="redactionRules"
     )
     postgres: PostgresOptions | None = Field(default=None, alias="postgresOptions")
+    tenant_id: str | None = Field(default=None, alias="tenantId")
+    scope_id: str | None = Field(default=None, alias="scopeId")
 
 
 class JobStatus(BaseModel):
