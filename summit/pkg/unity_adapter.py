@@ -41,7 +41,7 @@ def _assembly_definitions(package_root: Path) -> list[str]:
     asmdefs: list[str] = []
     for asmdef in sorted(package_root.rglob("*.asmdef")):
         asmdefs.append(str(asmdef.relative_to(package_root)).replace("\\", "/"))
-    return asmdefs
+    return sorted(asmdefs)
 
 
 def parse_unity_package(manifest_path: str | Path) -> dict[str, Any]:
