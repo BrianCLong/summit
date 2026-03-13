@@ -27,7 +27,7 @@ jobs:
         with:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
         with:
           version: 10.0.0
           run_install: false
@@ -64,7 +64,7 @@ jobs:
         with:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
         with:
           version: 10.0.0
           run_install: false
@@ -194,7 +194,7 @@ jobs:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
         with:
           version: 10.0.0
           run_install: false

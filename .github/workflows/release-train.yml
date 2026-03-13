@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v4 # v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0
+        uses: pnpm/action-setup@v3 # v4.1.0
 
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
@@ -118,7 +118,7 @@ jobs:
         uses: actions/checkout@v4 # v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0
+        uses: pnpm/action-setup@v3 # v4.1.0
 
       - name: Setup Node
         uses: actions/setup-node@v4 # v6

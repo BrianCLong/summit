@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+        uses: pnpm/action-setup@v3 # v4
         with:
 
           run_install: false

@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -77,8 +77,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v3
       - name: Install
         run: pnpm install --no-frozen-lockfile
       - name: Validate Jest & pnpm Configuration
@@ -134,8 +134,8 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v3
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Verify runtime configuration
@@ -188,7 +188,7 @@ jobs:
     needs: [integration-tests, build-test]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -216,7 +216,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -250,8 +250,8 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v3
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
       - name: Verify TSConfig Inheritance
@@ -267,7 +267,7 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -294,7 +294,7 @@ jobs:
     needs: [build-test]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
