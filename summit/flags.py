@@ -15,3 +15,8 @@ FEATURE_QWEN3_ASR = is_feature_enabled("FEATURE_QWEN3_ASR", default=False)
 FEATURE_QWEN3_TTS = is_feature_enabled("FEATURE_QWEN3_TTS", default=False)
 REDIS_CACHE_ENABLED = is_feature_enabled("REDIS_CACHE_ENABLED", default=True)
 COORDINATION_EVAL = is_feature_enabled("COORDINATION_EVAL", default=False)
+
+# Counterintelligence Features
+CI_ADVERSARIAL_ASSET_TRACKING = is_feature_enabled("CI_ADVERSARIAL_ASSET_TRACKING", default=False)
+CI_TRIPWIRES_ENABLED = is_feature_enabled("CI_TRIPWIRES_ENABLED", default=False)
+CI_EXTERNAL_EXPORTS_ENABLED = is_feature_enabled("CI_EXTERNAL_EXPORTS_ENABLED", default=False)
