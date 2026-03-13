@@ -1,23 +1,21 @@
-export type QuarantinedPGWriteSet = {
-  id: string;
-  receivedAt: string;
-  raw: unknown;
-  validation: unknown;
-};
-
 export class InMemoryPGQuarantine {
-  private readonly items = new Map<string, QuarantinedPGWriteSet>();
+  private actions: Map<string, any> = new Map();
+  private playbooks: Map<string, any> = new Map();
+  private hypotheses: Map<string, any> = new Map();
 
-  put(item: QuarantinedPGWriteSet) {
-    this.items.set(item.id, item);
-    return item;
+  upsertAction(id: string, payload: any) {
+    this.actions.set(id, payload);
   }
 
-  get(id: string) {
-    return this.items.get(id) ?? null;
+  upsertPlaybook(id: string, payload: any) {
+    this.playbooks.set(id, payload);
   }
 
-  list() {
-    return Array.from(this.items.values());
+  upsertHypothesis(id: string, payload: any) {
+    this.hypotheses.set(id, payload);
   }
+
+  getAction(id: string) { return this.actions.get(id); }
+  getPlaybook(id: string) { return this.playbooks.get(id); }
+  getHypothesis(id: string) { return this.hypotheses.get(id); }
 }

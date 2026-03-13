@@ -1,74 +1,52 @@
-import type { ErrorObject } from 'ajv';
+import type { ErrorObject } from "ajv";
+import { makeAjv } from "./ajv";
+import { DEFAULT_PG_CONTENT_SAFETY } from "../policy/pgPolicy";
 
-import { DEFAULT_PG_CONTENT_SAFETY } from '../policy/pgPolicy';
-import { makeAjv } from './ajv';
-
-export type ValidationReport = {
+export type RejectionReport = {
   ok: boolean;
   schemaErrors: Array<{
     message: string;
     instancePath: string;
     schemaPath: string;
   }>;
-  semanticViolations: Array<{
-    code: string;
-    message: string;
-    path: string;
-  }>;
+  semanticViolations: any[]; // reuse type if needed
 };
 
-function scanPrescriptiveText(value: unknown, path: string) {
-  if (typeof value !== 'string') {
-    return [];
+export function validateActionSignatureSemantics(actionSig: any): any[] {
+  const violations: any[] = [];
+  const lowerDesc = String(actionSig?.description || "").toLowerCase();
+  const lowerLabel = String(actionSig?.label || "").toLowerCase();
+  const forbidden = DEFAULT_PG_CONTENT_SAFETY.prescriptiveLanguageHeuristics.forbiddenPhrases;
+
+  for (const f of forbidden) {
+    if (lowerDesc.includes(f) || lowerLabel.includes(f)) {
+      violations.push({
+        code: "PG_SV_PRESCRIPTIVE_LANGUAGE",
+        message: `Potentially prescriptive language detected (${f}). This package is analytic/defensive only.`,
+        path: lowerDesc.includes(f) ? "/description" : "/label"
+      });
+    }
   }
-
-  const lowered = value.toLowerCase();
-  const hits =
-    DEFAULT_PG_CONTENT_SAFETY.prescriptiveLanguageHeuristics.forbiddenPhrases.filter(
-      (phrase) => lowered.includes(phrase),
-    );
-
-  if (!hits.length) {
-    return [];
-  }
-
-  return [
-    {
-      code: 'PG_SV_PRESCRIPTIVE_LANGUAGE',
-      message: `Potentially prescriptive language detected (${hits.join(', ')}). PG is analytic/defensive only.`,
-      path,
-    },
-  ];
+  return violations;
 }
 
-export function validateActionSignature(actionSignature: unknown): ValidationReport {
+export function validateActionSignature(actionSig: unknown): RejectionReport {
   const ajv = makeAjv();
-  const validate = ajv.getSchema('https://summit.dev/schemas/pg.action.schema.json');
-
+  const validate = ajv.getSchema("https://summit.dev/schemas/pg.action.schema.json");
   if (!validate) {
-    throw new Error('AJV schema not registered: pg.action.schema.json');
+    throw new Error("AJV schema not registered: pg.action.schema.json");
   }
 
-  const okSchema = validate(actionSignature);
-  const schemaErrors = (validate.errors ?? []).map((error: ErrorObject) => ({
-    message: error.message ?? 'schema validation error',
-    instancePath: error.instancePath,
-    schemaPath: error.schemaPath,
+  const okSchema = validate(actionSig);
+  const schemaErrors = (validate.errors ?? []).map((e: ErrorObject) => ({
+    message: e.message ?? "schema validation error",
+    instancePath: e.instancePath,
+    schemaPath: e.schemaPath
   }));
 
-  const action = actionSignature as {
-    label?: unknown;
-    description?: unknown;
-  };
+  const semanticViolations = validateActionSignatureSemantics(actionSig);
 
-  const semanticViolations = [
-    ...scanPrescriptiveText(action.label, '/label'),
-    ...scanPrescriptiveText(action.description, '/description'),
-  ];
+  const ok = Boolean(okSchema) && semanticViolations.length === 0;
 
-  return {
-    ok: Boolean(okSchema) && semanticViolations.length === 0,
-    schemaErrors,
-    semanticViolations,
-  };
+  return { ok, schemaErrors, semanticViolations };
 }

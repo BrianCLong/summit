@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import writeSetFixture from '../fixtures/writeset.pg.example.json';
+import writeSetFixture from '../fixtures/writeset.pg.example.json' assert { type: "json" };
 import { validatePGWriteSet } from '../validate/validatePGWriteSet';
 
 describe('PG WriteSet validation', () => {
@@ -21,7 +21,7 @@ describe('PG WriteSet validation', () => {
     expect(report.ok).toBe(false);
     expect(
       report.semanticViolations.some(
-        (violation) => violation.code === 'PG_WS_MUST_BE_QUARANTINED',
+        (violation: any) => violation.code === 'PG_SV_MUST_BE_QUARANTINED',
       ),
     ).toBe(true);
   });
@@ -39,7 +39,7 @@ describe('PG WriteSet validation', () => {
     expect(report.ok).toBe(false);
     expect(
       report.semanticViolations.some(
-        (violation) => violation.code === 'PG_WS_NEVER_PROMOTE_TO_REALITY',
+        (violation: any) => violation.code === 'PG_SV_NEVER_PROMOTE_REQUIRED',
       ),
     ).toBe(true);
   });

@@ -1,117 +1,111 @@
-import type { ErrorObject } from 'ajv';
+import type { ErrorObject } from "ajv";
+import { makeAjv } from "./ajv";
+import { validateActionSignatureSemantics } from "./validateActionSignature";
+import { validatePlaybookSemantics } from "../sv/semanticRules";
 
-import { validatePlaybook } from './validatePlaybook';
-import { validateActionSignature } from './validateActionSignature';
-import { makeAjv } from './ajv';
-
-export type PGWriteSetValidationReport = {
+export type RejectionReport = {
   ok: boolean;
   schemaErrors: Array<{
     message: string;
     instancePath: string;
     schemaPath: string;
   }>;
-  semanticViolations: Array<{
-    code: string;
-    message: string;
-    path: string;
-  }>;
-  opReports: Array<{
-    entityId: string;
-    ok: boolean;
-    details: unknown;
-  }>;
+  semanticViolations: any[];
 };
 
-export function validatePGWriteSet(writeSet: unknown): PGWriteSetValidationReport {
+export function validatePGWriteSetSemantics(writeset: any): any[] {
+  const violations: any[] = [];
+
+  if (writeset?.graph !== "PG") {
+    violations.push({
+      code: "PG_SV_MUST_BE_PG_GRAPH",
+      message: "PG WriteSets must target the PG graph.",
+      path: "/graph"
+    });
+  }
+
+  if (writeset?.mode !== "quarantine") {
+    violations.push({
+      code: "PG_SV_MUST_BE_QUARANTINED",
+      message: "PG WriteSets must be in quarantine mode.",
+      path: "/mode"
+    });
+  }
+
+  if (writeset?.safety?.neverPromoteToReality !== true) {
+    violations.push({
+      code: "PG_SV_NEVER_PROMOTE_REQUIRED",
+      message: "PG WriteSets must declare neverPromoteToReality=true.",
+      path: "/safety/neverPromoteToReality"
+    });
+  }
+
+  return violations;
+}
+
+export function validatePGWriteSet(writeset: any): RejectionReport {
   const ajv = makeAjv();
-  const validate = ajv.getSchema('https://summit.dev/schemas/pg.writeset.schema.json');
+  const validate = ajv.getSchema("https://summit.dev/schemas/pg.writeset.schema.json");
 
   if (!validate) {
     throw new Error('AJV schema not registered: pg.writeset.schema.json');
   }
 
-  const okSchema = validate(writeSet);
-  const schemaErrors = (validate.errors ?? []).map((error: ErrorObject) => ({
-    message: error.message ?? 'schema validation error',
-    instancePath: error.instancePath,
-    schemaPath: error.schemaPath,
+  const okSchema = validate(writeset);
+  let schemaErrors = (validate.errors ?? []).map((e: ErrorObject) => ({
+    message: e.message ?? "schema validation error",
+    instancePath: e.instancePath,
+    schemaPath: e.schemaPath
   }));
 
-  const ws = writeSet as {
-    graph?: string;
-    mode?: string;
-    safety?: { neverPromoteToReality?: boolean };
-    ops?: Array<{
-      entityType?: string;
-      entityId?: string;
-      payload?: unknown;
-    }>;
-  };
+  const semanticViolations = validatePGWriteSetSemantics(writeset);
 
-  const semanticViolations: Array<{ code: string; message: string; path: string }> = [];
-  const opReports: Array<{ entityId: string; ok: boolean; details: unknown }> = [];
+  if (Array.isArray(writeset?.ops)) {
+    for (let i = 0; i < writeset.ops.length; i++) {
+      const op = writeset.ops[i];
+      if (!op || !op.payload) continue;
 
-  if (ws?.graph !== 'PG') {
-    semanticViolations.push({
-      code: 'PG_WS_GRAPH_MUST_BE_PG',
-      message: 'PG WriteSet graph must be PG.',
-      path: '/graph',
-    });
-  }
-
-  if (ws?.mode !== 'quarantine') {
-    semanticViolations.push({
-      code: 'PG_WS_MUST_BE_QUARANTINED',
-      message: 'PG WriteSet mode must be quarantine.',
-      path: '/mode',
-    });
-  }
-
-  if (ws?.safety?.neverPromoteToReality !== true) {
-    semanticViolations.push({
-      code: 'PG_WS_NEVER_PROMOTE_TO_REALITY',
-      message: 'PG WriteSet must explicitly forbid promotion to RG.',
-      path: '/safety/neverPromoteToReality',
-    });
-  }
-
-  for (const [index, op] of (ws?.ops ?? []).entries()) {
-    const entityId = op.entityId ?? `unknown_${index}`;
-
-    if (op.entityType === 'ActionSignature') {
-      const report = validateActionSignature(op.payload);
-      opReports.push({ entityId, ok: report.ok, details: report });
-      if (!report.ok) {
-        semanticViolations.push({
-          code: 'PG_WS_INVALID_ACTION_SIGNATURE',
-          message: `Invalid ActionSignature payload at op ${index}.`,
-          path: `/ops/${index}/payload`,
-        });
+      let payloadValidate: any;
+      if (op.entityType === 'ActionSignature') {
+         payloadValidate = ajv.getSchema("https://summit.dev/schemas/pg.action.schema.json");
+      } else if (op.entityType === 'Playbook') {
+         payloadValidate = ajv.getSchema("https://summit.dev/schemas/pg.playbook.schema.json");
+      } else if (op.entityType === 'Hypothesis') {
+         payloadValidate = ajv.getSchema("https://summit.dev/schemas/pg.hypothesis.schema.json");
       }
-      continue;
-    }
 
-    if (op.entityType === 'Playbook') {
-      const report = validatePlaybook(op.payload);
-      opReports.push({ entityId, ok: report.ok, details: report });
-      if (!report.ok) {
-        semanticViolations.push({
-          code: 'PG_WS_INVALID_PLAYBOOK',
-          message: `Invalid Playbook payload at op ${index}.`,
-          path: `/ops/${index}/payload`,
-        });
+      if (payloadValidate) {
+        const okPayloadSchema = payloadValidate(op.payload);
+        if (!okPayloadSchema) {
+          schemaErrors = schemaErrors.concat((payloadValidate.errors ?? []).map((e: ErrorObject) => ({
+            message: e.message ?? "schema validation error",
+            instancePath: `/ops/${i}/payload` + e.instancePath,
+            schemaPath: e.schemaPath
+          })));
+        }
       }
-      continue;
-    }
 
-    opReports.push({ entityId, ok: true, details: { skipped: true } });
+      if (op.entityType === 'ActionSignature') {
+        const svErrors = validateActionSignatureSemantics(op.payload);
+        for (const err of svErrors) {
+          semanticViolations.push({
+             ...err,
+             path: `/ops/${i}/payload` + err.path
+          });
+        }
+      } else if (op.entityType === 'Playbook') {
+        const svErrors = validatePlaybookSemantics(op.payload);
+        for (const err of svErrors) {
+          semanticViolations.push({
+             ...err,
+             path: `/ops/${i}/payload` + err.path
+          });
+        }
+      }
+    }
   }
 
-  return {
-    ok: Boolean(okSchema) && semanticViolations.length === 0,
-    schemaErrors,
-    semanticViolations,
-    opReports,
-  };
+  const ok = schemaErrors.length === 0 && semanticViolations.length === 0;
+
+  return { ok, schemaErrors, semanticViolations };
 }
