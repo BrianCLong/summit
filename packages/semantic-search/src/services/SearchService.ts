@@ -7,10 +7,11 @@ import {
   SearchRequest,
   SearchResponse,
   SearchFacet,
-  FacetValue,
   AssetMetadata,
   FilterOperator,
+  SearchFilter,
 } from '@intelgraph/data-catalog';
+import { SemanticHardeningStack } from '../semantic/SemanticHardeningStack.js';
 
 export interface ISearchIndex {
   search(request: SearchRequest): Promise<SearchResponse>;
@@ -28,7 +29,8 @@ export interface ISearchAnalytics {
 export class SearchService {
   constructor(
     private index: ISearchIndex,
-    private analytics?: ISearchAnalytics
+    private analytics?: ISearchAnalytics,
+    private hardeningStack?: SemanticHardeningStack
   ) {}
 
   /**
@@ -36,16 +38,21 @@ export class SearchService {
    */
   async search(request: SearchRequest, userId?: string): Promise<SearchResponse> {
     const startTime = Date.now();
+    const hardenedRequest = this.hardeningStack ? this.hardeningStack.harden(request) : null;
 
     // Execute search
-    const response = await this.index.search(request);
+    const response = await this.index.search(hardenedRequest?.request ?? request);
 
     // Calculate time taken
     response.took = Date.now() - startTime;
 
     // Record analytics
     if (this.analytics && userId) {
-      await this.analytics.recordSearch(request.query, userId, response.total);
+      await this.analytics.recordSearch(
+        hardenedRequest?.request.query ?? request.query,
+        userId,
+        response.total
+      );
     }
 
     return response;
@@ -103,7 +110,7 @@ export class SearchService {
    */
   async advancedSearch(
     query: string,
-    filters: Record<string, any>,
+    filters: Record<string, unknown>,
     sort: { field: string; direction: 'ASC' | 'DESC' }[] = [],
     offset: number = 0,
     limit: number = 20,
@@ -176,8 +183,8 @@ export class SearchService {
   /**
    * Build filters from facet selections
    */
-  private buildFiltersFromFacets(selectedFacets: Record<string, string[]>): any[] {
-    const filters: any[] = [];
+  private buildFiltersFromFacets(selectedFacets: Record<string, string[]>): SearchFilter[] {
+    const filters: SearchFilter[] = [];
 
     for (const [field, values] of Object.entries(selectedFacets)) {
       if (values.length > 0) {
@@ -195,8 +202,8 @@ export class SearchService {
   /**
    * Build filters from advanced search criteria
    */
-  private buildFilters(criteria: Record<string, any>): any[] {
-    const filters: any[] = [];
+  private buildFilters(criteria: Record<string, unknown>): SearchFilter[] {
+    const filters: SearchFilter[] = [];
 
     for (const [field, value] of Object.entries(criteria)) {
       if (value === null || value === undefined) {
@@ -209,7 +216,7 @@ export class SearchService {
           operator: FilterOperator.IN,
           value,
         });
-      } else if (typeof value === 'object' && 'operator' in value) {
+      } else if (this.isOperatorFilter(value)) {
         filters.push({
           field,
           operator: value.operator,
@@ -225,5 +232,17 @@ export class SearchService {
     }
 
     return filters;
+  }
+
+  private isOperatorFilter(value: unknown): value is { operator: FilterOperator; value: unknown } {
+    if (!value || typeof value !== 'object') {
+      return false;
+    }
+
+    const candidate = value as { operator?: unknown; value?: unknown };
+    return (
+      typeof candidate.operator === 'string' &&
+      Object.values(FilterOperator).includes(candidate.operator as FilterOperator)
+    );
   }
 }

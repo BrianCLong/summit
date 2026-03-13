@@ -5,3 +5,4 @@
 
 export * from './services/SearchService.js';
 export * from './rankers/RelevanceRanker.js';
+export * from './semantic/SemanticHardeningStack.js';
