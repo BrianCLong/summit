@@ -127,9 +127,71 @@ class RedisClient:
             logger.error(f"Redis scan_iter error: {e}")
             return iter([])
 
-    def pipeline(self):
+    def mget(self, keys: list[str]) -> list[Any]:
+        if not self.enabled:
+            return [None] * len(keys)
+        try:
+            values = self.client.mget(keys)
+            results = []
+            for value in values:
+                if value:
+                    try:
+                        results.append(json.loads(value))
+                    except json.JSONDecodeError:
+                        results.append(value)
+                else:
+                    results.append(None)
+            return results
+        except redis.RedisError as e:
+            logger.error(f"Redis mget error for keys {keys}: {e}")
+            return [None] * len(keys)
+
+    def mset(self, mapping: dict[str, Any], ttl: Optional[int] = None) -> bool:
+        if not self.enabled:
+            return False
+        try:
+            processed_mapping = {}
+            for k, v in mapping.items():
+                if isinstance(v, (dict, list)):
+                    processed_mapping[k] = json.dumps(v)
+                else:
+                    processed_mapping[k] = v
+
+            pipe = self.pipeline()
+            # If pipeline is dummy, it still handles these methods safely
+            pipe.mset(processed_mapping)
+            if ttl is not None:
+                for k in processed_mapping.keys():
+                    pipe.expire(k, ttl)
+            pipe.execute()
+            return True
+        except redis.RedisError as e:
+            logger.error(f"Redis mset error: {e}")
+            return False
+
+    def ttl(self, key: str) -> Optional[int]:
         if not self.enabled:
             return None
+        try:
+            return self.client.ttl(key)
+        except redis.RedisError as e:
+            logger.error(f"Redis ttl error for key {key}: {e}")
+            return None
+
+    def pipeline(self):
+        if not self.enabled:
+            class DummyPipeline:
+                def __enter__(self):
+                    return self
+                def __exit__(self, exc_type, exc_val, exc_tb):
+                    pass
+                def execute(self):
+                    return []
+                def __getattr__(self, name):
+                    def dummy_method(*args, **kwargs):
+                        return self
+                    return dummy_method
+            return DummyPipeline()
         try:
             return self.client.pipeline()
         except redis.RedisError as e:
