@@ -22,113 +22,23 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
     "@apollo/server": "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.13.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.13.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
-=======
-<<<<<<< HEAD
-    "@apollo/server": "4.16.0",
     "graphql": "16.8.1",
     "neo4j-driver": "5.14.0",
     "mathjs": "12.0.0",
     "lodash": "4.17.21",
     "winston": "3.11.0",
     "uuid": "9.0.1"
-=======
-    "@apollo/server": "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.14.0",
-    mathjs: "12.0.0",
-    lodash: "4.17.21",
-    winston: "3.11.0",
-    uuid: "9.0.1"
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
+
+
+
+
+
+
+
+
+
+
   },
   "devDependencies": {
     "@types/jest": "29.5.8",
