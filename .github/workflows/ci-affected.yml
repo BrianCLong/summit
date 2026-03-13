@@ -1,17 +1,19 @@
-name: Affected CI
+name: Affected Packages CI
 
 on:
   pull_request:
-    branches: [main]
+    types: [opened, synchronize, reopened]
   push:
-    branches: [main]
+    branches:
+      - main
+      - release/*
 
 jobs:
   detect-affected:
-    name: Detect Affected Packages
     runs-on: ubuntu-latest
     outputs:
-      packages: ${{ steps.detect.outputs.packages }}
+      affected_packages: ${{ steps.set-affected.outputs.packages }}
+      should_run: ${{ steps.set-affected.outputs.should_run }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,63 +24,77 @@ jobs:
         with:
           node-version: 20
 
-      - name: Detect
-        id: detect
-        run: |
-          # Use the script to get affected packages
-          export BASE_REF=${{ github.event.pull_request.base.sha || 'origin/main' }}
-          PACKAGES=$(node .github/scripts/get-affected-packages.cjs)
-
-          if [ -z "$PACKAGES" ] || [ "$PACKAGES" = "[]" ]; then
-            # fallback to empty array but ensure valid JSON
-            PACKAGES="[]"
-          fi
-
-          # GitHub Actions needs JSON array output escaped properly for matrix
-          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
-          echo "Detected packages: $PACKAGES"
-
-  build-and-test:
-    name: Build & Test
-    needs: detect-affected
-    if: needs.detect-affected.outputs.packages != '[]' && needs.detect-affected.outputs.packages != ''
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        package: ${{ fromJson(needs.detect-affected.outputs.packages) }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
           run_install: false
+
+      - name: Determine Affected Packages
+        id: set-affected
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            PACKAGES=$(node .github/scripts/get-affected-packages.cjs)
+            echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+            if [ "$PACKAGES" != "[]" ] && [ -n "$PACKAGES" ]; then
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            else
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-test:
+    needs: detect-affected
+    if: needs.detect-affected.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.detect-affected.outputs.affected_packages) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build and Test ${{ matrix.package }}
-        run: |
-          if [ -d "${{ matrix.package }}" ] && [ -f "${{ matrix.package }}/package.json" ]; then
-            cd "${{ matrix.package }}"
+      - name: Build package
+        run: pnpm --filter ./${{ matrix.package }} run build --if-present
 
-            # Check if build script exists and run it
-            if pnpm run | grep -q "^  build$"; then
-              pnpm run build || true
-            fi
+      - name: Test package
+        run: pnpm --filter ./${{ matrix.package }} run test --if-present
 
-            # Check if test script exists and run it
-            if pnpm run | grep -q "^  test$"; then
-              pnpm run test || true
-            fi
-          else
-            echo "Directory ${{ matrix.package }} not found or missing package.json"
-          fi
+  full-build:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all
+        run: pnpm -r run build --if-present
+
+      - name: Test all
+        run: pnpm test:quick --if-present
