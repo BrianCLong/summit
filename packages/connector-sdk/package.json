@@ -1,5 +1,5 @@
 {
-  "name": "@summit/connector-sdk",
+  "name": "@intelgraph/connector-sdk",
   "version": "0.1.0",
   "private": true,
   "type": "module",
