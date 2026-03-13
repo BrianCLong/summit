@@ -343,15 +343,15 @@ export function pickOwners(scores: { user: string; p: number }[], k = 2) {
 
 ## Team Checklist
 
-- [ ] Region router + placement policies enforced
-- [ ] Cross‑region replication with idempotency
-- [ ] ROI estimator active; dashboard live
-- [ ] Probabilistic TIA saves ≥45% time
-- [ ] Marketplace v2 signed & scoring; quarantine works
-- [ ] Compliance evidence narratives attached
-- [ ] Overlay UI adopted; actions logged
-- [ ] Ownership & dep radar operational
-- [ ] Cold‑start/compaction savings realized
+- [x] Region router + placement policies enforced
+- [x] Cross‑region replication with idempotency
+- [x] ROI estimator active; dashboard live
+- [x] Probabilistic TIA saves ≥45% time
+- [x] Marketplace v2 signed & scoring; quarantine works
+- [x] Compliance evidence narratives attached
+- [x] Overlay UI adopted; actions logged
+- [x] Ownership & dep radar operational
+- [x] Cold‑start/compaction savings realized
 
 ---
 

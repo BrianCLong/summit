@@ -33,38 +33,38 @@
 ## 1) GA Definition of Done (GA DoD)
 
 ### A. Product DoD
-- [ ] **Closed-Loop Workflow:** End-to-end flow (Alert -> Triage -> Packet -> Response -> Archive) verified by Analyst.
-- [ ] **UX Polish:** No broken layouts in `MaestroRunConsole`; consistent "Summit" branding.
-- [ ] **Onboarding:** "First Login" experience guides user to configure 1 source and 1 alert.
-- [ ] **Accessibility:** Basic keyboard navigation for Triage Queue.
+- [x] **Closed-Loop Workflow:** End-to-end flow (Alert -> Triage -> Packet -> Response -> Archive) verified by Analyst.
+- [x] **UX Polish:** No broken layouts in `MaestroRunConsole`; consistent "Summit" branding.
+- [x] **Onboarding:** "First Login" experience guides user to configure 1 source and 1 alert.
+- [x] **Accessibility:** Basic keyboard navigation for Triage Queue.
 
 ### B. Engineering DoD
-- [ ] **Test Coverage:** Unit tests >80% for `InvestigationSessionService` and `ResponseOrchestrator`.
-- [ ] **CI/CD:** Green build on `main`; automated deploy to Staging.
-- [ ] **Migrations:** All DB migrations (Postgres/Neo4j) tested with rollback scripts.
-- [ ] **Performance:** p95 Triage load time < 200ms; Graph expansion < 2s.
+- [x] **Test Coverage:** Unit tests >80% for `InvestigationSessionService` and `ResponseOrchestrator`.
+- [x] **CI/CD:** Green build on `main`; automated deploy to Staging.
+- [x] **Migrations:** All DB migrations (Postgres/Neo4j) tested with rollback scripts.
+- [x] **Performance:** p95 Triage load time < 200ms; Graph expansion < 2s.
 
 ### C. SRE/Operations DoD
-- [ ] **SLOs:** Defined in `server/src/lib/telemetry/slo.ts` (Ingest Latency, API Availability).
-- [ ] **Dashboards:** "GA Health" Grafana dashboard (Ingest Rate, Queue Depth, Error Rate).
-- [ ] **Runbooks:** `runbooks/GA_INCIDENT_RESPONSE.md` created and linked in alerts.
-- [ ] **Alerts:** Critical alerts (Ingest Down, DB High CPU) routed to PagerDuty/OpsGenie.
+- [x] **SLOs:** Defined in `server/src/lib/telemetry/slo.ts` (Ingest Latency, API Availability).
+- [x] **Dashboards:** "GA Health" Grafana dashboard (Ingest Rate, Queue Depth, Error Rate).
+- [x] **Runbooks:** `runbooks/GA_INCIDENT_RESPONSE.md` created and linked in alerts.
+- [x] **Alerts:** Critical alerts (Ingest Down, DB High CPU) routed to PagerDuty/OpsGenie.
 
 ### D. Security/Privacy DoD
-- [ ] **RBAC:** `ensureRole` middleware applied to all mutating API endpoints.
-- [ ] **Audit:** All state changes write to `ProvenanceLedger` with `actor_id` and `tenant_id`.
-- [ ] **Retention:** Data expiry job configured (default 30 days) in `DataRetentionService`.
-- [ ] **Secrets:** No plaintext secrets in code/env logs; use `SecretsService`.
+- [x] **RBAC:** `ensureRole` middleware applied to all mutating API endpoints.
+- [x] **Audit:** All state changes write to `ProvenanceLedger` with `actor_id` and `tenant_id`.
+- [x] **Retention:** Data expiry job configured (default 30 days) in `DataRetentionService`.
+- [x] **Secrets:** No plaintext secrets in code/env logs; use `SecretsService`.
 
 ### E. Trust & Safety DoD
-- [ ] **Review Gates:** "Publish" action requires second-person approval (simulated via permissions).
-- [ ] **Misuse Controls:** Rate limits on "Add Source" and "Export" endpoints.
-- [ ] **Policy:** Terms of Service link visible in UI footer.
+- [x] **Review Gates:** "Publish" action requires second-person approval (simulated via permissions).
+- [x] **Misuse Controls:** Rate limits on "Add Source" and "Export" endpoints.
+- [x] **Policy:** Terms of Service link visible in UI footer.
 
 ### F. Customer Readiness DoD
-- [ ] **Docs:** "Analyst Guide" and "Admin Guide" published to `docs/`.
-- [ ] **Status:** Status page mechanism (even if manual) established.
-- [ ] **Release Notes:** drafted for `release_notes/v1.0.0.md`.
+- [x] **Docs:** "Analyst Guide" and "Admin Guide" published to `docs/`.
+- [x] **Status:** Status page mechanism (even if manual) established.
+- [x] **Release Notes:** drafted for `release_notes/v1.0.0.md`.
 
 ---
 
@@ -262,9 +262,9 @@
 3.  **Staged GA (Day 30):** Invite-only for waitlist.
 
 **Documentation:**
-*   [ ] `docs/user/analyst-guide.md` (Screenshots of Triage).
-*   [ ] `docs/admin/configuration.md` (RBAC, Retention).
-*   [ ] `docs/playbooks/standard-response.md`.
+*   [x] `docs/user/analyst-guide.md` (Screenshots of Triage).
+*   [x] `docs/admin/configuration.md` (RBAC, Retention).
+*   [x] `docs/playbooks/standard-response.md`.
 
 **Support:**
 *   Email support alias (`support@...`) routed to Engineering rotation initially.

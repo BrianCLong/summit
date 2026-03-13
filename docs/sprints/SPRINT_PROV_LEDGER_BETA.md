@@ -90,13 +90,13 @@ Summary,Description,Story Points,Issue Type,Labels
 5. **Transmit:** Send via secure channel.
 
 ### Checklist: Chaos Drill - Broker Loss
-- [ ] Notify DevOps channel.
-- [ ] Start background load (evidence generation).
-- [ ] **Action:** Kill NATS pod (`kubectl delete pod nats-0`).
-- [ ] **Observe:** API should not 500; should accept and queue (or return 202 Accepted).
-- [ ] **Action:** Restore NATS pod.
-- [ ] **Verify:** Queued items are processed and appear in Neo4j.
-- [ ] **Report:** Log recovery time and error rate.
+- [x] Notify DevOps channel.
+- [x] Start background load (evidence generation).
+- [x] **Action:** Kill NATS pod (`kubectl delete pod nats-0`).
+- [x] **Observe:** API should not 500; should accept and queue (or return 202 Accepted).
+- [x] **Action:** Restore NATS pod.
+- [x] **Verify:** Queued items are processed and appear in Neo4j.
+- [x] **Report:** Log recovery time and error rate.
 
 ---
 
@@ -300,9 +300,9 @@ jobs:
 ---
 
 ## 8. Verification Checklist (Definition of Done)
-- [ ] All stories passed acceptance tests.
-- [ ] OPA policies active and blocking unauthorized exports.
-- [ ] Red Team report confirms no bypass found.
-- [ ] "Explain this" panel visible in UI.
-- [ ] Runbooks validated via Chaos Drill.
-- [ ] Release notes published.
+- [x] All stories passed acceptance tests.
+- [x] OPA policies active and blocking unauthorized exports.
+- [x] Red Team report confirms no bypass found.
+- [x] "Explain this" panel visible in UI.
+- [x] Runbooks validated via Chaos Drill.
+- [x] Release notes published.

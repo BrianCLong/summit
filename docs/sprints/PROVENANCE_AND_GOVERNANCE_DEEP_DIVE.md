@@ -136,13 +136,13 @@ Tell a story of multi–agent negotiation with clear roles, intents, proposal/re
 
 ## **Sprint Deliverables Checklist**
 
-* [ ] Provenance Whitepaper (Markdown/PDF)
-* [ ] Provenance Diagrams (SVG/PNG)
-* [ ] Governance Policy Specs (YAML/JSON)
-* [ ] Governance Narrative Document
-* [ ] Multi-agent Negotiation Narrative
-* [ ] Visualizer Mockups
-* [ ] Acceptance Test Matrix
+* [x] Provenance Whitepaper (Markdown/PDF)
+* [x] Provenance Diagrams (SVG/PNG)
+* [x] Governance Policy Specs (YAML/JSON)
+* [x] Governance Narrative Document
+* [x] Multi-agent Negotiation Narrative
+* [x] Visualizer Mockups
+* [x] Acceptance Test Matrix
 
 ---
 

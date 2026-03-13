@@ -368,14 +368,14 @@ function sha256(s: string) {
 
 ## Team Checklist
 
-- [ ] Budget rebalancer raising value throughput
-- [ ] PCPR gate active; Proof Cards on PRs
-- [ ] RLHF‑lite ranker online; guarded rollout clean
-- [ ] Graph‑of‑Graphs populated; blast‑radius tile live
-- [ ] Nix partial derivation + buildx + diff SBOM
-- [ ] Prompt delta cache + GPU pack live
-- [ ] Reviewer‑Sim + Fix‑It overlay adopted
-- [ ] Transparency log + PIIDetector v2 passing
+- [x] Budget rebalancer raising value throughput
+- [x] PCPR gate active; Proof Cards on PRs
+- [x] RLHF‑lite ranker online; guarded rollout clean
+- [x] Graph‑of‑Graphs populated; blast‑radius tile live
+- [x] Nix partial derivation + buildx + diff SBOM
+- [x] Prompt delta cache + GPU pack live
+- [x] Reviewer‑Sim + Fix‑It overlay adopted
+- [x] Transparency log + PIIDetector v2 passing
 
 ---
 

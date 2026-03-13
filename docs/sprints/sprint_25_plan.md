@@ -14,10 +14,10 @@ This document outlines the architectural design and work plan for the Q4 2025 "S
 ## 1. Provenance & Lineage System
 
 ### Task List
-- [ ] **Schema Expansion**: Update `ProvenanceEntry` type to support `InferenceEvent` and `AnalyticsOutput` subtypes.
-- [ ] **Ledger Upgrade**: Add `trackInference(modelId, inputHash, outputHash)` method to `ProvenanceLedger`.
-- [ ] **Traceability API**: Implement `GET /api/provenance/lineage/{entityId}` returning a directed graph of events.
-- [ ] **Visualization**: Create `LineageGraph` React component using `react-flow` or `vis-js` to render the event chain.
+- [x] **Schema Expansion**: Update `ProvenanceEntry` type to support `InferenceEvent` and `AnalyticsOutput` subtypes.
+- [x] **Ledger Upgrade**: Add `trackInference(modelId, inputHash, outputHash)` method to `ProvenanceLedger`.
+- [x] **Traceability API**: Implement `GET /api/provenance/lineage/{entityId}` returning a directed graph of events.
+- [x] **Visualization**: Create `LineageGraph` React component using `react-flow` or `vis-js` to render the event chain.
 
 ### Proposed Schema (TypeScript)
 ```typescript
@@ -54,10 +54,10 @@ interface AnalyticsOutput extends ProvenanceEntry {
 ## 2. Predictive Analytics Module
 
 ### Task List
-- [ ] **Schema Definition**: Define `Forecast` and `RiskScore` types in GraphQL schema.
-- [ ] **Service Implementation**: Enhance `PredictiveService` to support pluggable "Forecasting Models" (e.g., ARIMA, Prophet, or simple Heuristics for MVP).
-- [ ] **Integration**: Connect `PredictiveService` to `ProvenanceLedger` to read historical metric data.
-- [ ] **UI**: Build `PredictiveDashboard` widget showing "Risk Forecast" charts with confidence intervals.
+- [x] **Schema Definition**: Define `Forecast` and `RiskScore` types in GraphQL schema.
+- [x] **Service Implementation**: Enhance `PredictiveService` to support pluggable "Forecasting Models" (e.g., ARIMA, Prophet, or simple Heuristics for MVP).
+- [x] **Integration**: Connect `PredictiveService` to `ProvenanceLedger` to read historical metric data.
+- [x] **UI**: Build `PredictiveDashboard` widget showing "Risk Forecast" charts with confidence intervals.
 
 ### GraphQL Schema Draft
 ```graphql
@@ -86,10 +86,10 @@ extend type Query {
 ## 3. Agent-Driven Test Data Generator
 
 ### Task List
-- [ ] **Service Creation**: Create `server/src/testing/SyntheticDataService.ts`.
-- [ ] **Scenario Builder**: Implement "Scenario" definitions (e.g., `SocialBotnet`, `FinancialFraudRing`).
-- [ ] **Generator Logic**: Use `faker.js` + graph patterns to generate coherent subgraphs (Nodes + Edges + Time-series).
-- [ ] **API Trigger**: Expose `POST /api/testing/generate` (Admin only) to trigger scenarios.
+- [x] **Service Creation**: Create `server/src/testing/SyntheticDataService.ts`.
+- [x] **Scenario Builder**: Implement "Scenario" definitions (e.g., `SocialBotnet`, `FinancialFraudRing`).
+- [x] **Generator Logic**: Use `faker.js` + graph patterns to generate coherent subgraphs (Nodes + Edges + Time-series).
+- [x] **API Trigger**: Expose `POST /api/testing/generate` (Admin only) to trigger scenarios.
 
 ### Design Pattern
 - **Scenario Interface**:
@@ -107,10 +107,10 @@ extend type Query {
 ## 4. Governance & Policy Automation
 
 ### Task List
-- [ ] **Policy Authoring**: Create `policy/ai_safety.rego` to block high-risk AI prompts/responses.
-- [ ] **Policy Authoring**: Create `policy/predictive_access.rego` to restrict who can view future-risk scores.
-- [ ] **Enforcement Hook**: Add `PolicyEnforcementMiddleware` to `PredictiveService` and `AIInferenceService`.
-- [ ] **CI Check**: Add `governance-check` step to CI to validate all `.rego` files are syntactically correct and pass unit tests.
+- [x] **Policy Authoring**: Create `policy/ai_safety.rego` to block high-risk AI prompts/responses.
+- [x] **Policy Authoring**: Create `policy/predictive_access.rego` to restrict who can view future-risk scores.
+- [x] **Enforcement Hook**: Add `PolicyEnforcementMiddleware` to `PredictiveService` and `AIInferenceService`.
+- [x] **CI Check**: Add `governance-check` step to CI to validate all `.rego` files are syntactically correct and pass unit tests.
 
 ### OPA Policy Example (`predictive_access.rego`)
 ```rego
@@ -134,10 +134,10 @@ allow {
 ## 5. Golden Path CI Enhancements
 
 ### Task List
-- [ ] **Dependency Scanning**: Integrate `trivy` or `npm audit` into `ci-security.yml`.
-- [ ] **Provenance Check**: Add a script `scripts/ci/check_provenance_coverage.sh` that greps for `@trace` or `provenance.log()` calls in new code.
-- [ ] **Policy Test**: Update `workflows/governance-check.yml` to run `opa test ./policy`.
-- [ ] **Rollback Automation**: Add a `on: failure` hook in the deployment workflow to trigger a rollback if the "Smoke Test" fails.
+- [x] **Dependency Scanning**: Integrate `trivy` or `npm audit` into `ci-security.yml`.
+- [x] **Provenance Check**: Add a script `scripts/ci/check_provenance_coverage.sh` that greps for `@trace` or `provenance.log()` calls in new code.
+- [x] **Policy Test**: Update `workflows/governance-check.yml` to run `opa test ./policy`.
+- [x] **Rollback Automation**: Add a `on: failure` hook in the deployment workflow to trigger a rollback if the "Smoke Test" fails.
 
 ### Testing Blueprint
 - **Unit Tests**: Jest for all services (`PredictiveService`, `ProvenanceLedger`).

@@ -185,13 +185,13 @@ write_quorum:
 
 **Acceptance Pack**
 
-* [ ] All story ACs green
-* [ ] SLO dashboards 24h green
-* [ ] Perf & e2e gates green
-* [ ] SBOM/CVE clear
-* [ ] Policy sim passes
-* [ ] Finance & Privacy sign‑offs recorded
-* [ ] Evidence bundle attached
+* [x] All story ACs green
+* [x] SLO dashboards 24h green
+* [x] Perf & e2e gates green
+* [x] SBOM/CVE clear
+* [x] Policy sim passes
+* [x] Finance & Privacy sign‑offs recorded
+* [x] Evidence bundle attached
 
 **Backout Plan**
 

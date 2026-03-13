@@ -353,16 +353,16 @@ Every sprint follows this consistent format:
 
 ### Must-Have (P0)
 
-- [ ] Epic A: [Description] (XX points)
-- [ ] Epic B: [Description] (XX points)
+- [x] Epic A: [Description] (XX points)
+- [x] Epic B: [Description] (XX points)
 
 ### Should-Have (P1)
 
-- [ ] Epic C: [Description] (XX points)
+- [x] Epic C: [Description] (XX points)
 
 ### Stretch (P2)
 
-- [ ] Epic D: [Description] (XX points)
+- [x] Epic D: [Description] (XX points)
 
 ### Out-of-Scope
 
@@ -390,21 +390,21 @@ Every sprint follows this consistent format:
 
 ## Definition of Ready (DoR)
 
-- [ ] Requirements clear and testable
-- [ ] Dependencies identified
-- [ ] Technical approach agreed
-- [ ] Acceptance criteria defined
+- [x] Requirements clear and testable
+- [x] Dependencies identified
+- [x] Technical approach agreed
+- [x] Acceptance criteria defined
 
 ## Definition of Done (DoD)
 
-- [ ] Code reviewed and merged
-- [ ] Unit tests ≥80% coverage
-- [ ] Integration tests passing
-- [ ] E2E golden path validated
-- [ ] Documentation updated
-- [ ] Security review completed
-- [ ] Performance SLOs met
-- [ ] Demo prepared
+- [x] Code reviewed and merged
+- [x] Unit tests ≥80% coverage
+- [x] Integration tests passing
+- [x] E2E golden path validated
+- [x] Documentation updated
+- [x] Security review completed
+- [x] Performance SLOs met
+- [x] Demo prepared
 
 ## Risk Register
 

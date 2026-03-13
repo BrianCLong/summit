@@ -343,14 +343,14 @@ export async function fuzz(iter = 200) {
 
 ## Team Checklist
 
-- [ ] OPE report ≥ baseline; SPRT rollout clean
-- [ ] Trust ledger live; Decision Cards show trust %
-- [ ] 20+ mined properties compiled; p95 overhead <1%
-- [ ] Hypergraph TIA +10%; risk AUC +0.01
-- [ ] Repro builds ≥98%; CI p95 −10%
-- [ ] Control mapping complete; API v2 99.9% uptime
-- [ ] Red‑team passes; plugin anomalies quarantined
-- [ ] ChatOps overlay adopted ≥85%
+- [x] OPE report ≥ baseline; SPRT rollout clean
+- [x] Trust ledger live; Decision Cards show trust %
+- [x] 20+ mined properties compiled; p95 overhead <1%
+- [x] Hypergraph TIA +10%; risk AUC +0.01
+- [x] Repro builds ≥98%; CI p95 −10%
+- [x] Control mapping complete; API v2 99.9% uptime
+- [x] Red‑team passes; plugin anomalies quarantined
+- [x] ChatOps overlay adopted ≥85%
 
 ---
 

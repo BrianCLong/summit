@@ -301,14 +301,14 @@ export function shouldEscalate(conf: {
 
 ## Team Checklist
 
-- [ ] Repo Graph API deployed; impacted repos returned within 200ms
-- [ ] Cross‑repo affected workflows firing with cache reuse
-- [ ] Red‑team gauntlet scheduled; success rate <1%
-- [ ] Plan DAG & budgets attached to auto‑PRs
-- [ ] Flake rate <0.25%; self‑healing PRs merged
-- [ ] Weekly causal report + opened issues
-- [ ] Cascade & confidence gate metrics live
-- [ ] GameDay + DR rehearsal reports archived with provenance
+- [x] Repo Graph API deployed; impacted repos returned within 200ms
+- [x] Cross‑repo affected workflows firing with cache reuse
+- [x] Red‑team gauntlet scheduled; success rate <1%
+- [x] Plan DAG & budgets attached to auto‑PRs
+- [x] Flake rate <0.25%; self‑healing PRs merged
+- [x] Weekly causal report + opened issues
+- [x] Cascade & confidence gate metrics live
+- [x] GameDay + DR rehearsal reports archived with provenance
 
 ---
 

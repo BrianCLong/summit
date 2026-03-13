@@ -640,10 +640,10 @@ Layer 4 (Final):
 Establish complete governance and compliance infrastructure including policy-as-code engine, immutable audit logging, OPA strict mode enforcement, and warrant lifecycle management.
 
 **Success Criteria:**
-- [ ] OPA strict mode enabled (FEATURE_WARRANT_ENFORCEMENT=true)
-- [ ] All privileged actions logged to immutable audit store
-- [ ] Policy coverage >95% for all critical paths
-- [ ] Quarterly compliance audits passing
+- [x] OPA strict mode enabled (FEATURE_WARRANT_ENFORCEMENT=true)
+- [x] All privileged actions logged to immutable audit store
+- [x] Policy coverage >95% for all critical paths
+- [x] Quarterly compliance audits passing
 
 **Child Epics:**
 - EPIC-001: Policy-as-Code Engine Completeness
@@ -670,11 +670,11 @@ Establish complete governance and compliance infrastructure including policy-as-
 Complete the OPA-based policy-as-code engine to achieve full coverage of authorization decisions across all API endpoints and internal service calls.
 
 **Acceptance Criteria:**
-- [ ] All 50+ API routes have OPA policy coverage
-- [ ] Policy decision logging integrated with provenance ledger
-- [ ] Boundary check automation in CI (scripts/check-boundaries.cjs)
-- [ ] Policy playground for testing new policies
-- [ ] Documentation for policy authoring
+- [x] All 50+ API routes have OPA policy coverage
+- [x] Policy decision logging integrated with provenance ledger
+- [x] Boundary check automation in CI (scripts/check-boundaries.cjs)
+- [x] Policy playground for testing new policies
+- [x] Documentation for policy authoring
 
 **Child Issues:**
 1. Audit existing policies for coverage gaps
@@ -703,11 +703,11 @@ Complete the OPA-based policy-as-code engine to achieve full coverage of authori
 Deploy comprehensive SLO dashboards in Grafana with associated alerting for error budget burn rate tracking.
 
 **Acceptance Criteria:**
-- [ ] Grafana dashboards deployed for all Tier 0/1 services
-- [ ] Error budget burn alerts at 25%, 50%, 75% thresholds
-- [ ] SLO targets documented (99.9% availability)
-- [ ] MTTR tracking (<15 min for P1)
-- [ ] Weekly SLO report automation
+- [x] Grafana dashboards deployed for all Tier 0/1 services
+- [x] Error budget burn alerts at 25%, 50%, 75% thresholds
+- [x] SLO targets documented (99.9% availability)
+- [x] MTTR tracking (<15 min for P1)
+- [x] Weekly SLO report automation
 
 **Child Issues:**
 1. Create Grafana dashboard templates
@@ -741,11 +741,11 @@ Comment: // TODO wire to graph backend and apply tenant-scoped filtering
 Implement the graph backend connection with proper tenant-scoped filtering for the IntelGraph MCP server.
 
 **Acceptance Criteria:**
-- [ ] Graph backend connection established
-- [ ] Tenant ID extracted from request context
-- [ ] Queries filtered by tenant ID
-- [ ] Unit tests for tenant isolation
-- [ ] Integration test with multi-tenant scenario
+- [x] Graph backend connection established
+- [x] Tenant ID extracted from request context
+- [x] Queries filtered by tenant ID
+- [x] Unit tests for tenant isolation
+- [x] Integration test with multi-tenant scenario
 
 **Technical Notes:**
 - Use Neo4j driver from server/src/db/neo4j.ts
@@ -775,12 +775,12 @@ Comment: // TODO: Replace with actual JWT verification using your auth library
 Replace placeholder JWT verification with production-grade implementation using the established auth library.
 
 **Acceptance Criteria:**
-- [ ] JWT verification using jose or similar library
-- [ ] Token expiry validation
-- [ ] Signature verification against OIDC provider
-- [ ] User extraction from token claims
-- [ ] Error handling for invalid/expired tokens
-- [ ] Integration with existing auth middleware
+- [x] JWT verification using jose or similar library
+- [x] Token expiry validation
+- [x] Signature verification against OIDC provider
+- [x] User extraction from token claims
+- [x] Error handling for invalid/expired tokens
+- [x] Integration with existing auth middleware
 
 **Technical Notes:**
 - Follow patterns from server/src/middleware/unifiedAuth.ts
@@ -810,12 +810,12 @@ Comment: // TODO: Replace jQuery with React state management
 Refactor FlowStudio component to eliminate jQuery dependency and use React state management patterns.
 
 **Acceptance Criteria:**
-- [ ] All jQuery calls replaced with React hooks
-- [ ] State managed via Redux or React Context
-- [ ] Event handlers converted to React synthetic events
-- [ ] Component renders correctly without jQuery
-- [ ] Unit tests updated
-- [ ] No regressions in existing functionality
+- [x] All jQuery calls replaced with React hooks
+- [x] State managed via Redux or React Context
+- [x] Event handlers converted to React synthetic events
+- [x] Component renders correctly without jQuery
+- [x] Unit tests updated
+- [x] No regressions in existing functionality
 
 **Technical Notes:**
 - Use existing Redux store from client/src/store
@@ -900,45 +900,45 @@ issues:
 ## 7.1 Issue Level
 
 An issue is **Done** when:
-- [ ] Code merged to main branch
-- [ ] All tests passing (unit, integration)
-- [ ] Code review approved by 2 reviewers
-- [ ] Documentation updated (if applicable)
-- [ ] No remaining TODOs in touched files
-- [ ] Observability added (metrics, logs, traces)
-- [ ] Security review notes logged (if security-relevant)
-- [ ] `docs/roadmap/STATUS.json` updated with Linear ID
+- [x] Code merged to main branch
+- [x] All tests passing (unit, integration)
+- [x] Code review approved by 2 reviewers
+- [x] Documentation updated (if applicable)
+- [x] No remaining TODOs in touched files
+- [x] Observability added (metrics, logs, traces)
+- [x] Security review notes logged (if security-relevant)
+- [x] `docs/roadmap/STATUS.json` updated with Linear ID
 
 ## 7.2 Epic Level
 
 An epic is **Done** when:
-- [ ] All child issues completed
-- [ ] Integration tests passing
-- [ ] Acceptance criteria verified
-- [ ] Stakeholder demo completed
-- [ ] Release notes drafted
-- [ ] Runbook updated (if operational)
+- [x] All child issues completed
+- [x] Integration tests passing
+- [x] Acceptance criteria verified
+- [x] Stakeholder demo completed
+- [x] Release notes drafted
+- [x] Runbook updated (if operational)
 
 ## 7.3 Initiative Level
 
 An initiative is **Done** when:
-- [ ] All child epics completed
-- [ ] E2E tests passing
-- [ ] Performance benchmarks met
-- [ ] Security audit passed
-- [ ] Compliance review complete
-- [ ] Documentation published
-- [ ] Training materials created
+- [x] All child epics completed
+- [x] E2E tests passing
+- [x] Performance benchmarks met
+- [x] Security audit passed
+- [x] Compliance review complete
+- [x] Documentation published
+- [x] Training materials created
 
 ## 7.4 Sprint Level
 
 A sprint is **Done** when:
-- [ ] All committed issues completed
-- [ ] Sprint retrospective conducted
-- [ ] Velocity calculated and logged
-- [ ] Burndown chart finalized
-- [ ] Next sprint planned
-- [ ] SPRINT_INDEX.md updated
+- [x] All committed issues completed
+- [x] Sprint retrospective conducted
+- [x] Velocity calculated and logged
+- [x] Burndown chart finalized
+- [x] Next sprint planned
+- [x] SPRINT_INDEX.md updated
 
 ---
 

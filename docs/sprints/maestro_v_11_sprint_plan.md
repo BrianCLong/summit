@@ -303,14 +303,14 @@ import execa from 'execa';
 
 ## Team Checklist
 
-- [ ] WFQ scheduler active; fairness index ≥0.9
-- [ ] Budget preemption + Decision Card notes
-- [ ] 3 WASM plugins validated & signed
-- [ ] DP metrics (ε≤2.0); FedAvg improves cost by ≥8%
-- [ ] Remote exec wins (p95 ↓≥20%); previews ≤90s
-- [ ] Semantic resolver resolves ≥60% conflicts
-- [ ] Cost/carbon & N+1 dashboards live
-- [ ] `maestro doctor` + one‑pager shipped
+- [x] WFQ scheduler active; fairness index ≥0.9
+- [x] Budget preemption + Decision Card notes
+- [x] 3 WASM plugins validated & signed
+- [x] DP metrics (ε≤2.0); FedAvg improves cost by ≥8%
+- [x] Remote exec wins (p95 ↓≥20%); previews ≤90s
+- [x] Semantic resolver resolves ≥60% conflicts
+- [x] Cost/carbon & N+1 dashboards live
+- [x] `maestro doctor` + one‑pager shipped
 
 ---
 

@@ -327,14 +327,14 @@ export function pickOwner(scores: { user: string; p: number }[]) {
 
 ## Team Checklist
 
-- [ ] LSC signed on all PRs; auditor verify <20s
-- [ ] AST‑valid patches; postconditions enforced
-- [ ] Capacity futures + Dual‑OCO active; peak spend ↓20%
-- [ ] Build Graph OS CI p95 ↓≥15%; reuse ≥93%
-- [ ] eBPF + OPA JIT live; policy p95 ≤5ms
-- [ ] Twin predictions p50 error <8%; CEP guards ≥20
-- [ ] Memory Graph + adapters reduce nit churn ≥25%
-- [ ] Safety Case Viewer adopted; Repro Pack ≤6s
+- [x] LSC signed on all PRs; auditor verify <20s
+- [x] AST‑valid patches; postconditions enforced
+- [x] Capacity futures + Dual‑OCO active; peak spend ↓20%
+- [x] Build Graph OS CI p95 ↓≥15%; reuse ≥93%
+- [x] eBPF + OPA JIT live; policy p95 ≤5ms
+- [x] Twin predictions p50 error <8%; CEP guards ≥20
+- [x] Memory Graph + adapters reduce nit churn ≥25%
+- [x] Safety Case Viewer adopted; Repro Pack ≤6s
 
 ---
 

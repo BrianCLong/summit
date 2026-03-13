@@ -224,8 +224,8 @@
 Description:
 As an analyst, I want <goal> so that <outcome>.
 Acceptance Criteria:
-- [ ] <AC 1>
-- [ ] <AC 2>
+- [x] <AC 1>
+- [x] <AC 2>
 Design:
 - Figma: <link>
 Tech Notes:
@@ -243,8 +243,8 @@ QA Notes:
 Description:
 As an admin, I need <goal> to <outcome>.
 Acceptance Criteria:
-- [ ] <AC 1>
-- [ ] <AC 2>
+- [x] <AC 1>
+- [x] <AC 2>
 Design:
 - Figma: <link>
 Tech Notes:
@@ -279,11 +279,11 @@ QA Notes:
 
 ## 14) Prep Checklist (pre‑Mon Sep 15)
 
-- [ ] Backend stubs & contracts aligned (Saved Views, Audit Export, Webhook Test)
-- [ ] Figma components named & tokens v0.7 published
-- [ ] Storybook scaffolding + CI job green
-- [ ] Analytics event names reserved; dashboards created
-- [ ] Test datasets prepared (IG: 5k/20k; MC: 50k users)
+- [x] Backend stubs & contracts aligned (Saved Views, Audit Export, Webhook Test)
+- [x] Figma components named & tokens v0.7 published
+- [x] Storybook scaffolding + CI job green
+- [x] Analytics event names reserved; dashboards created
+- [x] Test datasets prepared (IG: 5k/20k; MC: 50k users)
 
 ---
 

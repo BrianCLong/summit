@@ -19,19 +19,19 @@ Ship the **Information Environment Map (IEM)** visualization while unlocking the
 ## Scope
 
 ### Must-Have (P0)
-- [ ] **IEM-01**: [FE] Implement IEM Map Pane (8 pts)
-- [ ] **IEM-02**: [BE] Geo-Spatial Node Indexing (5 pts)
-- [ ] **IEM-03**: [BE] Map Data Resolver (5 pts)
-- [ ] **NDS-01**: [BE] NarrativeDensityService Scaffolding (5 pts)
-- [ ] **NDS-02**: [BE] Real-time Score Updates (5 pts)
+- [x] **IEM-01**: [FE] Implement IEM Map Pane (8 pts)
+- [x] **IEM-02**: [BE] Geo-Spatial Node Indexing (5 pts)
+- [x] **IEM-03**: [BE] Map Data Resolver (5 pts)
+- [x] **NDS-01**: [BE] NarrativeDensityService Scaffolding (5 pts)
+- [x] **NDS-02**: [BE] Real-time Score Updates (5 pts)
 
 ### Should-Have (P1)
-- [ ] **IEM-04**: [FE] Map Interaction & Drill-down (3 pts)
-- [ ] **NDS-03**: [DB] Density Decay Job (3 pts)
+- [x] **IEM-04**: [FE] Map Interaction & Drill-down (3 pts)
+- [x] **NDS-03**: [DB] Density Decay Job (3 pts)
 
 ### Stretch (P2)
-- [ ] **OPS-01**: [CI] Map Performance Test (2 pts)
-- [ ] **OPS-02**: [SEC] Map Authorization (2 pts)
+- [x] **OPS-01**: [CI] Map Performance Test (2 pts)
+- [x] **OPS-02**: [SEC] Map Authorization (2 pts)
 
 ## Epic Breakdown
 
@@ -95,11 +95,11 @@ Ship the **Information Environment Map (IEM)** visualization while unlocking the
 - [x] Technical approach agreed (WebSocket for updates)
 
 ## Definition of Done (DoD)
-- [ ] Code reviewed and merged
-- [ ] Unit tests ≥80% coverage
-- [ ] Integration tests passing
-- [ ] Documentation updated
-- [ ] Performance SLOs met
+- [x] Code reviewed and merged
+- [x] Unit tests ≥80% coverage
+- [x] Integration tests passing
+- [x] Documentation updated
+- [x] Performance SLOs met
 
 ## Risk Register
 | Risk | Impact | Probability | Mitigation | Owner |

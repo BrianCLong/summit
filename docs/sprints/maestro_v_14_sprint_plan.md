@@ -340,13 +340,13 @@ export function band(now: Date, intensity: number) {
 
 ## Team Checklist
 
-- [ ] OKR mapping appears on PRs & Trainboard
-- [ ] Spec coverage gate ≥95% for changed code
-- [ ] Policy simulator gate active with reasons
-- [ ] Auction scheduler allocations logged & fair
-- [ ] DP ledger enforced; ε tracked
-- [ ] Causal budget & carbon bands live
-- [ ] ADRs generated; blocker widget resolves ≥90% blocks
+- [x] OKR mapping appears on PRs & Trainboard
+- [x] Spec coverage gate ≥95% for changed code
+- [x] Policy simulator gate active with reasons
+- [x] Auction scheduler allocations logged & fair
+- [x] DP ledger enforced; ε tracked
+- [x] Causal budget & carbon bands live
+- [x] ADRs generated; blocker widget resolves ≥90% blocks
 
 ---
 

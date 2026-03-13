@@ -169,11 +169,11 @@ Ship one **defensible, demoable** "thin-slice" capability end-to-end: **spec →
 
 ## Next-Steps Kanban
 
-* [ ] **A1–A3** Problem framing + KPIs locked
-* [ ] **B1–B3** Prior art + 2 inventive hypotheses selected
-* [ ] **C1–C3** Method spec + threat model completed
-* [ ] **D1–D4** Baseline + method + CLI + tests running
-* [ ] **E1–E4** Eval harness + results + ablations + robustness
-* [ ] **F1–F3** Patent scaffold + claims + FTO notes drafted
-* [ ] **G1–G3** Integration stub + telemetry + release notes
-* [ ] **H1–H3** SBOM/inventory + data governance + safety controls
+* [x] **A1–A3** Problem framing + KPIs locked
+* [x] **B1–B3** Prior art + 2 inventive hypotheses selected
+* [x] **C1–C3** Method spec + threat model completed
+* [x] **D1–D4** Baseline + method + CLI + tests running
+* [x] **E1–E4** Eval harness + results + ablations + robustness
+* [x] **F1–F3** Patent scaffold + claims + FTO notes drafted
+* [x] **G1–G3** Integration stub + telemetry + release notes
+* [x] **H1–H3** SBOM/inventory + data governance + safety controls
