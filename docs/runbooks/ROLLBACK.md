@@ -1,16 +1,33 @@
-# Rollback Procedure
+# Rollback Runbook
 
-## Automated Rollback
-- If the automated deployment monitor detects failure (e.g., >5% error rate), it will auto-revert the deployment.
-- Verify the auto-revert succeeded via CI/CD logs.
+## Overview
+This runbook describes the procedure for rolling back a release, specifically focusing on the canary rollback scenario.
 
-## Manual Rollback
-1. Find the last known good commit on the `main` branch.
-2. In GitHub UI or CLI, revert the bad merge commit.
+## Triggers
+- Canary SLO violation (Error Rate > 1% or Latency p95 > 1s).
+- Synthetic probe failure in canary environment.
+- Manual determination of critical defect.
+
+## Immediate Actions
+1. **Stop the Line**: Pause any ongoing pipelines.
+2. **Revert Traffic**: Switch 100% traffic back to the stable baseline.
    ```bash
-   git revert -m 1 <bad_merge_commit_sha>
+   # Example command (adjust for actual ingress controller)
+   kubectl patch virtualservice summit-api -n production --type='json' -p='[{"op": "replace", "path": "/spec/http/0/route/0/weight", "value": 100}, {"op": "replace", "path": "/spec/http/0/route/1/weight", "value": 0}]'
    ```
-3. Push the revert branch and open a PR.
-4. Obtain immediate approval from an on-call engineer.
-5. Merge the PR to trigger a new deployment of the known good state.
-6. Verify service health post-deployment.
+3. **Verify Health**: Check `/health` endpoint of stable version.
+   ```bash
+   curl -I https://api.summit.intelgraph.io/health
+   ```
+
+## Post-Rollback
+1. Capture logs from failed canary pods.
+2. Generate incident report using `scripts/incident-report.ts`.
+3. Mark the release version as bad in the registry.
+
+## Automation
+The auto-rollback mechanism is triggered by Prometheus alerts:
+- `CanaryHighErrorRate`
+- `CanaryHighLatency`
+
+Check `runbooks/maestro-rollback.md` for orchestrator-specific details.

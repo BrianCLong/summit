@@ -31,11 +31,11 @@ branch_protection:
     contexts:
       - "meta-gate"
       - "CI Core Gate ✅"
-      - "build-test"
+      - "Unit Tests"
       - "gate"
       - "Release Readiness Gate"
       - "SOC Controls"
-      - "test"
+      - "test (20.x)"
       - "Workflow Validity Check"
 
 # Always Required Checks
@@ -51,7 +51,7 @@ always_required:
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
 
-  - name: "build-test"
+  - name: "Unit Tests"
     workflow: "ci-pr.yml"
     rationale: "Primary PR test gate status required by branch protection"
 
@@ -63,7 +63,7 @@ always_required:
     workflow: "release-readiness.yml"
     rationale: "Comprehensive release readiness verification - runs on every change"
 
-  - name: "test"
+  - name: "test (20.x)"
     workflow: "unit-test-coverage.yml"
     rationale: "Test suite and coverage gates must pass for all code changes"
 
@@ -112,16 +112,16 @@ conditional_required:
       - '^\.github/workflows/supply-chain'
       - "^scripts/security/"
 
-  - name: "Reproducible Docker Build"
-    workflow: "repro-docker.yml"
+  - name: "Docker Build & Security Scan"
+    workflow: "docker-build.yml"
     rationale: "Docker image build and security validation"
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
       - '^\.dockerignore$'
 
-  - name: "API Schema Diff"
-    workflow: "schema-diff.yml"
+  - name: "Schema compatibility guard / schema-compat"
+    workflow: "schema-compat.yml"
     rationale: "API schema backward compatibility checks"
     when_paths_match:
       - "^server/src/graphql/schema"

@@ -1,15 +1,11 @@
-# Release Notes: v[X.Y.Z]
+# Release: v[X.Y.Z]
+**Date:** [Date]
 
 ## Highlights
-- Brief summary of the most important changes in this release.
-
-## Features
-- feat: Added support for X (#123)
-- feat: Improved performance of Y (#124)
+Major features in this release.
 
 ## Bug Fixes
-- fix: Resolved issue where Z crashed under load (#125)
-- fix: Corrected spelling in UI (#126)
+List of resolved issues.
 
-## Breaking Changes
-- **BREAKING:** The `api/v1/auth` endpoint now requires a Bearer token. Ensure clients are updated.
+## Deprecations
+Features scheduled for removal.
