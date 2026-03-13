@@ -289,6 +289,7 @@ export default function HomePage() {
                           investigation.priority
                         )}
                         className="text-xs"
+                        accessibleStatus
                       >
                         {investigation.priority}
                       </Badge>
@@ -362,6 +363,7 @@ export default function HomePage() {
                       <Badge
                         variant={getSeverityBadgeVariant(alert.severity)}
                         className="text-xs"
+                        accessibleStatus
                       >
                         {alert.severity}
                       </Badge>
@@ -432,6 +434,7 @@ export default function HomePage() {
                       <Badge
                         variant={getPriorityBadgeVariant(case_.priority)}
                         className="text-xs"
+                        accessibleStatus
                       >
                         {case_.priority}
                       </Badge>
