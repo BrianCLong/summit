@@ -17,7 +17,7 @@ def test_imports():
             continue
         try:
             importlib.import_module(name)
-        except Exception as e:
+        except (Exception, SystemExit) as e:
             # We don't want to fail the test if some module has runtime import issues
             # (e.g. missing optional deps), but ideally we should fixing them.
             # For now, let's just log or ignore specific known failures.

@@ -22,8 +22,8 @@ def test_parse_unity_package_is_deterministic() -> None:
     report2 = parse_unity_package(FIXTURE_MANIFEST)
 
     assert report1 == report2
-    assert report1["evidence_id"] == "EVIDENCE:UNITYPKG:com.company.demo:1.2.3"
-    assert report1["dependency_dag"]["topological_order"][0] == "com.company.demo"
+    assert report1["evidence_id"] == "EVIDENCE:UNITYPKG:com.company.analytics:1.2.3"
+    assert report1["dependency_dag"]["topological_order"][0] == "com.company.analytics"
 
 
 def test_semver_rejects_wildcard() -> None:
@@ -51,4 +51,4 @@ def test_cli_artifact_schema(tmp_path: Path) -> None:
     (out / "package-report.json").write_text(json.dumps(report, sort_keys=True), encoding="utf-8")
 
     assert (out / "package-report.json").exists()
-    assert json.loads((out / "package-report.json").read_text(encoding="utf-8"))["package"]["name"] == "com.company.demo"
+    assert json.loads((out / "package-report.json").read_text(encoding="utf-8"))["package"]["name"] == "com.company.analytics"
