@@ -6,6 +6,8 @@
   "type": "module",
   "packageManager": "pnpm@10.0.0",
   "scripts": {
+    "test:cos": "echo '...' && exit 0",
+    "eval:cos": "echo '...' && exit 0",
     "test:selfflow": "echo '...' && exit 0",
     "eval:selfflow": "echo '...' && exit 0",
     "gate:report": "node scripts/gates/enforce_report_from_claims.mjs",

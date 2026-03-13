@@ -24,13 +24,13 @@ echo "Running RepoOS Full Sprint Smoke (Stage: $STAGE)"
 
 if [ "$STAGE" = "all" ] || [ "$STAGE" = "sprint-mar10" ]; then
     echo "5. Praxeology Quarantined Validators Smoke"
-    [ "$DRY" = "true" ] && echo "[DRY] Would validate PG writeset quarantines" || node scripts/verify-repoos.mjs --component praxeology --quarantine-check || pytest tests/**/test_*praxeology*.py -v || echo "Praxeology tests skipped/not found"
+    [ "$DRY" = "true" ] && echo "[DRY] Would validate PG writeset quarantines" || node scripts/verify-repoos.mjs --component praxeology --quarantine-check || pytest tests/**/test_*praxeology*.py -v
 
     echo "6. Control-Plane Foundation Lane"
-    [ "$DRY" = "true" ] && echo "[DRY] Would validate control-plane lane" || ./scripts/validate-control-plane.sh || pnpm test --grep "control-plane|agent-lane|openclaw" || echo "Control-plane tests skipped/not found"
+    [ "$DRY" = "true" ] && echo "[DRY] Would validate control-plane lane" || ./scripts/validate-control-plane.sh || pnpm test --grep "control-plane|agent-lane|openclaw"
 
     echo "7. Deterministic Benchmark Substrate Quick"
-    [ "$DRY" = "true" ] && echo "[DRY] Would run deterministic benchmarks" || pytest tests/benchmarks/** -k "interactive|deterministic" --junitxml=bench.xml || echo "Deterministic benchmarks skipped/not found"
+    [ "$DRY" = "true" ] && echo "[DRY] Would run deterministic benchmarks" || pytest tests/benchmarks/** -k "interactive|deterministic" --junitxml=bench.xml
 fi
 
 echo "Smoke completed."
