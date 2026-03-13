@@ -151,7 +151,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
         with:
-          cosign-release: 'v3.0.5'
+          cosign-release: 'v2.2.4'
 
       - name: Verify Cosign Installation
         run: |
