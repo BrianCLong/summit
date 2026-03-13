@@ -11,9 +11,9 @@ def mock_redis():
     mock_redis = fakeredis.FakeRedis(server=server, decode_responses=True)
     with patch("summit.cache.redis_client.redis.Redis.from_url", return_value=mock_redis):
         # Reset singleton
-        RedisClient._instance = None
+        RedisClient._instances = {}
         yield mock_redis
-        RedisClient._instance = None
+        RedisClient._instances = {}
 
 @pytest.mark.asyncio
 async def test_cache_service_set_get(mock_redis):

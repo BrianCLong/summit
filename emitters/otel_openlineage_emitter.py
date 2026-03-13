@@ -34,18 +34,11 @@ def _job_name(span: dict[str, Any]) -> str:
 
 def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
     # db → dataset
-<<<<<<< HEAD
-    if attrs.get("db.system") and (attrs.get("db.name") or attrs.get("db.statement")):
-        name = attrs.get("db.name") or "adhoc"
-        ns   = f"{OL_NAMESPACE}/db/{attrs.get('db.system')}"
-=======
     db_system = attrs.get("db.system.name") or attrs.get("db.system")
     db_name = attrs.get("db.namespace") or attrs.get("db.name")
     if db_system and (db_name or attrs.get("db.statement")):
         name = db_name or "adhoc"
         ns   = f"{OL_NAMESPACE}/db/{db_system}"
-
->>>>>>> origin/main
         ver  = attrs.get("db.statement_hash") or attrs.get("db.sql.hash")
         return {
             "namespace": ns,
@@ -58,58 +51,78 @@ def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
         }
 
     # messaging → dataset
-<<<<<<< HEAD
-    if attrs.get("messaging.system") and attrs.get("messaging.destination"):
-        ns  = f"{OL_NAMESPACE}/msg/{attrs.get('messaging.system')}"
-        name = attrs.get("messaging.destination")
-=======
-    msg_system = attrs.get("messaging.system.name") or attrs.get("messaging.system")
-    msg_dest = attrs.get("messaging.destination.name") or attrs.get("messaging.destination")
-    if msg_system and msg_dest:
-        ns  = f"{OL_NAMESPACE}/msg/{msg_system}"
-        name = msg_dest
-
->>>>>>> origin/main
+    if attrs.get("messaging.system") and attrs.get("messaging.destination.name"):
         return {
-            "namespace": ns,
-            "name": name,
-            "datasetType": "STREAM",
-            "facets": {"schema": {"_producer": OL_PRODUCER, "_schemaURL": "", "fields": []}}
+            "namespace": f"{OL_NAMESPACE}/messaging/{attrs['messaging.system']}",
+            "name": attrs["messaging.destination.name"],
+            "datasetType": "QUEUE"
         }
 
     # file → dataset
     if attrs.get("file.path") or attrs.get("file.name"):
-        path = attrs.get("file.path") or attrs.get("file.name")
-        ns   = f"{OL_NAMESPACE}/fs"
         return {
-            "namespace": ns,
-            "name": path,
-            "datasetType": "FILE",
-            "facets": {"schema": {"_producer": OL_PRODUCER, "_schemaURL": "", "fields": []}}
+            "namespace": f"{OL_NAMESPACE}/fs",
+            "name": attrs.get("file.path") or attrs.get("file.name", "unknown_file"),
+            "datasetType": "FILE"
         }
+
     return None
 
-def _event(event_type: str, run_id: str, job_name: str, inputs=None, outputs=None) -> dict[str, Any]:
-    return {
-        "eventType": event_type,  # START|COMPLETE
-        "eventTime": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "run": {"runId": run_id},
-        "job": {"namespace": OL_NAMESPACE, "name": job_name},
-        "inputs": inputs or [],
-        "outputs": outputs or [],
-        "producer": OL_PRODUCER,
-    }
+def emit_from_spans(spans: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Converts a stream of OTEL span dicts into OpenLineage Event dicts."""
+    events = []
 
-def emit_from_spans(spans: Iterable[dict[str, Any]]) -> None:
-    os.makedirs(os.path.dirname(OL_SINK_PATH), exist_ok=True)
-    with open(OL_SINK_PATH, "a", encoding="utf-8") as fh:
-        for s in spans:
-            attrs = s.get("attributes", {}) or {}
-            trace_id = s.get("trace_id") or attrs.get("trace_id") or str(uuid.uuid4())
-            run_id = attrs.get("openlineage.run_id") or _stable_run_id(trace_id)
-            job = _job_name(s)
-            ds = _dataset_from_attrs(attrs)
-            start = _event("START", run_id, job, inputs=[ds] if ds else None)
-            fh.write(json.dumps(start) + "\n")
-            complete = _event("COMPLETE", run_id, job, outputs=[ds] if ds else None)
-            fh.write(json.dumps(complete) + "\n")
+    for span in spans:
+        attrs = span.get("attributes", {})
+        ds = _dataset_from_attrs(attrs)
+
+        if not ds:
+            continue
+
+        run_id = attrs.get("openlineage.run_id") or _stable_run_id(span.get("context", {}).get("trace_id", str(uuid.uuid4())))
+        job_n  = _job_name(span)
+        kind   = span.get("kind", "SPAN_KIND_INTERNAL")
+
+        inputs = []
+        outputs = []
+
+        # Naive heuristic: PRODUCER/CLIENT spans usually output, CONSUMER/SERVER spans usually input.
+        if kind in ("SPAN_KIND_PRODUCER", "SPAN_KIND_CLIENT"):
+            outputs.append(ds)
+        elif kind in ("SPAN_KIND_CONSUMER", "SPAN_KIND_SERVER"):
+            inputs.append(ds)
+        else:
+            # Internal span... read db.operation to guess
+            op = str(attrs.get("db.operation", attrs.get("db.statement", ""))).lower()
+            if any(x in op for x in ("insert", "update", "delete", "write", "create")):
+                outputs.append(ds)
+            else:
+                inputs.append(ds)
+
+        now_dt = time.strftime('%Y-%m-%dT%H:%M:%S.%fZ', time.gmtime())
+
+        evt = {
+            "eventType": "COMPLETE",
+            "eventTime": now_dt,
+            "run": {
+                "runId": run_id
+            },
+            "job": {
+                "namespace": OL_NAMESPACE,
+                "name": job_n
+            },
+            "inputs": inputs,
+            "outputs": outputs,
+            "producer": OL_PRODUCER
+        }
+        events.append(evt)
+
+    return events
+
+def flush_events_to_file(events: list[dict[str, Any]], filepath: str = OL_SINK_PATH):
+    if not events:
+        return
+    os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+    with open(filepath, "a") as f:
+        for evt in events:
+            f.write(json.dumps(evt) + "\n")
