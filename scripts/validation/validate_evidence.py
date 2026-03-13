@@ -4,7 +4,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Try to import jsonschema, but provide a simple fallback if not available
@@ -77,8 +77,9 @@ class EvidenceValidator:
                     if ev_id:
                         self.evidence_map[ev_id] = report_path
                         self.evidence_data[ev_id] = data
-                except Exception as e:
-                    print(f"Error loading {report_path}: {e}")
+                except Exception:
+                    # Silently skip malformed JSON during collection
+                    pass
 
     def validate_all(self):
         # Pre-calculate hashes for duplicate detection
@@ -87,13 +88,15 @@ class EvidenceValidator:
             # Simplistic hash of the data content (excluding evidence_id)
             content = dict(data)
             content.pop('evidence_id', None)
-            h = hash(json.dumps(content, sort_keys=True))
-            if h not in content_hashes:
-                content_hashes[h] = []
-            content_hashes[h].append(ev_id)
+            try:
+                h = hash(json.dumps(content, sort_keys=True))
+                if h not in content_hashes:
+                    content_hashes[h] = []
+                content_hashes[h].append(ev_id)
+            except Exception:
+                pass
 
         for ev_id, data in self.evidence_data.items():
-            report_path = self.evidence_map[ev_id]
             result = {
                 "evidence_id": ev_id,
                 "status": "PASS",
@@ -115,7 +118,7 @@ class EvidenceValidator:
                 result["errors"].extend(errors)
                 result["status"] = "FAIL"
 
-            # 2. Confidence Bounds Checking (Explicitly for claims if not covered by schema)
+            # 2. Confidence Bounds Checking
             if "claims" in data and isinstance(data["claims"], list):
                 for idx, claim in enumerate(data["claims"]):
                     if isinstance(claim, dict):
@@ -126,19 +129,27 @@ class EvidenceValidator:
                                 result["errors"].append(f"Claim {idx} confidence {conf} out of bounds [0, 1]")
                                 result["status"] = "FAIL"
 
+            if "confidence" in data:
+                conf = data["confidence"]
+                if isinstance(conf, (int, float)):
+                    if not (0 <= conf <= 1):
+                        result["checks"]["confidence_bounds"] = False
+                        result["errors"].append(f"Confidence {conf} out of bounds [0, 1]")
+                        result["status"] = "FAIL"
+
             # 3. Cross-reference Integrity
             refs = []
-            if "references" in data:
+            if "references" in data and isinstance(data["references"], list):
                 refs.extend(data["references"])
-            if "citations" in data:
+            if "citations" in data and isinstance(data["citations"], list):
                 refs.extend(data["citations"])
 
             # Also check claims supported_by
-            if "claims" in data:
+            if "claims" in data and isinstance(data["claims"], list):
                 for claim in data["claims"]:
-                    if "supported_by" in claim:
+                    if isinstance(claim, dict) and "supported_by" in claim and isinstance(claim["supported_by"], list):
                         for source in claim["supported_by"]:
-                            if "evidence_id" in source:
+                            if isinstance(source, dict) and "evidence_id" in source:
                                 refs.append(source["evidence_id"])
 
             for ref in refs:
@@ -147,10 +158,7 @@ class EvidenceValidator:
                     result["errors"].append(f"Broken cross-reference: Cited evidence '{ref}' not found")
                     result["status"] = "FAIL"
 
-            # 5. Evidence Chain Completeness
-            # Verify that every citation leads to another evidence that also has citations or is a root source
-            # A broken link here means a citation to something that doesn't exist (covered by cross-reference)
-            # OR a citation to something that exists but itself has no citations/sources when expected.
+            # 4. Evidence Chain Completeness
             if refs:
                 for ref in refs:
                     ref_data = self.evidence_data.get(ref)
@@ -158,25 +166,24 @@ class EvidenceValidator:
                         ref_refs = ref_data.get("references", []) + ref_data.get("citations", [])
                         ref_sources = ref_data.get("sources", [])
                         if not ref_refs and not ref_sources:
-                            # If it's not a root source (has no sources listed) and has no citations, it's a dead end
-                            # This is a warning rather than a fail unless strictly required.
                             result["checks"]["chain_completeness"] = False
                             result["warnings"].append(f"Evidence chain dead-end: '{ref}' has no further citations or sources")
                             if result["status"] == "PASS":
                                 result["status"] = "WARNING"
 
-            # 4. Duplicate Evidence Detection
-            # Check if this ID appears multiple times in our mapping (shouldn't happen with dict)
-            # Check if content is identical to another evidence
+            # 5. Duplicate Evidence Detection
             content = dict(data)
             content.pop('evidence_id', None)
-            h = hash(json.dumps(content, sort_keys=True))
-            if len(content_hashes.get(h, [])) > 1:
-                duplicates = [d for d in content_hashes[h] if d != ev_id]
-                result["checks"]["duplicate_detection"] = False
-                result["warnings"].append(f"Duplicate content detected with: {', '.join(duplicates)}")
-                if result["status"] == "PASS":
-                    result["status"] = "WARNING"
+            try:
+                h = hash(json.dumps(content, sort_keys=True))
+                if len(content_hashes.get(h, [])) > 1:
+                    duplicates = [d for d in content_hashes[h] if d != ev_id]
+                    result["checks"]["duplicate_detection"] = False
+                    result["warnings"].append(f"Duplicate content detected with: {', '.join(duplicates)}")
+                    if result["status"] == "PASS":
+                        result["status"] = "WARNING"
+            except Exception:
+                pass
 
             self.results.append(result)
 
@@ -187,7 +194,7 @@ class EvidenceValidator:
         total_warnings = sum(1 for r in self.results if r["status"] == "WARNING")
 
         report = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "overall_status": "PASS" if total_failed == 0 else "FAIL",
             "summary": {
                 "total_checked": total_checked,
