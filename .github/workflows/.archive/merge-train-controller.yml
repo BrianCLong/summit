@@ -40,7 +40,7 @@ jobs:
 
       - name: Install Tools
         run: |
-          npm install -g pnpm
+          pnpm install -g pnpm
           # Ensure scripts are executable
           chmod +x scripts/*.sh
           chmod +x scripts/*.js

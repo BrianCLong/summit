@@ -109,7 +109,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Start local stack (if local environment)
         if: (((needs.safety-check.outputs.environment == 'local') && (steps.report.outputs.report_path != '')) && (github.event_name == 'pull_request' && steps.report.outputs.report_path != '')) && (always() && needs.safety-check.outputs.environment == 'local')

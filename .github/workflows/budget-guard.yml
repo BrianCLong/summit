@@ -23,7 +23,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: ppnpm install
 
       - name: Run Budget Audit
         run: |

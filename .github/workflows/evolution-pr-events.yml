@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd services/evolution-ledger
-          npm install
+          pnpm install
 
       - name: Prepare PR context
         id: pr-context

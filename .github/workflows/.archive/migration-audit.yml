@@ -25,7 +25,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies (tsx)
-        run: npm install -g tsx
+        run: pnpm install -g tsx
 
       - name: Run Migration Audit
         run: npx tsx server/scripts/audit_migrations.ts --check

@@ -18,5 +18,5 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
+      - run: ppnpm install --frozen-lockfile
       - run: pnpm -C server test:unit --passWithNoTests

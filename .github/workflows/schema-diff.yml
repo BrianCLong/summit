@@ -60,7 +60,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          ppnpm install --frozen-lockfile
           pnpm add -g ts-node typescript
 
       - name: Run schema diff

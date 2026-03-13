@@ -37,12 +37,12 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build Policy Cards
         run: |
           cd packages/policy-cards
-          pnpm install
+          ppnpm install
           pnpm run build
 
       - name: Run Policy Validation

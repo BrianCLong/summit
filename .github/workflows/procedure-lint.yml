@@ -34,7 +34,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install
+        run: ppnpm install
 
       - name: Procedure lint
         run: pnpm exec tsx scripts/procedures/lint.ts

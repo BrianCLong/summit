@@ -36,7 +36,7 @@ jobs:
           node-version: '20'
 
       - name: Install tsx
-        run: npm install -g tsx
+        run: pnpm install -g tsx
 
       - name: Run link checker
         run: npx tsx scripts/check-doc-links.ts

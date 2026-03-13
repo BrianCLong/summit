@@ -52,7 +52,7 @@ jobs:
           node-version: "20"
 
       - name: Install marked (for HTML rendering)
-        run: npm install marked@16
+        run: pnpm install marked@16
 
       - name: Make Scripts Executable
         run: |

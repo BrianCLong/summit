@@ -29,7 +29,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: services/authz-gateway
-        run: npm install --legacy-peer-deps
+        run: pnpm install --legacy-peer-deps
 
       - name: Build service
         working-directory: services/authz-gateway

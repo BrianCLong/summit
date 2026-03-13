@@ -38,7 +38,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install
+        run: ppnpm install
 
       - name: Run Containment Analysis
         env:

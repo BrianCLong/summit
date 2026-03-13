@@ -83,7 +83,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Run Security Audit
         id: audit
@@ -260,12 +260,12 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Attempt Fixes
         run: |
           pnpm audit --fix || true
-          pnpm install
+          ppnpm install
 
       - name: Check for Changes
         id: check

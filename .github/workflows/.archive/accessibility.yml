@@ -31,7 +31,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Run eslint-plugin-jsx-a11y
         run: |
@@ -73,7 +73,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build application
         run: pnpm build --filter=client --filter=web
@@ -108,7 +108,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build application
         run: pnpm build --filter=client --filter=web
@@ -140,10 +140,10 @@ jobs:
           node-version: '20'
 
       - name: Install Pa11y
-        run: npm install -g pa11y pa11y-ci
+        run: pnpm install -g pa11y pa11y-ci
 
       - name: Build application
-        run: pnpm install --frozen-lockfile && pnpm build --filter=client
+        run: ppnpm install --frozen-lockfile && pnpm build --filter=client
         continue-on-error: true
 
       - name: Start application
@@ -178,7 +178,7 @@ jobs:
           node-version: '20'
 
       - name: Install color contrast checker
-        run: npm install -g color-contrast-checker
+        run: pnpm install -g color-contrast-checker
 
       - name: Check color contrast in CSS
         run: |
@@ -199,7 +199,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps chromium

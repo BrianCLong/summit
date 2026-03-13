@@ -48,8 +48,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install -g pnpm
-          pnpm install
+          pnpm install -g pnpm
+          ppnpm install
 
       - name: Seed Database (Schema only)
         # In a real scenario, we would restore a sanitized backup here.

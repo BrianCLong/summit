@@ -69,7 +69,7 @@ jobs:
           sudo mv cosign /usr/local/bin/
 
       - name: Install Project Dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       # ═══════════════════════════════════════════════════════════════════════════
       # 1. Antigravity Governance

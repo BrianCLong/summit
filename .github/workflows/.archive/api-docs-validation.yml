@@ -56,7 +56,7 @@ jobs:
             echo "Checking for breaking changes..."
 
             # Install oasdiff for breaking change detection
-            npm install -g oasdiff
+            pnpm install -g oasdiff
 
             # Compare specs
             oasdiff breaking /tmp/base-spec.yaml openapi/spec.yaml || {
@@ -87,7 +87,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Validate GraphQL schema
         run: |
@@ -182,7 +182,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Generate static documentation
         run: |

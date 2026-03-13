@@ -28,7 +28,7 @@ jobs:
           node-version: 20
 
       - name: Install ts-node runtime
-        run: npm install -g ts-node typescript
+        run: pnpm install -g ts-node typescript
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5

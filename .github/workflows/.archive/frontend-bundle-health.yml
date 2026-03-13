@@ -51,7 +51,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: ppnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build web app with bundle analysis
         working-directory: apps/web

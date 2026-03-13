@@ -22,7 +22,7 @@ jobs:
       - name: Build summitctl
         run: |
           cd tools/summitctl
-          npm install
+          pnpm install
           npm run build
 
       - name: Run Policy Check

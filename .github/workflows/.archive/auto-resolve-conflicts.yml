@@ -72,10 +72,10 @@ jobs:
 
             # Regenerate based on package.json
             if [ -f "pnpm-lock.yaml" ]; then
-              pnpm install --lockfile-only
+              ppnpm install --lockfile-only
               git add pnpm-lock.yaml
             elif [ -f "package-lock.json" ]; then
-              npm install --package-lock-only
+              pnpm install --package-lock-only
               git add package-lock.json
             fi
 

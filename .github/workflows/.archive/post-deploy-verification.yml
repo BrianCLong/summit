@@ -94,7 +94,7 @@ jobs:
         run: k6 run tests/load/graphql_read_p95.js
 
       - name: Install synthetic dependencies
-        run: npm install axios ts-node typescript --no-save
+        run: pnpm install axios ts-node typescript --no-save
 
       - name: Run synthetic journey
         id: synthetic

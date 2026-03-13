@@ -270,7 +270,7 @@ jobs:
           node-version: '20'
 
       - name: Install markdownlint
-        run: npm install -g markdownlint-cli
+        run: pnpm install -g markdownlint-cli
 
       - name: Lint Documentation
         run: |

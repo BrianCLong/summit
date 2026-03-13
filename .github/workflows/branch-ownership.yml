@@ -22,7 +22,7 @@ jobs:
           node-version: "20"
 
       - name: Install tsx
-        run: npm install -g tsx
+        run: pnpm install -g tsx
 
       - name: Run Enforcer
         env:

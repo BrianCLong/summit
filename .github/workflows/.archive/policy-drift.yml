@@ -23,12 +23,12 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm ci || pnpm install
 
       - name: Build Policy Cards
         run: |
           cd packages/policy-cards
-          npm install
+          pnpm install
           npm run build
 
       - name: Run Drift Check

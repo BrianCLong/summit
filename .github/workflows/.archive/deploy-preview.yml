@@ -25,8 +25,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g pnpm
-          pnpm install --frozen-lockfile
+          pnpm install -g pnpm
+          ppnpm install --frozen-lockfile
 
       # OIDC Authentication
       - name: Configure AWS Credentials

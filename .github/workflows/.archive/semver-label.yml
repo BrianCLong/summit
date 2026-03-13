@@ -31,7 +31,7 @@ jobs:
 
       - name: Install dependencies (scripts)
         run: |
-          npm install -g tsx
+          pnpm install -g tsx
           # OR use npx directly
 
       - name: Run Label Check

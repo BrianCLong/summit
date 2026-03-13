@@ -18,7 +18,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install typescript tsx --no-save
+        run: pnpm install typescript tsx --no-save
 
       - name: Run Failover Simulation
         run: npx tsx scripts/dr/simulate_failover.ts

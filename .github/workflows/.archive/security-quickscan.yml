@@ -29,7 +29,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install server dependencies (frozen)
-        run: pnpm install --filter intelgraph-server --ignore-scripts --frozen-lockfile
+        run: ppnpm install --filter intelgraph-server --ignore-scripts --frozen-lockfile
 
       - name: Run Semgrep OWASP Top 10 policy
         uses: returntocorp/semgrep-action@v1

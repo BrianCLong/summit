@@ -26,7 +26,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies (root)
-        run: npm install -g pnpm && pnpm install
+        run: pnpm install -g pnpm && ppnpm install
 
       - name: Run Static Scanner
         run: npx tsx scripts/security/scan-tenant-isolation.ts
@@ -69,7 +69,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies (root)
-        run: npm install -g pnpm && pnpm install
+        run: pnpm install -g pnpm && ppnpm install
 
       - name: Run Dynamic Verifier
         env:

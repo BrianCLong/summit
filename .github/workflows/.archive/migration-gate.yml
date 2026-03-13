@@ -58,7 +58,7 @@ jobs:
 
       - name: Install toolchain
         run: |
-          npm install -g pnpm
+          pnpm install -g pnpm
           pip install --upgrade pip
           pip install alembic psycopg2-binary neo4j typesense
 

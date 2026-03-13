@@ -79,4 +79,4 @@ jobs:
 
       - name: Install dependencies
         if: ${{ inputs.install-deps }}
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: ppnpm install --frozen-lockfile --prefer-offline

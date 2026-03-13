@@ -48,7 +48,7 @@ jobs:
           node-version: 18
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Verify Server Build
         run: pnpm -C server build

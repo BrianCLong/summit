@@ -49,7 +49,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Install Vale
         run: |
@@ -60,19 +60,19 @@ jobs:
 
       - name: Install markdownlint-cli
         run: |
-          npm install -g markdownlint-cli
+          pnpm install -g markdownlint-cli
           markdownlint --version
 
       - name: Install additional documentation tools
         run: |
           # Install doctoc for table of contents generation
-          npm install -g doctoc
+          pnpm install -g doctoc
 
           # Install markdown-link-check for link validation
-          npm install -g markdown-link-check
+          pnpm install -g markdown-link-check
 
           # Install alex for inclusive language checking
-          npm install -g alex
+          pnpm install -g alex
 
       - name: Setup Vale configuration
         run: |
@@ -186,7 +186,7 @@ jobs:
 
           if [ -d "docs-site" ]; then
             cd docs-site
-            npm install
+            pnpm install
             npm run build
           elif [ -f "pnpm-workspace.yaml" ] && grep -q "docs" pnpm-workspace.yaml; then
             # Build docs using workspace

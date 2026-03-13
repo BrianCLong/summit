@@ -35,7 +35,7 @@ jobs:
           if [ -f pnpm-lock.yaml ]; then
             corepack enable
             pnpm -v
-            pnpm install --frozen-lockfile
+            ppnpm install --frozen-lockfile
           elif [ -f package-lock.json ]; then
             npm ci
           elif [ -f yarn.lock ]; then

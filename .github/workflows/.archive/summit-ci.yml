@@ -25,13 +25,13 @@ jobs:
 
       - name: Install dependencies (Global)
         run: |
-          npm install -g typescript ts-node
+          pnpm install -g typescript ts-node
 
       - name: Install Server Dependencies (Manual Workaround)
         working-directory: ./server
         run: |
-          npm install --legacy-peer-deps --ignore-scripts --no-optional
-          npm install --save-dev ts-jest --legacy-peer-deps --ignore-scripts --no-optional
+          pnpm install --legacy-peer-deps --ignore-scripts --no-optional
+          pnpm install --save-dev ts-jest --legacy-peer-deps --ignore-scripts --no-optional
 
       - name: Run Server Tests
         working-directory: ./server
@@ -53,10 +53,10 @@ jobs:
       - name: Install Client Dependencies (Manual Workaround)
         working-directory: ./apps/web
         run: |
-          npm install --legacy-peer-deps --ignore-scripts --no-optional
-          npm install --save-dev @rollup/rollup-linux-x64-gnu --legacy-peer-deps
-          npm install --save-dev jest-axe @radix-ui/react-popover --legacy-peer-deps
-          npm install --save @mui/material @mui/icons-material @emotion/react @emotion/styled yjs mermaid y-websocket --legacy-peer-deps
+          pnpm install --legacy-peer-deps --ignore-scripts --no-optional
+          pnpm install --save-dev @rollup/rollup-linux-x64-gnu --legacy-peer-deps
+          pnpm install --save-dev jest-axe @radix-ui/react-popover --legacy-peer-deps
+          pnpm install --save @mui/material @mui/icons-material @emotion/react @emotion/styled yjs mermaid y-websocket --legacy-peer-deps
 
       - name: Run Client Tests
         working-directory: ./apps/web
@@ -77,7 +77,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Install Deps
-        run: npm install --legacy-peer-deps --ignore-scripts --no-optional
+        run: pnpm install --legacy-peer-deps --ignore-scripts --no-optional
 
       - name: Run Playwright tests
         run: npx playwright test

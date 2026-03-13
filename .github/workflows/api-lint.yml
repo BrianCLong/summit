@@ -34,7 +34,7 @@ jobs:
           node-version: '20'
 
       - name: Install Spectral
-        run: npm install -g @stoplight/spectral-cli
+        run: pnpm install -g @stoplight/spectral-cli
 
       - name: Lint API Spec
         run: spectral lint docs/api-spec.yaml --ruleset openapi/.spectral.yaml

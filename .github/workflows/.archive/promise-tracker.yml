@@ -182,7 +182,7 @@ jobs:
           version: 10.0.0
 
       - name: Install dependencies
-        run: cd tools/promise-tracker && pnpm install
+        run: cd tools/promise-tracker && ppnpm install
 
       - name: Run health check
         id: health
@@ -282,7 +282,7 @@ jobs:
           version: 10.0.0
 
       - name: Install dependencies
-        run: cd tools/promise-tracker && pnpm install
+        run: cd tools/promise-tracker && ppnpm install
 
       - name: Run extraction
         run: |
@@ -332,7 +332,7 @@ jobs:
           version: 10.0.0
 
       - name: Install dependencies
-        run: cd tools/promise-tracker && pnpm install
+        run: cd tools/promise-tracker && ppnpm install
 
       - name: Generate report
         run: |

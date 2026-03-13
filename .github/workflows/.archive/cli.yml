@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: cli
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Type check
         working-directory: cli
@@ -94,7 +94,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: cli
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build TypeScript
         working-directory: cli
@@ -170,7 +170,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: cli
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build
         working-directory: cli

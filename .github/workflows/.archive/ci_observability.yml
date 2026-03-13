@@ -27,7 +27,7 @@ jobs:
           cache: 'pnpm'
           node-version: "20"
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: pnpm install -g pnpm
       - name: Install dependencies (Bootstrap)
         run: make bootstrap
       - name: Test Observability (No OTel)

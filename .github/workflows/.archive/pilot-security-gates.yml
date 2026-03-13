@@ -33,7 +33,7 @@ jobs:
 
 
       - name: Install dependencies (scoped)
-        run: pnpm install --filter @intelgraph/security-gates --recursive
+        run: ppnpm install --filter @intelgraph/security-gates --recursive
 
       - name: Run unit tests
         run: pnpm --filter @intelgraph/security-gates test

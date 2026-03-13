@@ -20,7 +20,7 @@ jobs:
           node-version: "20"
 
       - name: Install ajv
-        run: npm install -g ajv-cli ajv-formats
+        run: pnpm install -g ajv-cli ajv-formats
 
       - name: Compile schemas
         run: |

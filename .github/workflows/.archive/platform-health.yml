@@ -23,7 +23,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install tsx -D
+        run: pnpm install tsx -D
 
       # Note: In a production environment, this workflow would depend on test/build workflows
       # and use actions/download-artifact to retrieve:

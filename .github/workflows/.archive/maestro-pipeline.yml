@@ -21,8 +21,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install -g pnpm
-          pnpm install
+          pnpm install -g pnpm
+          ppnpm install
           # Install 'just' if not present
           if ! command -v just &> /dev/null; then
               curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin

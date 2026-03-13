@@ -27,7 +27,7 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm install -g pnpm && pnpm install
+        run: pnpm install -g pnpm && ppnpm install
 
       - name: Generate Ops Evidence Pack
         id: generate

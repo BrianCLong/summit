@@ -38,7 +38,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install
+        run: ppnpm install
 
       - name: Run tests
         run: pnpm --filter=${{ inputs.image_name }} test

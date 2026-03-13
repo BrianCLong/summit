@@ -17,5 +17,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: pnpm install --frozen-lockfile
+      - run: ppnpm install --frozen-lockfile
       - run: npx tsx .github/scripts/verify_self_flow.ts

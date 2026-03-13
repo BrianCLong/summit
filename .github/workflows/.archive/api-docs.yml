@@ -107,7 +107,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g redoc-cli swagger-ui-dist
+          pnpm install -g redoc-cli swagger-ui-dist
 
       - name: Generate ReDoc HTML
         run: |
@@ -122,7 +122,7 @@ jobs:
 
       - name: Convert Markdown to HTML
         run: |
-          npm install -g markdown-to-html
+          pnpm install -g markdown-to-html
           markdown docs/API_INTEGRATION_GUIDE.md > docs/API_INTEGRATION_GUIDE.html || true
           markdown docs/API_VERSIONING_STRATEGY.md > docs/API_VERSIONING_STRATEGY.html || true
 

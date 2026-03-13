@@ -29,7 +29,7 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Policy checks (OPA placeholder)
         run: pnpm exec tsx governance/policy-check.ts

@@ -47,7 +47,7 @@ jobs:
       - name: Install deps
         run: |
           corepack enable
-          pnpm install --dir companyos
+          ppnpm install --dir companyos
 
       - name: Run canary SLO gate
         run: |

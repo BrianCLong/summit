@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Normally we would run 'pnpm install' here.
+          # Normally we would run 'ppnpm install' here.
           # Mocking the install step for CI purposes.
           echo "Dependencies installed"
 

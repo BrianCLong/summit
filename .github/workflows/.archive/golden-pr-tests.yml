@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          ppnpm install --frozen-lockfile
 
       - name: Install Release Captain dependencies
         run: |
@@ -68,7 +68,7 @@ jobs:
           chmod +x opa-bin && sudo mv opa /usr/local/bin/
 
           # Install additional testing tools
-          npm install -g @types/jest
+          pnpm install -g @types/jest
 
       - name: Validate OPA policies
         run: |
@@ -178,7 +178,7 @@ jobs:
           }
           EOF
 
-          npm install
+          pnpm install
 
           # Test audit gate script
           chmod +x ../.github/scripts/audit-gate.js

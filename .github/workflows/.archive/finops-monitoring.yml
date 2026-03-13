@@ -65,8 +65,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g pnpm
-          pnpm install --frozen-lockfile
+          pnpm install -g pnpm
+          ppnpm install --frozen-lockfile
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

@@ -16,7 +16,7 @@ jobs:
           cache: npm
       - name: Update dependencies and run tests
         run: |
-          npm install -g npm-check-updates
+          pnpm install -g npm-check-updates
           ./scripts/update-dependencies.sh
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4

@@ -34,7 +34,7 @@ jobs:
 
       - name: Install validation tools
         run: |
-          npm install -g \
+          pnpm install -g \
             markdownlint-cli2 \
             markdown-link-check \
             cspell

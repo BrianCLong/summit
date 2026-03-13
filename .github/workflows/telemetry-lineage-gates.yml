@@ -26,7 +26,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --filter @intelgraph/summit-lineage-normalizer...
+        run: ppnpm install --filter @intelgraph/summit-lineage-normalizer...
 
       - name: Build Normalizer
         run: pnpm run build --filter @intelgraph/summit-lineage-normalizer

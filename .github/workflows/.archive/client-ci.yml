@@ -33,7 +33,7 @@ jobs:
           run_install: false
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
         working-directory: client
 
       - name: Run pnpm audit

@@ -60,7 +60,7 @@ jobs:
           node-version: "20"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build Packages
         id: build
@@ -130,7 +130,7 @@ jobs:
         run: |
           if [ -f scripts/compliance/generate_evidence.ts ]; then
             # Install tsx globally or usage npx to run the script
-            npm install -g tsx
+            pnpm install -g tsx
             npx tsx scripts/compliance/generate_evidence.ts
           else
             echo "Provenance generation script not found. Skipping."

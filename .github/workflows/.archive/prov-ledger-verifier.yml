@@ -32,7 +32,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --filter @intelgraph/prov-ledger-verifier --frozen-lockfile
+        run: ppnpm install --filter @intelgraph/prov-ledger-verifier --frozen-lockfile
 
       - name: Run unit and integration tests
         run: pnpm --filter @intelgraph/prov-ledger-verifier test

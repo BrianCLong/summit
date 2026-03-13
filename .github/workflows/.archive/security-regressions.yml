@@ -39,7 +39,7 @@ jobs:
           node-version: "20"
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: ppnpm install --no-frozen-lockfile
 
       - name: Run Regression Pack
         run: pnpm test:integration

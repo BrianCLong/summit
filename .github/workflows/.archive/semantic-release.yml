@@ -84,7 +84,7 @@ jobs:
           restore-keys: ${{ runner.os }}-turbo-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build workspace
         run: pnpm build

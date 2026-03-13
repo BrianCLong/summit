@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: tools/ses
-        run: npm install
+        run: pnpm install
 
       - name: Run SES tests
         working-directory: tools/ses

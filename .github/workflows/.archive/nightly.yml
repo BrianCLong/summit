@@ -32,7 +32,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm --filter ${{ matrix.package }} build

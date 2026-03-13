@@ -64,7 +64,7 @@ jobs:
       - name: Install dependencies
         run: |
           echo "📦 Installing dependencies..."
-          npm install --legacy-peer-deps
+          pnpm install --legacy-peer-deps
 
       - name: Fix common issues
         run: |
@@ -81,7 +81,7 @@ jobs:
           # Update lockfiles if needed
           echo "  🔒 Checking lockfiles..."
           if [ -f package-lock.json ]; then
-            npm install --package-lock-only 2>/dev/null || echo "Lockfile updated"
+            pnpm install --package-lock-only 2>/dev/null || echo "Lockfile updated"
           fi
 
       - name: Check for changes
@@ -193,7 +193,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: pnpm install --legacy-peer-deps
 
       - name: Run validation suite
         run: |

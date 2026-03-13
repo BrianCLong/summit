@@ -23,7 +23,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install
+        run: pnpm install -g pnpm && ppnpm install
 
       - name: Run Drift Check
         run: npx tsx scripts/monitoring/reg-automation-update-2026-02-04-drift.ts

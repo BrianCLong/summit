@@ -40,7 +40,7 @@ jobs:
           corepack prepare pnpm@9.12.3 --activate || true
           pnpm -v
       - name: Install
-        run: pnpm install --frozen-lockfile=false
+        run: ppnpm install --frozen-lockfile=false
       - name: Lint
         run: pnpm run lint || true
       - name: Typecheck

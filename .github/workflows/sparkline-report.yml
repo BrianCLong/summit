@@ -32,7 +32,7 @@ jobs:
 
       - name: Install deps (none required) & generate
         run: |
-          pnpm install --prefer-offline || true
+          ppnpm install --prefer-offline || true
           node scripts/generate_release_timeline.js build/releases.json
 
       - name: Smoke-check HTML

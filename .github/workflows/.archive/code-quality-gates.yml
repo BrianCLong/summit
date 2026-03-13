@@ -46,13 +46,13 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Install complexity analysis tools
         run: |
           # TypeScript/JavaScript complexity
-          npm install -g complexity-report
-          npm install -g eslint-plugin-complexity
+          pnpm install -g complexity-report
+          pnpm install -g eslint-plugin-complexity
 
           # Python complexity (if needed)
           pip install radon mccabe flake8
@@ -147,7 +147,7 @@ jobs:
           echo "🔍 Detecting code duplication..."
 
           # Install jscpd for duplication detection
-          npm install -g jscpd
+          pnpm install -g jscpd
 
           # Run duplication detection on changed files
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E '\.(ts|tsx|js|jsx|py)$' || echo "")
@@ -425,7 +425,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Run ESLint with sarif output
         run: |
@@ -499,7 +499,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Run pnpm audit
         run: |

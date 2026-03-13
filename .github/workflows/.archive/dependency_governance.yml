@@ -21,10 +21,10 @@ jobs:
           node-version: "20"
 
       - name: Install Tools
-        run: npm install -g pnpm@10.0.0
+        run: pnpm install -g pnpm@10.0.0
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: License Scan
         # Use pnpm dlx to run license-checker without adding it to deps

@@ -37,7 +37,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts --frozen-lockfile
+        run: ppnpm install --ignore-scripts --frozen-lockfile
 
       - name: Run Tests
         run: pnpm --filter @intelgraph/extortion test

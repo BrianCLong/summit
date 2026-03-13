@@ -48,7 +48,7 @@ jobs:
       - name: Install Server dependencies and build
         working-directory: ./server
         run: |
-          npm install
+          pnpm install
           npm run build
 
       - name: Run Server Unit Tests
@@ -58,7 +58,7 @@ jobs:
       - name: Install Client dependencies and build
         working-directory: ./client
         run: |
-          npm install
+          pnpm install
           npm run build
 
       - name: Run Client Unit Tests

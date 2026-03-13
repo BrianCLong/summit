@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 18
       - name: Install deps
-        run: pnpm install
+        run: ppnpm install
       - name: Run capability evaluations
         run: pnpm ts-node packages/capabilities/capability-evaluator/evaluator.ts
       - name: Check metrics

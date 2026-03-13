@@ -26,8 +26,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install -g pnpm
-          pnpm install --frozen-lockfile
+          pnpm install -g pnpm
+          ppnpm install --frozen-lockfile
 
       - name: Start Environment (Golden Path)
         run: |

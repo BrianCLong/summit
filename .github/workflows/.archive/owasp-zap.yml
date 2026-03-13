@@ -44,7 +44,7 @@ jobs:
           version: '10.0.0'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build web application
         run: |
@@ -106,7 +106,7 @@ jobs:
           version: '10.0.0'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Build mobile interface
         run: |
@@ -188,7 +188,7 @@ jobs:
           version: '10.0.0'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Start API server
         run: |

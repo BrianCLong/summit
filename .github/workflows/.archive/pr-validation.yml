@@ -175,7 +175,7 @@ jobs:
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Run build and typecheck
         run: |
@@ -215,7 +215,7 @@ jobs:
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Run Test Validation
         run: |
@@ -273,14 +273,14 @@ jobs:
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Run Security Validation
         run: |
           echo "🔒 Running security validation..."
 
           # Install security tools
-          npm install -g audit-ci
+          pnpm install -g audit-ci
 
           # Check for secrets in code
           echo "Scanning for potential secrets..."
@@ -320,7 +320,7 @@ jobs:
           pnpm audit --prod --json > audit.json || true
 
           # Install audit gate dependencies
-          npm install -g audit-ci
+          pnpm install -g audit-ci
 
           # Run audit gate
           node .github/scripts/audit-gate.js audit.json
@@ -471,7 +471,7 @@ jobs:
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Run Lint Validation
         run: |

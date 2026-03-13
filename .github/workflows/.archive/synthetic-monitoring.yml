@@ -313,7 +313,7 @@ jobs:
 
       - name: Install Playwright
         run: |
-          npm install -g playwright
+          pnpm install -g playwright
           playwright install chromium
 
       - name: Run user journey - ${{ matrix.journey.name }}

@@ -24,7 +24,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
 
       - name: Validate evidence ID consistency
         run: node scripts/verify_evidence_id_consistency.mjs

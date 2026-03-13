@@ -42,8 +42,8 @@ jobs:
 
       - name: Install release-notes tools
         run: |
-          npm install -g conventional-changelog-cli
-          npm install -g auto-changelog
+          pnpm install -g conventional-changelog-cli
+          pnpm install -g auto-changelog
 
       - name: Determine tag range
         id: tags

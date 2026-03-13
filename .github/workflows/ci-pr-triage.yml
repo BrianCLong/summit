@@ -41,7 +41,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
         working-directory: .
 
       - name: Run PR triage feature tests
@@ -81,7 +81,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: ppnpm install --frozen-lockfile
         working-directory: .
 
       - name: Type-check PR triage feature

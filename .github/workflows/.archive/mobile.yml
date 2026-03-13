@@ -26,8 +26,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g pnpm
-          pnpm install --no-frozen-lockfile
+          pnpm install -g pnpm
+          ppnpm install --no-frozen-lockfile
 
       - name: Lint Mobile SDK
         run: cd packages/mobile-sdk && pnpm lint
@@ -68,8 +68,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g pnpm
-          pnpm install --no-frozen-lockfile
+          pnpm install -g pnpm
+          ppnpm install --no-frozen-lockfile
 
       - name: Build Android Bundle
         run: cd apps/mobile/android && ./gradlew bundleRelease
@@ -94,8 +94,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g pnpm
-          pnpm install --no-frozen-lockfile
+          pnpm install -g pnpm
+          ppnpm install --no-frozen-lockfile
 
       - name: Install Pods
         run: cd apps/mobile/ios && pod install
@@ -119,8 +119,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g pnpm
-          pnpm install --no-frozen-lockfile
+          pnpm install -g pnpm
+          ppnpm install --no-frozen-lockfile
 
       - name: Install Applesimutils
         run: |
