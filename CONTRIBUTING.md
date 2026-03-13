@@ -153,3 +153,75 @@ source ~/.bashrc
 - **License**: Contributions are accepted under the terms in [`CONTRIBUTOR_LICENSE_AGREEMENT.md`](CONTRIBUTOR_LICENSE_AGREEMENT.md).
 
 Thank you for building with us!
+
+## 🌱 First Contribution Guide
+
+Making your first contribution to an open-source project can be daunting, but we want to make it as smooth as possible! Here is a step-by-step guide to get you started:
+
+### 1. Find a "Good First Issue"
+Look for issues labeled `good first issue` or `help wanted` on our [Issues page](https://github.com/BrianCLong/summit/issues). These are specifically curated to be approachable for newcomers and usually involve well-defined tasks without deep architectural knowledge.
+
+### 2. Comment on the Issue
+Once you find an issue you'd like to tackle, leave a comment saying "I'd like to work on this!" so others know it's being handled. If you need any clarification, don't hesitate to ask questions right in the issue thread.
+
+### 3. Set Up Your Environment
+Follow the instructions in our [Developer Onboarding Guide](docs/ONBOARDING.md) or run the quickstart commands:
+```bash
+make bootstrap && make up && make smoke
+```
+
+### 4. Create a Branch
+Create a new branch for your work:
+```bash
+git checkout -b fix/issue-number-short-description
+```
+
+### 5. Write Your Code (With Examples!)
+Whether you're fixing a bug or adding a small feature, keep it focused. Here's a quick example of a standard contribution (e.g., adding a simple utility function in TypeScript):
+
+**Example: Adding a utility function**
+```typescript
+// src/utils/formatters.ts
+
+/**
+ * Capitalizes the first letter of a string.
+ * @param text The input string
+ * @returns The capitalized string
+ */
+export function capitalize(text: string): string {
+  if (!text) return text;
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+```
+
+**Example: Writing a test for it**
+```typescript
+// src/utils/__tests__/formatters.test.ts
+import { capitalize } from '../formatters';
+
+describe('capitalize', () => {
+  it('capitalizes the first letter of a valid string', () => {
+    expect(capitalize('summit')).toBe('Summit');
+  });
+
+  it('handles empty strings correctly', () => {
+    expect(capitalize('')).toBe('');
+  });
+});
+```
+
+### 6. Test Your Changes
+Make sure your new code works and doesn't break existing tests:
+```bash
+pnpm test
+```
+
+### 7. Commit and Push
+We use [Conventional Commits](https://www.conventionalcommits.org/):
+```bash
+git commit -m "feat: add capitalize utility function"
+# After committing, push your changes to your fork or branch on GitHub!
+```
+
+### 8. Open a Pull Request
+Go to the repository on GitHub and click "Compare & pull request". Fill out the PR template provided, linking back to the issue you solved (e.g., "Fixes #123"). One of our maintainers will review your PR, offer feedback, and help you get it merged!
