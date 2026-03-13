@@ -1,0 +1,72 @@
+groups:
+  - name: post-deploy-first-week
+    rules:
+      - alert: CriticalErrorRateSpike
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 5 * (
+            sum(rate(http_requests_total{status=~"5.."}[5m] offset 1h))
+            /
+            sum(rate(http_requests_total[5m] offset 1h))
+          )
+        for: 5m
+        labels:
+          severity: critical
+          phase: post-deploy
+        annotations:
+          summary: "Critical error rate spike detected after deployment"
+          description: "The HTTP 5xx error rate has exceeded 5x its baseline from 1 hour ago. This is a potential critical regression."
+          runbook_url: "docs/runbooks/CriticalErrorRateSpike.md"
+
+      - alert: FailedPostDeployValidation
+        expr: post_deploy_validation_success == 0
+        for: 1m
+        labels:
+          severity: critical
+          phase: post-deploy
+        annotations:
+          summary: "Post-deploy validation checks failed"
+          description: "One or more post-deploy validation checks (smoke tests, health checks) have failed."
+          runbook_url: "docs/runbooks/FailedPostDeployValidation.md"
+
+      - alert: DegradedDependencyHealth
+        expr: |
+          (sum(rate(dependency_errors_total[5m])) / sum(rate(dependency_requests_total[5m])) > 0.01)
+          or
+          (histogram_quantile(0.99, sum(rate(dependency_request_duration_seconds_bucket[5m])) by (le)) > 2.0)
+        for: 5m
+        labels:
+          severity: warning
+          phase: post-deploy
+        annotations:
+          summary: "Degraded dependency health detected"
+          description: "Dependency latency has exceeded 2x SLA or the error rate is greater than 1%."
+          runbook_url: "docs/runbooks/DegradedDependencyHealth.md"
+
+      - alert: MissingOrInvalidEvidenceArtifact
+        expr: evidence_artifact_valid == 0
+        for: 5m
+        labels:
+          severity: critical
+          phase: post-deploy
+        annotations:
+          summary: "Evidence artifact missing or invalid"
+          description: "The post-deploy evidence artifact is either missing or has failed validation."
+          runbook_url: "docs/runbooks/MissingOrInvalidEvidenceArtifact.md"
+
+      - alert: SLOBurnRateFastBurn
+        expr: |
+          (
+            rate(slo_errors_total[1h]) / rate(slo_requests_total[1h])
+          ) > (0.05 * slo_error_budget)
+        for: 5m
+        labels:
+          severity: critical
+          phase: post-deploy
+        annotations:
+          summary: "Fast SLO burn rate detected"
+          description: "The service is burning through 5% of its SLO error budget within 1 hour."
+          runbook_url: "docs/runbooks/SLOBurnRateFastBurn.md"
