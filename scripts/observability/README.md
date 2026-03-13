@@ -13,7 +13,8 @@ The primary entry point that aggregates metrics from multiple sources into a str
 
 **Usage:**
 ```bash
-npx tsx scripts/observability/summit_dashboard.ts
+# Requires Node.js 22+
+node --input-type=module -e "import { generateDashboard } from './scripts/observability/summit_dashboard.ts'; generateDashboard().then(m => console.log(JSON.stringify(m, null, 2)))"
 ```
 
 **Output Example:**
@@ -21,31 +22,32 @@ npx tsx scripts/observability/summit_dashboard.ts
 {
   "status": "online",
   "pipeline": {
-    "latency_p95_ms": 1250,
+    "latency_probe_ms": 1250,
     "stages": {
-      "retrieval": 450,
-      "fusion": 200,
-      "generation": 600
+      "entity_extraction": 450,
+      "graph_query": 200,
+      "answer_synthesis": 600
     },
     "complexity": {
       "avg_nodes_traversed": 45,
-      "avg_docs_searched": 12
+      "avg_docs_searched": 12,
+      "avg_depth": 3
     }
   },
   "operational": {
-    "throughput_qps": 2.5,
-    "error_rate_percent": 0.1,
-    "components": [...]
+    "counters": [
+      { "name": "retrieval", "total": 1000, "errors": 2 }
+    ]
   },
   "timestamp": "2025-02-26T14:30:00Z"
 }
 ```
 
 ### 2. Pipeline Probe (`scripts/metrics/pipeline_probe.ts`)
-Executes synthetic queries against the GraphRAG `/query` endpoint to extract per-stage latency and graph complexity metrics.
+Executes synthetic queries against the GraphRAG `/query` endpoint to extract per-stage latency (extraction, query, synthesis) and graph complexity metrics (nodes, docs, depth).
 
 ### 3. Metrics Scraper (`scripts/metrics/scraper.ts`)
-Scrapes the Prometheus `/metrics` endpoint of the GraphRAG service to calculate throughput and component-level error rates.
+Scrapes the Prometheus `/metrics` endpoint of the GraphRAG service to report cumulative counters for throughput and error analysis.
 
 ## Configuration
 
@@ -56,8 +58,4 @@ Environment variables can be used to configure the target endpoints:
 
 ## Integration
 
-These scripts are designed to be integrated into:
-- Datadog/NewRelic custom checks
-- Periodic health-check cron jobs
-- Deployment verification gates
-- Operational dashboards
+These scripts are designed to be integrated into custom checks and operational dashboards. They handle connection failures gracefully by returning an `offline` status.

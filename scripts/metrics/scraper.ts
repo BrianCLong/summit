@@ -6,17 +6,22 @@
 const METRICS_URL = process.env.METRICS_URL || 'http://localhost:8002/metrics';
 
 export interface ComponentMetrics {
-  throughput: number; // queries per second
-  error_rate: number; // percentage
+  total_count: number;
+  error_count: number;
   component: string;
 }
 
 export interface SystemMetrics {
   components: ComponentMetrics[];
   timestamp: string;
+  error?: string;
 }
 
-async function scrapeMetrics(): Promise<SystemMetrics> {
+/**
+ * Scrapes Prometheus metrics and reports raw counters.
+ */
+export async function scrapeMetrics(): Promise<SystemMetrics> {
+  const timestamp = new Date().toISOString();
   try {
     const response = await fetch(METRICS_URL);
     if (!response.ok) {
@@ -25,50 +30,42 @@ async function scrapeMetrics(): Promise<SystemMetrics> {
 
     const text = await response.text();
 
-    // Parse Prometheus text format
-    // This is a simplified parser for demonstration
-    // In a real scenario, we'd use a proper prometheus parser
+    const parseMetric = (name: string): number => {
+      // Robust regex for Prometheus metrics including labels
+      const regex = new RegExp(`^${name}(?:\\{.*?\\})?\\s+(\\d+(?:\\.\\d+)?)`, 'm');
+      const match = text.match(regex);
+      return match ? parseFloat(match[1]) : 0;
+    };
 
     const components = ['retrieval', 'fusion', 'generation', 'policy'];
-    const results: ComponentMetrics[] = components.map(comp => {
-      const throughputMatch = text.match(new RegExp(`${comp}_total_count (\\d+)`));
-      const errorMatch = text.match(new RegExp(`${comp}_error_count (\\d+)`));
-
-      const total = throughputMatch ? parseInt(throughputMatch[1], 10) : 10; // Default mock values
-      const errors = errorMatch ? parseInt(errorMatch[1], 10) : 0;
-
-      return {
-        component: comp,
-        throughput: total / 60, // Mock QPS
-        error_rate: total > 0 ? (errors / total) * 100 : 0
-      };
-    });
+    const results: ComponentMetrics[] = components.map(comp => ({
+      component: comp,
+      total_count: parseMetric(`${comp}_total_count`),
+      error_count: parseMetric(`${comp}_error_count`)
+    }));
 
     return {
       components: results,
-      timestamp: new Date().toISOString()
+      timestamp
     };
   } catch (error) {
-    // Return mock data if scraper fails
     return {
       components: [
-        { component: 'retrieval', throughput: 0, error_rate: 0 },
-        { component: 'fusion', throughput: 0, error_rate: 0 },
-        { component: 'generation', throughput: 0, error_rate: 0 },
-        { component: 'policy', throughput: 0, error_rate: 0 }
+        { component: 'retrieval', total_count: 0, error_count: 0 },
+        { component: 'fusion', total_count: 0, error_count: 0 },
+        { component: 'generation', total_count: 0, error_count: 0 },
+        { component: 'policy', total_count: 0, error_count: 0 }
       ],
-      timestamp: new Date().toISOString(),
-      // @ts-ignore
+      timestamp,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
 }
 
 // If run directly
-if (process.argv[1] && (process.argv[1].endsWith('scraper.ts') || process.argv[1].endsWith('scraper.js'))) {
+const isMain = process.argv[1] && (process.argv[1].endsWith('scraper.ts') || process.argv[1].endsWith('scraper.js'));
+if (isMain) {
   scrapeMetrics().then(metrics => {
     console.log(JSON.stringify(metrics, null, 2));
   });
 }
-
-export { scrapeMetrics };

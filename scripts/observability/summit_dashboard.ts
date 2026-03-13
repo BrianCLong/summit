@@ -9,24 +9,23 @@ import { scrapeMetrics } from '../metrics/scraper.ts';
 export interface DashboardReport {
   status: 'online' | 'degraded' | 'offline';
   pipeline: {
-    latency_p95_ms: number;
+    latency_probe_ms: number;
     stages: {
-      retrieval: number;
-      fusion: number;
-      generation: number;
+      entity_extraction: number;
+      graph_query: number;
+      answer_synthesis: number;
     };
     complexity: {
       avg_nodes_traversed: number;
       avg_docs_searched: number;
+      avg_depth: number;
     };
   };
   operational: {
-    throughput_qps: number;
-    error_rate_percent: number;
-    components: Array<{
+    counters: Array<{
       name: string;
-      throughput: number;
-      error_rate: number;
+      total: number;
+      errors: number;
     }>;
   };
   timestamp: string;
@@ -38,32 +37,32 @@ export async function generateDashboard(): Promise<DashboardReport> {
     scrapeMetrics()
   ]);
 
-  const hasErrors = (probeResults as any).error || (systemMetrics as any).error;
+  const isOffline = !!(probeResults.error || systemMetrics.error);
 
-  const avgThroughput = systemMetrics.components.reduce((acc, curr) => acc + curr.throughput, 0) / systemMetrics.components.length;
-  const avgErrorRate = systemMetrics.components.reduce((acc, curr) => acc + curr.error_rate, 0) / systemMetrics.components.length;
+  const totalErrors = systemMetrics.components.reduce((acc, curr) => acc + curr.error_count, 0);
+  const totalRequests = systemMetrics.components.reduce((acc, curr) => acc + curr.total_count, 0);
+  const errorRate = totalRequests > 0 ? (totalErrors / totalRequests) * 100 : 0;
 
   return {
-    status: hasErrors ? 'offline' : (avgErrorRate > 5 ? 'degraded' : 'online'),
+    status: isOffline ? 'offline' : (errorRate > 5 ? 'degraded' : 'online'),
     pipeline: {
-      latency_p95_ms: probeResults.latency.total_ms,
+      latency_probe_ms: probeResults.latency.total_ms,
       stages: {
-        retrieval: probeResults.latency.retrieval_ms,
-        fusion: probeResults.latency.fusion_ms,
-        generation: probeResults.latency.generation_ms,
+        entity_extraction: probeResults.latency.entity_extraction_ms,
+        graph_query: probeResults.latency.graph_query_ms,
+        answer_synthesis: probeResults.latency.answer_synthesis_ms,
       },
       complexity: {
         avg_nodes_traversed: probeResults.complexity.nodes_traversed,
         avg_docs_searched: probeResults.complexity.documents_searched,
+        avg_depth: probeResults.complexity.depth
       }
     },
     operational: {
-      throughput_qps: avgThroughput,
-      error_rate_percent: avgErrorRate,
-      components: systemMetrics.components.map(c => ({
+      counters: systemMetrics.components.map(c => ({
         name: c.component,
-        throughput: c.throughput,
-        error_rate: c.error_rate
+        total: c.total_count,
+        errors: c.error_count
       }))
     },
     timestamp: new Date().toISOString()

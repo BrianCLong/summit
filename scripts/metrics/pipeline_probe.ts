@@ -10,18 +10,24 @@ const DEFAULT_TENANT = "system-test";
 export interface PipelineMetrics {
   latency: {
     total_ms: number;
-    retrieval_ms: number;
-    fusion_ms: number;
-    generation_ms: number;
+    entity_extraction_ms: number;
+    graph_query_ms: number;
+    answer_synthesis_ms: number;
   };
   complexity: {
     nodes_traversed: number;
     documents_searched: number;
+    depth: number;
   };
   timestamp: string;
+  error?: string;
 }
 
-async function runProbe(query = DEFAULT_QUERY, tenantId = DEFAULT_TENANT): Promise<PipelineMetrics> {
+/**
+ * Executes a synthetic probe against the GraphRAG pipeline.
+ */
+export async function runProbe(query = DEFAULT_QUERY, tenantId = DEFAULT_TENANT): Promise<PipelineMetrics> {
+  const timestamp = new Date().toISOString();
   try {
     const response = await fetch(GRAPH_RAG_URL, {
       method: 'POST',
@@ -34,38 +40,42 @@ async function runProbe(query = DEFAULT_QUERY, tenantId = DEFAULT_TENANT): Promi
     }
 
     const json = await response.json() as any;
+    if (!json?.data?.metadata || !json?.data?.retrievalResult) {
+      throw new Error("Invalid API response structure");
+    }
+
     const { metadata, retrievalResult } = json.data;
 
+    // Use reported metrics from the service metadata
+    // We report what the service provides, avoiding arbitrary ratios.
     return {
       latency: {
-        total_ms: metadata.totalProcessingTimeMs,
-        retrieval_ms: metadata.retrievalTimeMs,
-        fusion_ms: metadata.fusionTimeMs,
-        generation_ms: metadata.generationTimeMs,
+        total_ms: metadata.totalProcessingTimeMs ?? 0,
+        entity_extraction_ms: metadata.extractionTimeMs ?? 0,
+        graph_query_ms: metadata.retrievalTimeMs ?? 0,
+        answer_synthesis_ms: (metadata.fusionTimeMs ?? 0) + (metadata.generationTimeMs ?? 0),
       },
       complexity: {
-        nodes_traversed: retrievalResult.totalNodesTraversed,
-        documents_searched: retrievalResult.totalDocumentsSearched,
+        nodes_traversed: retrievalResult.totalNodesTraversed ?? 0,
+        documents_searched: retrievalResult.totalDocumentsSearched ?? 0,
+        depth: retrievalResult.metadata?.maxHopsReached ?? 0
       },
-      timestamp: new Date().toISOString()
+      timestamp
     };
   } catch (error) {
-    // Return empty metrics if service is unreachable
     return {
-      latency: { total_ms: 0, retrieval_ms: 0, fusion_ms: 0, generation_ms: 0 },
-      complexity: { nodes_traversed: 0, documents_searched: 0 },
-      timestamp: new Date().toISOString(),
-      // @ts-ignore
+      latency: { total_ms: 0, entity_extraction_ms: 0, graph_query_ms: 0, answer_synthesis_ms: 0 },
+      complexity: { nodes_traversed: 0, documents_searched: 0, depth: 0 },
+      timestamp,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
 }
 
 // If run directly
-if (process.argv[1] && (process.argv[1].endsWith('pipeline_probe.ts') || process.argv[1].endsWith('pipeline_probe.js'))) {
+const isMain = process.argv[1] && (process.argv[1].endsWith('pipeline_probe.ts') || process.argv[1].endsWith('pipeline_probe.js'));
+if (isMain) {
   runProbe().then(metrics => {
     console.log(JSON.stringify(metrics, null, 2));
   });
 }
-
-export { runProbe };
