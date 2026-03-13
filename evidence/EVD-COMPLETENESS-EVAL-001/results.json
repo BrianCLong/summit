@@ -1,0 +1,38 @@
+[
+  {
+    "id": "EVAL-COMP-001",
+    "completeness_score": 0.9142857142857143,
+    "omission_rate": 0.4285714285714286,
+    "details": {
+      "entity_coverage": 1.0,
+      "sub_question_coverage": 1.0,
+      "critical_context_score": 0.5714285714285714,
+      "length_calibration": 1.0,
+      "relationship_surfacing": 1.0
+    }
+  },
+  {
+    "id": "EVAL-COMP-002",
+    "completeness_score": 0.5552380952380952,
+    "omission_rate": 1.0,
+    "details": {
+      "entity_coverage": 0.3333333333333333,
+      "sub_question_coverage": 1.0,
+      "critical_context_score": 0.0,
+      "length_calibration": 0.44285714285714284,
+      "relationship_surfacing": 1.0
+    }
+  },
+  {
+    "id": "EVAL-COMP-003",
+    "completeness_score": 0.7150000000000001,
+    "omission_rate": 0.8,
+    "details": {
+      "entity_coverage": 0.375,
+      "sub_question_coverage": 1.0,
+      "critical_context_score": 0.2,
+      "length_calibration": 1.0,
+      "relationship_surfacing": 1.0
+    }
+  }
+]

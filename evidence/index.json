@@ -60,12 +60,28 @@
         "metrics.json",
         "stamp.json"
       ]
+    },
+    "EVD-COMPLETENESS-EVAL-001": {
+      "report": "EVD-COMPLETENESS-EVAL-001/report.json",
+      "metrics": "EVD-COMPLETENESS-EVAL-001/metrics.json",
+      "stamp": "EVD-COMPLETENESS-EVAL-001/stamp.json",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json",
+        "results.json"
+      ]
     }
   },
-  "items": [
-    {
-      "id": "EVD-COMPLETENESS-EVAL-001",
-      "path": "EVD-COMPLETENESS-EVAL-001/report.json"
+  "items": {
+    "EVD-COMPLETENESS-EVAL-001": {
+      "path": "evidence/EVD-COMPLETENESS-EVAL-001",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json",
+        "results.json"
+      ]
     }
-  ]
+  }
 }

@@ -142,6 +142,7 @@ def main():
     stamp = {
         "evidence_id": evidence_id,
         "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+        "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "git_commit": "HEAD"
     }
 
@@ -149,19 +150,31 @@ def main():
     (out_dir / "report.json").write_text(json.dumps(report, indent=2))
     (out_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))
     (out_dir / "stamp.json").write_text(json.dumps(stamp, indent=2))
+    (out_dir / "results.json").write_text(json.dumps(results, indent=2))
 
     # Update index.json (preserving schema)
     index_path = EVIDENCE_DIR / "index.json"
     index = json.loads(index_path.read_text())
 
-    # Remove existing entry if any
-    index["items"] = [x for x in index.get("items", []) if x["id"] != evidence_id]
+    # Update mappings (Legacy/Common format)
+    if "mappings" not in index:
+        index["mappings"] = {}
 
-    entry = {
-        "id": evidence_id,
-        "path": f"{evidence_id}/report.json"
+    index["mappings"][evidence_id] = {
+        "report": f"{evidence_id}/report.json",
+        "metrics": f"{evidence_id}/metrics.json",
+        "stamp": f"{evidence_id}/stamp.json",
+        "files": ["report.json", "metrics.json", "stamp.json", "results.json"]
     }
-    index["items"].append(entry)
+
+    # Update items (New/Verifier format)
+    if "items" not in index or isinstance(index["items"], list):
+        index["items"] = {}
+
+    index["items"][evidence_id] = {
+        "path": f"evidence/{evidence_id}",
+        "files": ["report.json", "metrics.json", "stamp.json", "results.json"]
+    }
 
     index_path.write_text(json.dumps(index, indent=2) + "\n")
 
