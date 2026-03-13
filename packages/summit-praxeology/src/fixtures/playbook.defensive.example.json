@@ -8,15 +8,8 @@
     "strategyIds": ["tg.strategy.information-shaping"]
   },
   "steps": [
-    {
-      "id": "s1",
-      "actionSignatureId": "pg.action.sig.coordinated-posting.v1"
-    },
-    {
-      "id": "s2",
-      "actionSignatureId": "pg.action.sig.cross-platform-amplification.v1",
-      "dependsOn": ["s1"]
-    }
+    { "id": "s1", "actionSignatureId": "pg.action.sig.coordinated-posting.v1" },
+    { "id": "s2", "actionSignatureId": "pg.action.sig.cross-platform-amplification.v1", "dependsOn": ["s1"] }
   ],
   "outcomes": [
     {
@@ -25,11 +18,7 @@
       "timeToEffectDays": 14,
       "likelihood": 0.35,
       "stateDeltas": [
-        {
-          "stateVarId": "rg.state.community-trust-index",
-          "delta": -0.1,
-          "confidence": 0.4
-        }
+        { "stateVarId": "rg.state.community-trust-index", "delta": -0.1, "confidence": 0.4 }
       ]
     }
   ],

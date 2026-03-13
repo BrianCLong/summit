@@ -1,8 +1,8 @@
 {
-  "id": "pg.ws.demo.001",
+  "id": "pg.ws.demo-cluster.v1",
   "graph": "PG",
   "mode": "quarantine",
-  "batchSignature": "1f4c2d7a-demo-batch",
+  "batchSignature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "ops": [
     {
       "op": "upsert_action_signature",
@@ -11,65 +11,17 @@
       "payload": {
         "id": "pg.action.sig.coordinated-posting.v1",
         "label": "Coordinated posting signature",
-        "description": "Observed pattern of synchronized high-volume posting across monitored channels.",
         "indicators": [
-          {
-            "id": "ind1",
-            "signal": "coordinated posting pattern",
-            "weight": 0.7,
-            "evidenceKinds": ["post", "report"]
-          }
+          { "id": "ind1", "signal": "coordinated posting pattern", "weight": 0.7 }
         ],
-        "provenance": {
-          "source": "internal-analytic-seed",
-          "createdAt": "2026-03-05T00:00:00Z",
-          "curator": "summit.seed"
-        }
-      }
-    },
-    {
-      "op": "upsert_playbook",
-      "entityType": "Playbook",
-      "entityId": "pg.playbook.defensive.indicator-cluster.v1",
-      "payload": {
-        "id": "pg.playbook.defensive.indicator-cluster.v1",
-        "name": "Indicator Cluster: Coordinated Narrative Injection (Analytic)",
-        "useCase": "detection",
-        "links": {
-          "valueIds": ["vg.value.trust", "vg.value.security"],
-          "goalIds": ["tg.goal.undermine-credibility"],
-          "strategyIds": ["tg.strategy.information-shaping"]
-        },
-        "steps": [
-          {
-            "id": "s1",
-            "actionSignatureId": "pg.action.sig.coordinated-posting.v1"
-          }
-        ],
-        "outcomes": [
-          {
-            "id": "o1",
-            "description": "Observed trust metrics may degrade in targeted communities over time.",
-            "timeToEffectDays": 14,
-            "likelihood": 0.35
-          }
-        ],
-        "provenance": {
-          "source": "internal-analytic-seed",
-          "createdAt": "2026-03-05T00:00:00Z",
-          "curator": "summit.seed"
-        },
-        "contentSafety": {
-          "analyticOnly": true,
-          "forbidPrescriptive": true
-        }
+        "provenance": { "source": "seed", "createdAt": "2026-03-05T00:00:00Z", "curator": "summit.seed" }
       }
     }
   ],
   "provenance": {
-    "source": "internal-analytic-seed",
+    "source": "internal",
     "createdAt": "2026-03-05T00:00:00Z",
-    "curator": "summit.seed"
+    "curator": "system"
   },
   "safety": {
     "analyticOnly": true,

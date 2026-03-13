@@ -1,14 +1,14 @@
 export type EvidenceItem = {
   id: string;
-  kind: string;
-  signal: string;
-  ts: string;
+  kind: string;        // e.g., "log", "report", "post", "sensor"
+  signal: string;      // normalized string signal
+  ts: string;          // ISO date-time
 };
 
 export type MatchedIndicator = {
   indicatorId: string;
   evidenceId: string;
-  score: number;
+  score: number; // 0..1
 };
 
 export type PGHypothesis = {
@@ -20,5 +20,5 @@ export type PGHypothesis = {
   confidence: number;
   matchedIndicators: MatchedIndicator[];
   missingEvidence: string[];
-  notes: string;
+  notes: string; // analytic explanation ONLY
 };
