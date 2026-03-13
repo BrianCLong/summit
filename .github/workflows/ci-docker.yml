@@ -1,0 +1,151 @@
+name: Docker Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: prov-ledger
+            context: ./services/prov-ledger
+            dockerfile: ./services/prov-ledger/Dockerfile
+          - name: policy-lac
+            context: ./gateway/policy-lac
+            dockerfile: ./gateway/policy-lac/Dockerfile
+          - name: nl2cypher
+            context: ./server/ai/nl2cypher
+            dockerfile: ./server/ai/nl2cypher/Dockerfile
+          - name: server
+            context: .
+            dockerfile: server/Dockerfile.prod
+          - name: api-gateway
+            context: ./services/api-gateway
+            dockerfile: ./services/api-gateway/Dockerfile
+          - name: gateway
+            context: .
+            dockerfile: apps/gateway/Dockerfile
+          - name: backup-service
+            context: ./server/infrastructure/disaster-recovery
+            dockerfile: ./server/infrastructure/disaster-recovery/Dockerfile
+          - name: web
+            context: .
+            dockerfile: apps/web/Dockerfile
+          - name: prediction-service
+            context: .
+            dockerfile: services/prediction-service/Dockerfile
+          - name: rag
+            context: .
+            dockerfile: services/rag/Dockerfile
+          - name: graphrag
+            context: .
+            dockerfile: services/graphrag/Dockerfile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.service.name }}
+          tags: |
+            type=sha,format=long
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build Docker image
+        id: build
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
+          push: false
+          load: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.service.name }}:sha-${{ github.sha }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner (HIGH - Warn)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.service.name }}:sha-${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results-${{ matrix.service.name }}-high.sarif'
+          severity: 'HIGH'
+          exit-code: '0'
+          ignore-unfixed: true
+
+      - name: Run Trivy vulnerability scanner (CRITICAL - Block)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.service.name }}:sha-${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results-${{ matrix.service.name }}-critical.sarif'
+          severity: 'CRITICAL'
+          exit-code: '1'
+          ignore-unfixed: true
+
+      - name: Build and push multi-arch Docker image
+        id: build-push
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+        if: github.event_name != 'pull_request'
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Upload Trivy HIGH scan results
+        uses: github/codeql-action/upload-sarif@9792ccaef0455e446c567163589397e8c3ac2e0d # v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results-${{ matrix.service.name }}-high.sarif'
+          category: trivy-high-${{ matrix.service.name }}
+
+      - name: Upload Trivy CRITICAL scan results
+        uses: github/codeql-action/upload-sarif@9792ccaef0455e446c567163589397e8c3ac2e0d # v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results-${{ matrix.service.name }}-critical.sarif'
+          category: trivy-critical-${{ matrix.service.name }}
