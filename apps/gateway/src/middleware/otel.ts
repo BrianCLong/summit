@@ -21,6 +21,11 @@ export function otelMiddleware(req: Request, res: Response, next: NextFunction) 
         "feature.flags": req.headers["x-feature-flags"] || process.env.FEATURE_FLAGS || "",
         "release.sha": req.headers[HEADER_RELEASE] || process.env.GIT_SHA || "",
         pr_number: req.headers[HEADER_PR] || process.env.PR_NUMBER || "",
+        "http.method": req.method,
+        "http.target": req.url,
+        "http.host": req.get("host") || "",
+        "http.user_agent": req.get("user-agent") || "",
+        "http.client_ip": req.ip || "",
       },
     });
 
