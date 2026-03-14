@@ -25,7 +25,8 @@ class RedisBackupProvider(BackupProvider):
 
         # Prefix with partition name for clear organization
         partition = getattr(self.client, 'partition', 'default')
-        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        import datetime as dt
+        timestamp = datetime.now(dt.UTC).strftime("%Y%m%d%H%M%S")
         filename = f"redis_backup_{partition}_{timestamp}.jsonl"
         filepath = os.path.join(destination, filename)
 
