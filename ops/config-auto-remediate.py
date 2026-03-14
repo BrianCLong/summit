@@ -270,8 +270,8 @@ class ConfigAutoRemediation:
         # Use git to find tracked files matching patterns
         try:
             for pattern in self.config["monitored_paths"]:
-                cmd = f"git ls-files '{pattern}'"
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                cmd = ["git", "ls-files", pattern]
+                result = subprocess.run(cmd, capture_output=True, text=True)
 
                 if result.returncode == 0:
                     for file_path in result.stdout.strip().split("\n"):
