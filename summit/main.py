@@ -5,6 +5,7 @@ from summit.api.factgov.router import router as factgov_router
 from summit.api.factlaw.router import router as factlaw_router
 from summit.api.factmarkets.router import router as factmarkets_router
 from summit.observability import setup_observability
+from server.src.health.health_router import router as health_router
 
 app = FastAPI(title="Summit Multi-Product API")
 
@@ -12,6 +13,7 @@ app = FastAPI(title="Summit Multi-Product API")
 setup_observability(app)
 
 # Include all product routers
+app.include_router(health_router)
 app.include_router(factflow_router)
 app.include_router(factlaw_router)
 app.include_router(factmarkets_router)
