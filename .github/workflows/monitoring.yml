@@ -1,0 +1,66 @@
+name: Repository Health Monitoring
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Hourly
+  workflow_dispatch: # Allow manual triggers
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+  actions: read
+
+jobs:
+  monitor-repo-health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run CI Health Monitor
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: npx tsx scripts/monitoring/ci_health.ts
+
+      - name: Run Determinism Drift Monitor
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: npx tsx scripts/monitoring/determinism_drift.ts
+
+      - name: Run Repo Entropy Monitor
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: npx tsx scripts/monitoring/repo_entropy.ts
+
+      - name: Run Security Drift Monitor
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: npx tsx scripts/monitoring/security_drift.ts
+
+      - name: Upload Monitoring Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-artifacts
+          path: artifacts/monitoring/*.json
+          retention-days: 7
