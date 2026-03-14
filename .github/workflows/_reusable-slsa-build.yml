@@ -182,7 +182,7 @@ jobs:
 
           IMAGE="${{ steps.image-uri.outputs.uri }}"
 
-          cosign verify --use-signed-timestamps "$IMAGE" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify --use-signed-timestamps "$IMAGE" \
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 

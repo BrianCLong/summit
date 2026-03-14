@@ -70,7 +70,7 @@ jobs:
       - name: Verify container signature
         run: |
           set -euo pipefail
-          cosign verify --use-signed-timestamps "${{ inputs.image_uri }}" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify --use-signed-timestamps "${{ inputs.image_uri }}" \
             --rekor-url "${{ env.REKOR_URL }}" \
             --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
