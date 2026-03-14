@@ -8,6 +8,5 @@
     "validate:connectors": "node ../../scripts/validate-connectors.mjs",
     "replay:connectors": "node ../../scripts/replay-connectors.mjs",
     "check:determinism": "node ../../scripts/check-determinism.mjs"
-  },
   }
 }
