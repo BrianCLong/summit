@@ -35,6 +35,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Detect versions
         id: versions
@@ -250,6 +251,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: SBOM Generation (Syft)
         uses: anchore/sbom-action@v0.17.1

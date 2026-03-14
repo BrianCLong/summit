@@ -111,6 +111,7 @@ jobs:
         with:
           ref: ${{ inputs.commit_sha }}
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Verify Commit Exists
         run: |

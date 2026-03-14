@@ -36,6 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Maybe skip docs (toggle via DOCS_DISABLE)
         if: ((((((((((((((((((((${{ vars.DOCS_DISABLE == '1' }}) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (always())) && (always())) && (github.ref == 'refs/heads/main' && github.event_name == 'push')) && (always())

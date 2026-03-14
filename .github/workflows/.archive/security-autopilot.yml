@@ -34,6 +34,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -60,6 +61,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2

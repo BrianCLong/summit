@@ -49,6 +49,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          fetch-tags: true
 
       - name: Validate commits
         id: validate-commits
@@ -125,6 +126,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
           fetch-tags: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -448,6 +450,7 @@ jobs:
         with:
           ref: ${{ needs.validate.outputs.branch_name }}
           fetch-depth: 0
+          fetch-tags: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: pnpm/action-setup@v4

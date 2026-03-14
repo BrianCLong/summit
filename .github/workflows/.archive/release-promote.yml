@@ -61,6 +61,7 @@ jobs:
         with:
           ref: release/v${{ inputs.version }}
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Parse version
         id: version
@@ -567,6 +568,7 @@ jobs:
         with:
           ref: release/v${{ inputs.version }}
           fetch-depth: 0
+          fetch-tags: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: pnpm/action-setup@v4

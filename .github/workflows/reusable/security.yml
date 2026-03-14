@@ -17,6 +17,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          fetch-tags: true
       - name: Generate SBOM (SPDX)
         uses: anchore/sbom-action@v0 # v0
         with:
@@ -44,6 +45,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          fetch-tags: true
       - uses: trufflesecurity/trufflehog@v3
         with: { path: '.', base: 'origin/main', head: '${{ github.sha }}' }
 
@@ -53,6 +55,7 @@ jobs:
       - uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
+          fetch-tags: true
           fetch-tags: true
       - uses: pilosus/action-pip-license-checker@cc7a461bfa27b44ad187b8578c881ef5138c13fd # v2
         with: { requirements: 'requirements.txt', fail: 'strong' }
@@ -65,6 +68,7 @@ jobs:
       - uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
+          fetch-tags: true
           fetch-tags: true
       - uses: actions/setup-node@v4 # v4
         with:

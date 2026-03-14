@@ -24,6 +24,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          fetch-tags: true
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
