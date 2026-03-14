@@ -148,22 +148,25 @@ class SymphonyCLI:
 
     def run_just_command(self, justfile: str, target: str, args: str = "", dry_run: bool = False):
         """Execute Just command with autonomy checks"""
-        cmd = f"just --justfile {justfile} {target}"
+        import shlex
+        cmd = ["just", "--justfile", justfile, target]
         if args:
-            cmd += f" {args}"
+            cmd.extend(shlex.split(args))
+
+        cmd_str = shlex.join(cmd)
 
         if dry_run or self.config.config["autonomy"] == 0:
-            print(f"DRY RUN: {cmd}")
+            print(f"DRY RUN: {cmd_str}")
             return True
 
         if self.config.config["autonomy"] == 1:
-            confirm = input(f"Execute: {cmd}? [y/N] ").lower()
+            confirm = input(f"Execute: {cmd_str}? [y/N] ").lower()
             if confirm != "y":
                 print("Aborted.")
                 return False
 
         try:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            result = subprocess.run(cmd, capture_output=True, text=True)
             if result.returncode == 0:
                 print(result.stdout)
                 return True

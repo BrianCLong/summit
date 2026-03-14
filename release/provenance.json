@@ -1,0 +1,50 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "build_definition": {
+    "build_type": "https://summit.dev/build/release-artifact/v1",
+    "external_parameters": {
+      "node": ">=18.18",
+      "package_manager": "pnpm@10"
+    },
+    "resolved_dependencies": [
+      {
+        "digest": {
+          "sha256": "a2a83e1bd1613f8e9dfbd18b57fbad38d346937f322ccedaee864d490f09698b"
+        },
+        "uri": "file://pnpm-lock.yaml"
+      }
+    ]
+  },
+  "builder": {
+    "generator": "fallback",
+    "id": "github-actions://.github/workflows/release-integrity.yml",
+    "workflow_ref": ".github/workflows/release-integrity.yml@refs/heads/main"
+  },
+  "commit_sha": "182cbb8b14fc5e5e20f47e9985e0ba53071a8994",
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "run_details": {
+    "metadata": {
+      "invocation_id": "deterministic-release-integrity"
+    }
+  },
+  "subjects": [
+    {
+      "digest": {
+        "sha256": "cb4c4c84c8dfa2343ae63758518fbe1730f8086fd0870a884afe6a8d7fad8d4a"
+      },
+      "name": "release/manifest.json"
+    },
+    {
+      "digest": {
+        "sha256": "d1ce45fa1b6e8c08d9765833cfab43e1e6f6600d84fc83068550ff94d45fdd86"
+      },
+      "name": "release/sbom.json"
+    },
+    {
+      "digest": {
+        "sha256": "7467b82bd8a4f3043adf9057c6720d7e82ed4927833a6d54ac59acb2a334a920"
+      },
+      "name": ".repoos/release/release-surface.json"
+    }
+  ]
+}

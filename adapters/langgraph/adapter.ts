@@ -1,4 +1,5 @@
 import { SummitAgentAdapter, Trace, Metrics } from '../../sdk/agent-adapter';
+import { convertToSummitArtifact } from '../utils/converter';
 
 export class LangGraphAdapter implements SummitAgentAdapter {
   private events: any[] = [];
@@ -9,7 +10,7 @@ export class LangGraphAdapter implements SummitAgentAdapter {
   };
 
   public recordEvent(event: any) {
-    this.events.push(event);
+    this.events.push(convertToSummitArtifact(event, 'langgraph'));
     this.metrics.invocations++;
     // Assume event might have token/latency data to parse in a real implementation
   }
