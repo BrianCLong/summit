@@ -4,3 +4,9 @@ seed: 42
 queries:
   - id: "q1"
     shape: "MATCH (n) RETURN n LIMIT 10"
+  - id: "q2"
+    shape: "MATCH (a)-[r]->(b) RETURN a, r, b LIMIT 5"
+  - id: "q3"
+    shape: "MATCH (n:Tool) RETURN n LIMIT 10"
+  - id: "q4"
+    shape: "MATCH (a:Agent)-[r:COMMUNICATES]->(b:Agent) RETURN a, r, b LIMIT 5"

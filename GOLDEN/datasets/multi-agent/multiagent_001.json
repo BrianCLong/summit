@@ -1,0 +1,8 @@
+{
+  "id": "EVID:multiagent:001:beta",
+  "content": "Agents communicate via a centralized message bus with strict schema validation.",
+  "metadata": {
+    "source": "Agent Operations Manual",
+    "classification": "internal"
+  }
+}

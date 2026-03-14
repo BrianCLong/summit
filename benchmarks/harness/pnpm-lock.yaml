@@ -1,0 +1,29 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@intelgraph/synthdata-js':
+        specifier: file:../../packages/sdk/synthdata-js
+        version: file:../../packages/sdk/synthdata-js
+
+packages:
+
+  '@intelgraph/synthdata-js@file:../../packages/sdk/synthdata-js':
+    resolution: {directory: ../../packages/sdk/synthdata-js, type: directory}
+
+  seedrandom@3.0.5:
+    resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
+
+snapshots:
+
+  '@intelgraph/synthdata-js@file:../../packages/sdk/synthdata-js':
+    dependencies:
+      seedrandom: 3.0.5
+
+  seedrandom@3.0.5: {}
