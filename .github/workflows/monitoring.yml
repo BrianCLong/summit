@@ -1,0 +1,67 @@
+name: "Hourly Repo Health Monitoring"
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run CI Health Monitoring
+        run: npx tsx scripts/monitoring/ci_health.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Determinism Drift Monitoring
+        run: npx tsx scripts/monitoring/determinism_drift.ts
+
+      - name: Run Repo Entropy Monitoring
+        run: npx tsx scripts/monitoring/repo_entropy.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Security Drift Monitoring
+        run: npx tsx scripts/monitoring/security_drift.ts
+
+      - name: Check Health Thresholds & Alert
+        run: npx tsx scripts/monitoring/threshold_alerts.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit Monitoring Artifacts
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add artifacts/monitoring/*.json
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update hourly repo health monitoring artifacts"
+            git push
+          else
+            echo "No monitoring artifacts changed."
+          fi
