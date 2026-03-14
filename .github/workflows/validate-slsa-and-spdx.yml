@@ -27,7 +27,7 @@ jobs:
       - name: Validate SLSA Provenance
         run: |
           # Only check real attestations and sboms, ignoring templates and schemas
-          find . -type f \( -name "*.intoto.jsonl" -o -name "provenance.json" \) -not -path "*/node_modules/*" -not -path "*/schemas/*" -not -path "*/templates/*" -not -path "*/docs/*" -not -path "*/.summit/*" | while read -r file; do
+          find . -type f \( -name "*.intoto.jsonl" -o -name "provenance.json" \) -not -path "*/node_modules/*" -not -path "*/schemas/*" -not -path "*/templates/*" -not -path "*/docs/*" -not -path "*/.summit/*" -not -path "*/fixtures/*" -not -path "*/test-fixtures/*" | while read -r file; do
             echo "Validating SLSA provenance in $file"
 
             # Check if valid SLSA 1.2
@@ -47,7 +47,7 @@ jobs:
 
       - name: Validate SPDX SBOMs
         run: |
-          find . -type f \( -name "*.spdx.json" -o -name "sbom*.json" \) -not -path "*/node_modules/*" -not -path "*/schemas/*" -not -path "*/templates/*" -not -path "*/docs/*" -not -path "*/.summit/*" | while read -r file; do
+          find . -type f \( -name "*.spdx.json" -o -name "sbom*.json" \) -not -path "*/node_modules/*" -not -path "*/schemas/*" -not -path "*/templates/*" -not -path "*/docs/*" -not -path "*/.summit/*" -not -path "*/fixtures/*" -not -path "*/test-fixtures/*" | while read -r file; do
             echo "Validating SPDX SBOM in $file"
 
             # Use jq to check if this is meant to be an SPDX file (has an SPDX ID or context)
