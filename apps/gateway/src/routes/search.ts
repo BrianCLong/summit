@@ -5,13 +5,20 @@ import { logger } from '../logger';
 const router = Router();
 
 function getTenantId(req: Request): string {
-    return (req as any).user?.tenantId || req.headers['x-tenant-id'] || 'default-tenant';
+    // Only trust verified tenant context from req.user
+    const tenantId = (req as any).user?.tenantId;
+    if (!tenantId) {
+        logger.error('Security Failure: Request reached search route without tenant context');
+        throw new Error('Unauthorized: Tenant context required');
+    }
+    return tenantId;
 }
 
 function getRoles(req: Request): string[] {
     // Only trust verified roles from middleware (req.user)
-    if ((req as any).user?.roles && Array.isArray((req as any).user.roles)) {
-        return (req as any).user.roles;
+    const user = (req as any).user;
+    if (user?.roles && Array.isArray(user.roles)) {
+        return user.roles;
     }
     return [];
 }

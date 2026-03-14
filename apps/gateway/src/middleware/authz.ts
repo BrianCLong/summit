@@ -42,10 +42,16 @@ const redacted = (value?: string) =>
   value ? createHash("sha256").update(value).digest("hex").slice(0, 8) : undefined;
 
 function buildInput(req: Request): AuthzInput {
-  const roles = (req.headers["x-roles"] as string | undefined)?.split(",") || [];
-  const tenantHeader = (req.headers["x-tenant"] as string | undefined) ||
-    (req.headers["x-tenant-id"] as string | undefined) ||
-    "unknown";
+  // Use verified identity from req.user (populated by authenticate middleware)
+  // Fallback to anonymous for unauthenticated requests that might reach here
+  const user = (req as any).user || {
+    id: 'anonymous',
+    tenantId: 'unknown',
+    roles: [],
+    clearance: 'internal'
+  };
+
+  const tenant = user.tenantId;
   const classification =
     (req.headers["x-resource-classification"] as string | undefined) || "internal";
 
@@ -55,16 +61,16 @@ function buildInput(req: Request): AuthzInput {
 
   return {
     subject: {
-      id: (req.headers["x-subject-id"] as string | undefined) || "anonymous",
-      roles,
-      tenant: tenantHeader,
-      clearance: (req.headers["x-clearance"] as string | undefined) || "internal",
+      id: user.id,
+      roles: user.roles,
+      tenant,
+      clearance: user.clearance?.toString() || "internal",
       mfa: (req.headers["x-mfa"] as string | undefined) || "unknown",
     },
     resource: {
       type: req.headers["x-resource-type"]?.toString() || req.path,
       id: req.headers["x-resource-id"]?.toString() || "na",
-      tenant: tenantHeader,
+      tenant,
       classification,
     },
     action:

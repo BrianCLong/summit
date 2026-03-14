@@ -3,6 +3,7 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
 import { ApolloGateway, RemoteGraphQLDataSource } from "@apollo/gateway";
 import { security } from "./security";
+import { authenticate } from "./middleware/authenticate";
 import { policyGuard } from "./middleware/policyGuard";
 import searchRouter from "./routes/search";
 import { logger } from "./logger";
@@ -16,15 +17,20 @@ async function startGateway() {
   const app = express();
   app.use(express.json({ limit: "1mb" }));
   app.use(security);
-  
-  // Routes
-  app.use(searchRouter);
-  
-  // Health
+
+  // Health check routes must be accessible without authentication
   app.get("/healthz", (_req, res) => res.json({ ok: true, service: "gateway", timestamp: new Date() }));
   app.get("/health", (_req, res) => res.json({ status: "ok", timestamp: new Date() }));
   app.get("/api/health", (_req, res) => res.json({ status: "ok", service: "api", timestamp: new Date() }));
 
+  // Apply authentication to all other routes
+  app.use(authenticate);
+
+  // Apply authorization/policy guard globally after authentication
+  app.use(policyGuard);
+
+  // Routes
+  app.use(searchRouter);
   // GraphQL Gateway setup
   let subgraphConfig;
   try {
@@ -70,7 +76,6 @@ async function startGateway() {
 
   app.use(
     "/graphql",
-    policyGuard,
     expressMiddleware(server, {
       context: async ({ req }) => ({ headers: req.headers })
     }) as any
