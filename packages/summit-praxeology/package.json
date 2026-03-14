@@ -11,28 +11,5 @@
     "dev:pg": "tsx src/api/pgServe.ts"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "ajv": "8.18.0",
-    "ajv-formats": "3.0.1"
-  },
-  "devDependencies": {
-<<<<<<< HEAD
-    typescript: "5.9.3",
-    vitest: "2.1.9"
-=======
-    "typescript": "5.9.3",
-    "vitest": "2.1.9"
-=======
-    ajv: "8.18.0",
-    ajv-formats: "3.0.1",
-    express: "4.21.2"
-  },
-  "devDependencies": {
-    @types/express: "5.0.1",
-    tsx: "4.19.3",
-    typescript: "5.9.3",
-    vitest: "2.1.9"
->>>>>>> origin/main
->>>>>>> origin/main
   }
 }
