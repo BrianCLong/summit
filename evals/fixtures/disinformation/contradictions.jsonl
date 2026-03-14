@@ -1,0 +1,2 @@
+[{"id": "c1", "stance": "pro_vaccine", "items": [{"media_hashes": ["hash_vax_1"], "ts": "2026-01-01T10:00:00Z"}]}, {"id": "c2", "stance": "anti_vaccine", "items": [{"media_hashes": ["hash_vax_1"], "ts": "2026-01-01T10:05:00Z"}]}]
+[{"id": "c3", "stance": "pro_vaccine", "items": [{"media_hashes": ["hash_vax_2"], "ts": "2026-01-01T11:00:00Z"}]}, {"id": "c4", "stance": "pro_vaccine", "items": [{"media_hashes": ["hash_vax_2"], "ts": "2026-01-01T11:10:00Z"}]}]

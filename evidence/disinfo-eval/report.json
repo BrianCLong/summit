@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-DISINFO-EVAL-001",
+  "item_slug": "disinfo-detection-eval",
+  "summary": "Evaluation of Summit's disinformation detection capabilities across false claims, CIB, source credibility, contradictions, and narrative manipulation.",
+  "artifacts": [
+    {
+      "path": "evals/disinformation/disinfo_eval_report.json",
+      "sha256": "db40dd97e15de6e32f67ac714f746c93500bec1312d92f998f385027b7536bd2"
+    }
+  ]
+}
