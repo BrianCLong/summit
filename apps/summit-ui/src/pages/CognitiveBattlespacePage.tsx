@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchCompatibility, fetchDiffusionGeoJson, fetchDiffusionMap, fetchLinguisticAnomaly } from "../lib/culturalApi";
 import { CompatibilityPanel } from "../components/cognitive/CompatibilityPanel";
 import { DiffusionHeatmap } from "../components/cognitive/DiffusionHeatmap";
@@ -53,11 +53,13 @@ export default function CognitiveBattlespacePage() {
     [compatibility, anomaly]
   );
 
-  async function handleSelectRegion(regionId: string) {
+  // ⚡ Bolt: Memoize region selection handler to prevent Map component re-renders
+  // when only the compatibility panel updates.
+  const handleSelectRegion = useCallback(async (regionId: string) => {
     const point = diffusionMap?.points.find((p) => p.regionId === regionId);
     if (!point) return;
     setCompatibility(await fetchCompatibility(point.populationId, narrativeId));
-  }
+  }, [diffusionMap, narrativeId]);
 
   return (
     <div className="p-6 space-y-6">

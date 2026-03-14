@@ -2,7 +2,9 @@ import React from "react";
 import Map, { Layer, Source } from "react-map-gl/maplibre";
 import type { DiffusionGeoJson } from "../../types/cultural";
 
-export function DiffusionHeatmap(props: {
+// ⚡ Bolt: Memoize the heatmap to prevent expensive MapLibre re-renders
+// when sibling components (like the compatibility panel) update.
+export const DiffusionHeatmap = React.memo(function DiffusionHeatmap(props: {
   data: DiffusionGeoJson | null;
   onSelectRegion?: (regionId: string) => void;
 }) {
@@ -75,4 +77,4 @@ export function DiffusionHeatmap(props: {
       </div>
     </div>
   );
-}
+});
