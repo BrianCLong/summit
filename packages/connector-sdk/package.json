@@ -9,4 +9,3 @@
     "replay:connectors": "node ../../scripts/replay-connectors.mjs",
     "check:determinism": "node ../../scripts/check-determinism.mjs"
   }
-}
