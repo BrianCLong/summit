@@ -24,7 +24,6 @@ otel = []
 policy = []
 sbom = []
 perf = []
-dev = ["ruff", "pytest", "pytest-cov", "mypy", "numpy", "scikit-learn"]
 
 [tool.setuptools.packages.find]
 include = ["maestro*", "api*"]

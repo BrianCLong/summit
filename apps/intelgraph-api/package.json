@@ -11,6 +11,7 @@
     "lint": "eslint . || true"
   },
   "dependencies": {
+<<<<<<< HEAD
     @opentelemetry/api: "1.9.0",
     @apollo/server: "4.11.3",
     @as-integrations/express4: "1.0.0",
@@ -26,6 +27,203 @@
     pino: "10.1.0",
     jsonwebtoken: "9.0.2",
     jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    "@apollo/server": "4.11.3",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.11.0",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.13.0",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.13.0",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.11.3",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.11.3",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.11.0",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.11.0",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.11.3",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+=======
+<<<<<<< HEAD
+    "@opentelemetry/api": "1.9.0",
+    "@apollo/server": "4.16.0",
+    "@as-integrations/express4": "1.0.0",
+    "graphql-tag": "2.12.6",
+    "express": "5.2.0",
+    "express-jwt": "8.4.1",
+    "graphql": "16.12.0",
+    "neo4j-driver": "6.0.1",
+    "pg": "8.12.0",
+    "zod": "4.1.12",
+    "dotenv": "17.2.3",
+    "cors": "2.8.5",
+    "pino": "10.1.0",
+    "jsonwebtoken": "9.0.2",
+    "jwks-rsa": "3.1.0"
+=======
+    @opentelemetry/api: "1.9.0",
+    @apollo/server: "4.13.0",
+    @as-integrations/express4: "1.0.0",
+    graphql-tag: "2.12.6",
+    express: "5.2.0",
+    express-jwt: "8.4.1",
+    graphql: "16.12.0",
+    neo4j-driver: "6.0.1",
+    pg: "8.12.0",
+    zod: "4.1.12",
+    dotenv: "17.2.3",
+    cors: "2.8.5",
+    pino: "10.1.0",
+    jsonwebtoken: "9.0.2",
+    jwks-rsa: "3.1.0"
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
   },
   "devDependencies": {
     "@types/express": "5.0.3",

@@ -21,8 +21,7 @@ class DisinfoEvalHarness:
         data = []
         with open(filepath, "r") as f:
             for line in f:
-                if line.strip():
-                    data.append(json.loads(line))
+                if line.strip(): data.append(json.loads(line))
         return data
 
     def eval_false_claims(self):
@@ -116,7 +115,7 @@ class DisinfoEvalHarness:
         self.results = report
         return report
 
-    def save_report(self, filename: str = "disinfo_eval_report.json"):
+    def save_report(self, filename: str = "evals/disinformation/disinfo_eval_report.json"):
         with open(filename, "w") as f:
             json.dump(self.results, f, indent=2)
 

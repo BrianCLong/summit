@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-DISINFO-EVAL-001",
+  "metrics": {
+    "accuracy": 0.61538,
+    "false_positive_rate": 0.0,
+    "total_tp": 2,
+    "total_fp": 0,
+    "total_tn": 6,
+    "total_fn": 5
+  }
+}
