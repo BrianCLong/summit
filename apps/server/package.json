@@ -11,7 +11,178 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config ./jest.config.cjs --runInBand"
   },
   "dependencies": {
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
     "@apollo/server": "4.11.3",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.13.0",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.13.0",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+=======
+<<<<<<< HEAD
+    "@apollo/server": "4.16.0",
     "axios": "1.7.9",
     "body-parser": "2.2.0",
     "connect-redis": "8.0.1",
@@ -26,6 +197,33 @@
     "rate-limit-redis": "4.0.0",
     "uuid": "13.0.0",
     "validator": "13.12.0"
+=======
+    "@apollo/server": "4.11.3",
+    axios: "1.7.9",
+    body-parser: "2.2.0",
+    connect-redis: "8.0.1",
+    cors: "2.8.5",
+    express: "4.21.2",
+    express-rate-limit: "7.4.0",
+    express-session: "1.18.1",
+    graphql: "16.12.0",
+    helmet: "7.2.0",
+    ioredis: "5.4.2",
+    node-vault: "0.10.9",
+    rate-limit-redis: "4.0.0",
+    uuid: "13.0.0",
+    validator: "13.12.0"
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
   },
   "devDependencies": {
     "@types/jest": "29.5.14",

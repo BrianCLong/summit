@@ -13,16 +13,30 @@
     "dev:fixtures": "node --loader ts-node/esm src/index.ts"
   },
   "dependencies": {
-    "ajv": "8.17.1",
-    "ajv-formats": "3.0.1",
-    "h3-js": "4.1.0",
-    "zod": "3.23.8"
+<<<<<<< HEAD
+    zod: "4.1.12"
   },
   "devDependencies": {
-    "@types/geojson": "7946.0.16",
-    "@types/node": "22.10.1",
-    "ts-node": "10.9.2",
-    "typescript": "5.7.0",
-    "vitest": "2.1.8"
+    tsx: "4.20.6",
+    typescript: "5.9.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+=======
+    ajv: "8.17.1",
+    ajv-formats: "3.0.1",
+    h3-js: "4.1.0",
+    zod: "3.23.8"
+  },
+  "devDependencies": {
+    @types/geojson: "7946.0.16",
+    @types/node: "22.10.1",
+    ts-node: "10.9.2",
+    typescript: "5.7.0",
+    vitest: "2.1.8"
+>>>>>>> origin/main
   }
 }

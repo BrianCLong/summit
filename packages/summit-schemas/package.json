@@ -9,7 +9,12 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
-    "ajv": "8.18.0",
+<<<<<<< HEAD
+    "ajv": "8.17.1",
     "ajv-formats": "3.0.1"
+=======
+    ajv: "8.18.0",
+    ajv-formats: "3.0.1"
+>>>>>>> origin/main
   }
 }

@@ -1,0 +1,11 @@
+{
+  "verified": true,
+  "checks": {
+    "artifacts_present": true,
+    "hashes_match": true,
+    "sbom_integrity": true,
+    "provenance_contract": true,
+    "deterministic_build": true
+  },
+  "failures": []
+}

@@ -1,46 +1,35 @@
-# Summit Product Vision & Strategy
-
-## Product Vision
-
-To become the undeniable operating system for verifiable, agent-driven open-source intelligence (OSINT) and complex investigations. Summit aims to transform opaque, ad-hoc research into a mathematically provable, automated science.
+# Product Vision: Summit
 
 ## Mission Statement
+Summit aims to empower government, defense, enterprise, and research organizations by delivering a resilient, deterministic, and highly secure GraphRAG intelligence platform. We focus on fusing sparse, multimodal data into actionable, mathematically verifiable insights.
 
-To empower intelligence teams, investigators, and researchers to uncover truth rapidly. We achieve this through deterministic, audit-grade AI orchestration that replaces manual analytical toil with an immutable chain-of-custody.
+## Product Vision
+We envision a future where complex, distributed organizations can instantly trace mission-critical decisions back to their foundational evidence. Summit breaks down data silos by synthesizing structured and unstructured knowledge into a cohesive, temporal graph that operators can query with absolute confidence.
 
 ## Target Users and Use Cases
 
-### Enterprise Intelligence & SOC Teams
+### Government and Defense
+- **Use Case:** Threat intelligence analysis, battlefield command coordination, and secure evidence-based logistics.
+- **Needs:** Absolute data provenance, zero-trust security (air-gapped deployments), and deterministic AI responses that eliminate hallucination risks in high-stakes environments.
 
-* **Brand Protection & Takedowns:** Seamless workflows for typosquat detection, automated screenshot capture, DNS/certificate analysis, and the generation of cryptographically signed evidence bundles ready for legal submission.
-* **Vulnerability Prioritization:** Intelligence feeds enriched with deterministic scoring based on explainable lifecycle stages, rejecting opaque vendor algorithms in favor of clear evidence.
+### Enterprise Intelligence
+- **Use Case:** Supply chain risk monitoring, corporate espionage detection, and massive-scale compliance auditing.
+- **Needs:** Scalable multi-tenant architecture, rapid integration with legacy knowledge bases, and clear ROI through automated intelligence synthesis.
 
-### Government & Defense
-
-* **Regulated Investigations:** Conducting complex, multi-hop link analysis with strict, code-enforced governance (e.g., "no mass scraping", API limits).
-* **Audit & Replay:** Every step of an investigation can be replayed byte-for-byte, proving exactly how a conclusion was reached, meeting strict legal and compliance thresholds.
-
-### Research & Legal
-
-* **Casework & Compliance:** Deep graph analysis and evidence collection for legal cases. Summit eliminates manual data entry and unstructured note-taking, automatically compiling nodes and edges into immutable evidence artifacts.
+### Research and Academia
+- **Use Case:** Long-horizon scientific literature review and complex pattern discovery across disparate datasets.
+- **Needs:** Deep integration with academic toolchains, support for highly complex multimodal ingestion, and reproducible query results.
 
 ## Current Capabilities Overview
-
-* **Agentic AI Orchestration:** Autonomous multi-agent coordination (e.g., Jules, Codex, Observer) executing specific investigation playbooks.
-* **Knowledge Graphs & GraphRAG:** Neo4j-backed multi-hop graph traversal and vector similarity search (Qdrant) to connect disparate intelligence markers.
-* **Real-time Data Ingestion:** Streaming "Switchboard" connectors for REST APIs, CSVs, S3, Postgres/Neo4j replication, and Webhooks.
-* **Deterministic Evidence Ledger:** An evidence-first audit trail generating immutable, verifiable artifacts (e.g., `report.json`, `stamp.json`).
-* **Code-Enforced Governance:** Strict sandbox policies and MCP integration frameworks ensuring that agent tool usage remains compliant and trackable.
+- **Deterministic GraphRAG:** Ensures AI responses are explicitly linked to verifiable evidence IDs in the underlying Neo4j knowledge graph.
+- **Multimodal Ingestion Pipeline:** High-throughput processing of text, imagery, and structured datasets.
+- **Enterprise-Grade Security:** Air-gapped deployment readiness, JWT tenant-scoped boundaries, and continuous automated drift detection.
+- **Ecosystem Integration:** First-class adapters for LangGraph, OpenAI Agents, AutoGen, and CrewAI.
 
 ## Known Limitations
-
-* **Bring Your Own Key (BYOK) Model:** Summit is an intelligence operating system, not a data broker. It relies on customers providing their own subscriptions and API keys for premium data feeds (e.g., Social Links, Orpheus).
-* **Playbook Rigidity:** To maintain high determinism and evidentiary standards, agent execution relies heavily on predefined, structured playbooks rather than entirely open-ended, unconstrained exploration.
-* **Graph Scale Overheads:** Extremely massive, unbounded multi-hop ad-hoc queries require careful optimization and schema tuning within Neo4j to maintain real-time responsiveness.
+- **Latency in Complex Multi-Hop Queries:** Extremely deep graph traversals currently experience performance degradation compared to simple vector lookups.
+- **Streaming Ingestion Bottlenecks:** Real-time processing of high-volume video data requires significant dedicated compute resources.
+- **Ontology Rigidity:** Modifying the core knowledge graph schema post-deployment requires managed database migrations.
 
 ## Competitive Differentiation
-
-* **vs. Recorded Future:** While Recorded Future provides broad intelligence graph feeds with opaque risk scores, Summit provides the *workspace* where that intelligence is fused with internal data and scored deterministically, based on clear, verifiable logic.
-* **vs. Maltego:** Maltego is the standard for manual link analysis. Summit leapfrogs it by treating the investigation as code: autonomous agents build the graph, allowing for replayability, policy-aware redaction, and automated evidence generation.
-* **vs. ShadowDragon / Social Links:** Competitors emphasize OPSEC and raw data breadth. Summit subsumes these capabilities (via API adapters) but surrounds them with an "Evidence Ledger" and code-enforced policy engine, turning ad-hoc scraping into reproducible casework.
-* **vs. Palantir:** Palantir is a generalized operational platform with high integration overhead. Summit provides an *investigation-native* schema out-of-the-box, specifically optimized for the evidentiary rigor required by intelligence and SOC teams.
+Unlike standard vector-based RAG solutions that suffer from untraceable hallucinations, Summit's GraphRAG relies on an explicitly constructed, multi-hop Cypher traversal engine. Every insight generated by Summit carries a cryptographic evidence stamp, providing an unmatched audit trail designed specifically for zero-trust and high-security operations.

@@ -5,6 +5,10 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "stripe": "20.4.1"
+<<<<<<< HEAD
+    "stripe": "15.0.0"
+=======
+    stripe: "20.4.1"
+>>>>>>> origin/main
   }
 }

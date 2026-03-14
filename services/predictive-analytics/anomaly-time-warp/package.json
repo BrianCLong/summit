@@ -16,7 +16,116 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
     "@apollo/server": "4.11.3",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.13.0",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.13.0",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+=======
+<<<<<<< HEAD
+    "@apollo/server": "4.16.0",
     "graphql": "16.8.1",
     "graphql-tag": "2.12.6",
     "pg": "8.11.3",
@@ -26,6 +135,27 @@
     "mathjs": "12.0.0",
     "ml-matrix": "6.11.0",
     "fft.js": "4.0.4"
+=======
+    "@apollo/server": "4.11.3",
+    graphql: "16.8.1",
+    graphql-tag: "2.12.6",
+    pg: "8.11.3",
+    redis: "4.6.10",
+    winston: "3.11.0",
+    date-fns: "2.30.0",
+    mathjs: "12.0.0",
+    ml-matrix: "6.11.0",
+    fft.js: "4.0.4"
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
   },
   "devDependencies": {
     "@types/jest": "29.5.8",

@@ -1,4 +1,5 @@
 import { SummitAgentAdapter, Trace, Metrics } from '../../sdk/agent-adapter';
+import { convertToSummitArtifact } from '../utils/converter';
 
 export class AutoGenAdapter implements SummitAgentAdapter {
   private events: any[] = [];
@@ -9,7 +10,7 @@ export class AutoGenAdapter implements SummitAgentAdapter {
   };
 
   public recordEvent(event: any) {
-    this.events.push(event);
+    this.events.push(convertToSummitArtifact(event, 'autogen'));
     this.metrics.invocations++;
   }
 

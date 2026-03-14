@@ -22,12 +22,102 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
     "@apollo/server": "4.11.3",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.13.0",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.13.0",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
+    @apollo/server: "4.11.3",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+=======
+<<<<<<< HEAD
+    "@apollo/server": "4.16.0",
     "cors": "2.8.5",
     "express": "4.22.1",
     "graphql": "16.12.0",
     "uuid": "9.0.1",
     "zod": "3.22.0"
+=======
+    "@apollo/server": "4.11.3",
+    cors: "2.8.5",
+    express: "4.22.1",
+    graphql: "16.12.0",
+    uuid: "9.0.1",
+    zod: "3.22.0"
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
   },
   "devDependencies": {
     "@types/cors": "2.8.19",
