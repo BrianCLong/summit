@@ -25,9 +25,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@053f9b74638557590800a301da1ba82351507e2c # v3.8.1
         with:
-          cosign-release: 'v3.0.5'
+          cosign-release: 'v3.1.1'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.14.3

@@ -361,7 +361,7 @@ jobs:
           output-file: sbom.spdx.json
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@053f9b74638557590800a301da1ba82351507e2c # v3.8.1
 
       - name: Sign Image
         run: |
