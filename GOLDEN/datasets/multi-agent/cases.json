@@ -1,0 +1,9 @@
+[
+  {
+    "id": "EVID:multiagent:case1",
+    "task": "Coordinate between agent X and agent Y",
+    "required_evidence": [
+      "EVID:multiagent:001"
+    ]
+  }
+]

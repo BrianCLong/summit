@@ -1,0 +1,8 @@
+{
+  "id": "EVID:tooluse:001:alpha",
+  "content": "The ExtractionTool is initialized with a specific parser schema.",
+  "metadata": {
+    "source": "Tool Registry",
+    "classification": "public"
+  }
+}
