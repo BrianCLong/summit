@@ -9,6 +9,7 @@
     "gate:report": "node scripts/gates/enforce_report_from_claims.mjs",
     "test:selfflow": "echo '...' && exit 0",
     "eval:selfflow": "echo '...' && exit 0",
+    "test:cos": "echo '...' && exit 0",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
