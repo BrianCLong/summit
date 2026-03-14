@@ -1,0 +1,28 @@
+[
+  {
+    "id": "doc1",
+    "entities": [
+      {"id": "ex1", "text": "Apple Inc.", "type": "ORGANIZATION"},
+      {"id": "ex2", "text": "Tim Cook", "type": "PERSON"},
+      {"id": "ex3", "text": "Paris", "type": "CITY"},
+      {"id": "ex4", "text": "Cupertino", "type": "LOCATION"}
+    ],
+    "relationships": [
+      {"source": "ex2", "target": "ex1", "type": "WORKS_FOR"}
+    ]
+  },
+  {
+    "id": "doc2",
+    "entities": [
+      {"id": "ex6", "text": "Elon Musk", "type": "PERSON"},
+      {"id": "ex7", "text": "Twitter", "type": "ORGANIZATION"},
+      {"id": "ex8", "text": "$44 billion", "type": "MONEY"},
+      {"id": "ex10", "text": "San Francisco", "type": "LOCATION"},
+      {"id": "ex11", "text": "globally", "type": "LOCATION"}
+    ],
+    "relationships": [
+      {"source": "ex6", "target": "ex7", "type": "OWNER"},
+      {"source": "ex7", "target": "ex10", "type": "LOCATED_IN"}
+    ]
+  }
+]

@@ -1,0 +1,33 @@
+[
+  {
+    "id": "doc1",
+    "text": "Apple Inc. announced today that Tim Cook will be visiting Paris next month. The company, headquartered in Cupertino, continues to expand in Europe.",
+    "entities": [
+      {"id": "e1", "text": "Apple Inc.", "type": "ORGANIZATION"},
+      {"id": "e2", "text": "Tim Cook", "type": "PERSON"},
+      {"id": "e3", "text": "Paris", "type": "LOCATION"},
+      {"id": "e4", "text": "Cupertino", "type": "LOCATION"},
+      {"id": "e5", "text": "Europe", "type": "LOCATION"}
+    ],
+    "relationships": [
+      {"source": "e2", "target": "e1", "type": "WORKS_FOR"},
+      {"source": "e1", "target": "e4", "type": "HEADQUARTERED_IN"}
+    ]
+  },
+  {
+    "id": "doc2",
+    "text": "Elon Musk acquired Twitter for $44 billion. Twitter is now known as X and operates globally from San Francisco.",
+    "entities": [
+      {"id": "e6", "text": "Elon Musk", "type": "PERSON"},
+      {"id": "e7", "text": "Twitter", "type": "ORGANIZATION"},
+      {"id": "e8", "text": "$44 billion", "type": "MONEY"},
+      {"id": "e9", "text": "X", "type": "ORGANIZATION"},
+      {"id": "e10", "text": "San Francisco", "type": "LOCATION"}
+    ],
+    "relationships": [
+      {"source": "e6", "target": "e7", "type": "ACQUIRED"},
+      {"source": "e7", "target": "e9", "type": "RENAMED_TO"},
+      {"source": "e9", "target": "e10", "type": "LOCATED_IN"}
+    ]
+  }
+]
