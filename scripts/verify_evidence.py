@@ -113,6 +113,9 @@ def main() -> int:
     elif "evidence" in index:
         # Legacy support
         pass
+    elif "mappings" in index:
+        # Legacy support
+        pass
     else:
         print("FAIL index.json must contain top-level 'items' array or 'evidence' object")
         return 3
