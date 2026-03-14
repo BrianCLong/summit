@@ -28,6 +28,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: false
+          version: 10.0.0
 
       - name: Determine Affected Packages
         id: set-affected
@@ -64,6 +65,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: false
+          version: 10.0.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -89,6 +91,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: false
+          version: 10.0.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
