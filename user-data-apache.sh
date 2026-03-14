@@ -16,7 +16,7 @@ cat > /var/www/html/healthz << 'EOF'
 {"status":"healthy","timestamp":"2025-09-05T13:00:00Z","environment":"development","service":"maestro-dev"}
 EOF
 
-# Root endpoint  
+# Root endpoint
 cat > /var/www/html/index.html << 'EOF'
 <!DOCTYPE html>
 <html>
@@ -30,13 +30,13 @@ cat > /var/www/html/index.html << 'EOF'
     <p><strong>Environment:</strong> Development</p>
     <p><strong>Version:</strong> 1.0.0</p>
     <p><strong>Platform:</strong> IntelGraph AI Platform</p>
-    
+
     <h2>API Endpoints:</h2>
     <ul>
         <li><a href="/healthz">/healthz</a> - Health check</li>
         <li><a href="/api">/api</a> - API info</li>
     </ul>
-    
+
     <h2>Server Info:</h2>
     <p>Timestamp: 2025-09-05T13:00:00Z</p>
     <p>Server: Apache/Amazon Linux 2023</p>

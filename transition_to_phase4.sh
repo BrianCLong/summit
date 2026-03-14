@@ -63,7 +63,7 @@ if git rev-parse @{u} >/dev/null 2>&1; then
     UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
     LOCAL=$(git rev-parse HEAD)
     REMOTE=$(git rev-parse "$UPSTREAM")
-    
+
     if [[ "$LOCAL" != "$REMOTE" ]]; then
         warn "Local and remote branches have diverged"
         info "Local:  $(git rev-parse --short HEAD)"

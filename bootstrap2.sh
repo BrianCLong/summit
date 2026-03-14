@@ -258,4 +258,3 @@ log "Versions snapshot:"
 ) | sed 's/^/  /'
 
 log "Done. Restart your shell (or 'exec $SHELL') for PATH updates. For Docker on Linux: run 'newgrp docker'."
-

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # IntelGraph Maestro Composer vNext+5: Release Orchestrator & Zero-Trust Supply Chain Demo
-# 
-# Demonstrates comprehensive release orchestration with immutable promotion, 
+#
+# Demonstrates comprehensive release orchestration with immutable promotion,
 # SLSA L3 provenance, REAPI compatibility, and zero-trust supply chain security.
 
 set -e
@@ -84,7 +84,7 @@ echo ""
 
 echo "Data Locality Metrics:"
 echo "  • Storage Locality Score: 0.842 (84.2%)"
-echo "  • Network Transfer Reduction: 76.3%"  
+echo "  • Network Transfer Reduction: 76.3%"
 echo "  • Cross-Region Latency: 23ms avg"
 echo "  • Local Execution Priority: 89.1%"
 echo ""
@@ -103,7 +103,7 @@ echo "────────────────────────�
 npm run maestro:vnext+5 report
 echo ""
 
-# Demo 8: Enterprise Security Compliance  
+# Demo 8: Enterprise Security Compliance
 echo "🏢 DEMO 8: Enterprise Security & Compliance Summary"
 echo "──────────────────────────────────────────────────"
 echo ""
@@ -174,7 +174,7 @@ echo "  [13:45:22] 📊 Storage locality score improved: 0.756 → 0.842"
 echo ""
 
 # Demo 10: Integration with CI/CD Ecosystem
-echo "🔗 DEMO 10: CI/CD Ecosystem Integration Status"  
+echo "🔗 DEMO 10: CI/CD Ecosystem Integration Status"
 echo "────────────────────────────────────────────────"
 echo ""
 
@@ -210,7 +210,7 @@ echo "   Result: 0.007% drift rate - EXCEEDED TARGET by 30%"
 echo "   Status: 🟢 EXCELLENT"
 echo ""
 
-echo "✅ SLSA L3 PROVENANCE" 
+echo "✅ SLSA L3 PROVENANCE"
 echo "   Target: materials + invocation captured, verified ≥99.5%"
 echo "   Result: 99.8% verification rate - EXCEEDED TARGET"
 echo "   Status: 🟢 EXCELLENT"

@@ -189,4 +189,3 @@ echo "• perf/bpftrace/bcc now available. Try:"
 echo "    sudo perf top    |   sudo bpftrace -l    |   sudo /usr/sbin/opensnoop-bpfcc"
 echo "• Debug symbols will auto-fetch via debuginfod (gdb/lldb/elfutils)."
 echo "• Node 22 LTS via nvm, Python CLIs via pipx, containers via docker/podman."
-

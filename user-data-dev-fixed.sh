@@ -50,24 +50,24 @@ cat > /etc/nginx/conf.d/maestro.conf << 'EOF'
 server {
     listen 80 default_server;
     server_name dev.topicality.co _;
-    
+
     location / {
         proxy_pass http://localhost:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # Timeout settings
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
-        
+
         # Retry settings
         proxy_next_upstream error timeout http_502 http_503 http_504;
         proxy_next_upstream_tries 3;
     }
-    
+
     # Health check endpoint
     location /health {
         proxy_pass http://localhost:8080/healthz;

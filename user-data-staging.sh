@@ -47,7 +47,7 @@ cat > /etc/nginx/conf.d/maestro.conf << 'EOF'
 server {
     listen 80 default_server;
     server_name staging.topicality.co _;
-    
+
     location / {
         proxy_pass http://localhost:8080;
         proxy_set_header Host $host;

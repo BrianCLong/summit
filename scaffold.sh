@@ -386,7 +386,7 @@ TOML
     cat > src/main.py <<'PY'
 from fastapi import FastAPI
 app = FastAPI()
-@app.get("/healthz") 
+@app.get("/healthz")
 def healthz(): return {"ok": True}
 PY
     cat > Dockerfile <<'DOCKER'

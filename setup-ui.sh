@@ -470,8 +470,8 @@ function Layout() {
           variant="persistent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
               width: DRAWER_WIDTH,
               transition: 'width 0.3s',
             },
@@ -519,21 +519,21 @@ EOF
 # Create Dashboard.jsx
 cat > src/components/dashboard/Dashboard.jsx << 'EOF'
 import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
   Button,
   Chip,
 } from '@mui/material';
-import { 
-  Add as AddIcon, 
-  TrendingUp, 
-  Group, 
+import {
+  Add as AddIcon,
+  TrendingUp,
+  Group,
   AccountTree,
-  Assessment 
+  Assessment
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -585,12 +585,12 @@ function Dashboard() {
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Box sx={{ 
-                    p: 1, 
-                    borderRadius: 2, 
+                  <Box sx={{
+                    p: 1,
+                    borderRadius: 2,
                     bgcolor: `${stat.color}.light`,
                     color: `${stat.color}.main`,
-                    mr: 2 
+                    mr: 2
                   }}>
                     {stat.icon}
                   </Box>
@@ -635,8 +635,8 @@ function Dashboard() {
                     {investigation.entities} entities • Updated {investigation.updated}
                   </Typography>
                 </Box>
-                <Chip 
-                  label={investigation.status} 
+                <Chip
+                  label={investigation.status}
                   color={getStatusColor(investigation.status)}
                   size="small"
                 />
@@ -655,12 +655,12 @@ EOF
 # Create InvestigationPage.jsx
 cat > src/components/investigation/InvestigationPage.jsx << 'EOF'
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
   Button,
   Chip,
   TextField,
@@ -670,8 +670,8 @@ import {
   DialogContent,
   DialogActions
 } from '@mui/material';
-import { 
-  Add as AddIcon, 
+import {
+  Add as AddIcon,
   Search as SearchIcon,
   Edit,
   AccountTree
@@ -794,23 +794,23 @@ function InvestigationPage() {
                     {investigation.title}
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Chip 
-                      label={investigation.status} 
+                    <Chip
+                      label={investigation.status}
                       color={getStatusColor(investigation.status)}
                       size="small"
                     />
-                    <Chip 
-                      label={investigation.priority} 
+                    <Chip
+                      label={investigation.priority}
                       color={getPriorityColor(investigation.priority)}
                       size="small"
                     />
                   </Box>
                 </Box>
-                
+
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   {investigation.description}
                 </Typography>
-                
+
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                   <Typography variant="caption" color="text.secondary">
                     {investigation.entities} entities
@@ -819,11 +819,11 @@ function InvestigationPage() {
                     {investigation.relationships} relationships
                   </Typography>
                 </Box>
-                
+
                 <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
                   Updated {investigation.updated}
                 </Typography>
-                
+
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <Button
                     size="small"
@@ -904,20 +904,20 @@ EOF
 # Create GraphExplorer.jsx
 cat > src/components/graph/GraphExplorer.jsx << 'EOF'
 import React, { useRef, useEffect, useState } from 'react';
-import { 
-  Box, 
-  Paper, 
-  Typography, 
-  IconButton, 
-  Tooltip, 
+import {
+  Box,
+  Paper,
+  Typography,
+  IconButton,
+  Tooltip,
   Fab,
   Button,
   Alert
 } from '@mui/material';
-import { 
-  ZoomIn, 
-  ZoomOut, 
-  CenterFocusStrong, 
+import {
+  ZoomIn,
+  ZoomOut,
+  CenterFocusStrong,
   Add,
   Save,
   Refresh
@@ -959,21 +959,21 @@ function GraphExplorer() {
   const drawGraph = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     ctx.strokeStyle = '#999';
     ctx.lineWidth = 2;
     edges.forEach(edge => {
       const sourceNode = nodes.find(n => n.id === edge.source);
       const targetNode = nodes.find(n => n.id === edge.target);
-      
+
       if (sourceNode && targetNode) {
         ctx.beginPath();
         ctx.moveTo(sourceNode.x, sourceNode.y);
         ctx.lineTo(targetNode.x, targetNode.y);
         ctx.stroke();
-        
+
         const midX = (sourceNode.x + targetNode.x) / 2;
         const midY = (sourceNode.y + targetNode.y) / 2;
         ctx.fillStyle = '#666';
@@ -982,10 +982,10 @@ function GraphExplorer() {
         ctx.fillText(edge.label, midX, midY - 5);
       }
     });
-    
+
     nodes.forEach(node => {
       const color = getNodeColor(node.type);
-      
+
       ctx.beginPath();
       ctx.arc(node.x, node.y, 20, 0, 2 * Math.PI);
       ctx.fillStyle = color;
@@ -993,7 +993,7 @@ function GraphExplorer() {
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 3;
       ctx.stroke();
-      
+
       ctx.fillStyle = '#333';
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
@@ -1056,10 +1056,10 @@ function GraphExplorer() {
         This is a basic graph visualization. Click "Add Node" to add entities, or use the zoom controls.
       </Alert>
 
-      <Paper 
-        sx={{ 
-          flexGrow: 1, 
-          position: 'relative', 
+      <Paper
+        sx={{
+          flexGrow: 1,
+          position: 'relative',
           overflow: 'hidden',
           minHeight: 500
         }}
@@ -1075,12 +1075,12 @@ function GraphExplorer() {
             background: '#fafafa',
           }}
         />
-        
-        <Box sx={{ 
-          position: 'absolute', 
-          top: 16, 
-          right: 16, 
-          display: 'flex', 
+
+        <Box sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          display: 'flex',
           flexDirection: 'column',
           gap: 1
         }}>
@@ -1131,11 +1131,11 @@ EOF
 # Create LoginPage.jsx
 cat > src/components/auth/LoginPage.jsx << 'EOF'
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Paper, 
-  TextField, 
-  Button, 
+import {
+  Box,
+  Paper,
+  TextField,
+  Button,
   Typography,
   Alert
 } from '@mui/material';
@@ -1151,7 +1151,7 @@ function LoginPage() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    
+
     if (credentials.email && credentials.password) {
       const mockUser = {
         id: '1',
@@ -1160,12 +1160,12 @@ function LoginPage() {
         lastName: 'User',
         role: 'ANALYST'
       };
-      
+
       dispatch(loginSuccess({
         user: mockUser,
         token: 'demo-token-12345'
       }));
-      
+
       navigate('/dashboard');
     } else {
       setError('Please enter email and password');
@@ -1173,10 +1173,10 @@ function LoginPage() {
   };
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <Box sx={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'center',
       bgcolor: 'grey.100'
     }}>
@@ -1187,9 +1187,9 @@ function LoginPage() {
         <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
           Intelligence Analysis Platform
         </Typography>
-        
+
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        
+
         <Box component="form" onSubmit={handleLogin}>
           <TextField
             fullWidth
@@ -1216,7 +1216,7 @@ function LoginPage() {
             Sign In
           </Button>
         </Box>
-        
+
         <Alert severity="info" sx={{ mt: 3 }}>
           Demo: Enter any email and password to continue
         </Alert>
@@ -1239,10 +1239,10 @@ function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
       justifyContent: 'center',
       minHeight: '60vh',
       textAlign: 'center'

@@ -54,14 +54,14 @@ upstream maestro_backend {
 server {
     listen 80 default_server;
     server_name prod.topicality.co _;
-    
+
     location / {
         proxy_pass http://maestro_backend;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # Production optimizations
         proxy_connect_timeout 5s;
         proxy_send_timeout 10s;
@@ -70,7 +70,7 @@ server {
         proxy_buffer_size 4k;
         proxy_buffers 8 4k;
     }
-    
+
     # Health check endpoint
     location /health {
         proxy_pass http://maestro_backend/healthz;

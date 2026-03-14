@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # IntelGraph Maestro Composer vNext+7: Autonomous Operations & Self-Healing Systems Demo
-# 
+#
 # Demonstrates comprehensive autonomous operations with self-healing infrastructure,
 # predictive maintenance, zero-touch incident resolution, and proactive security.
 

@@ -179,4 +179,3 @@ for rc in "$HOME/.${SHELL_NAME}rc" "$HOME/.bashrc" "$HOME/.zshrc"; do
 done
 
 ok "Post-setup complete. Open a new shell or: exec \$SHELL"
-

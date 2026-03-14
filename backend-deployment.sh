@@ -68,7 +68,7 @@ require('dotenv').config();
 const config = {
   env: process.env.NODE_ENV || 'development',
   port: process.env.PORT || 4000,
-  
+
   // Database configurations
   neo4j: {
     uri: process.env.NEO4J_URI || 'bolt://localhost:7687',
@@ -76,7 +76,7 @@ const config = {
     password: process.env.NEO4J_PASSWORD || 'devpassword',
     database: process.env.NEO4J_DATABASE || 'neo4j'
   },
-  
+
   postgres: {
     host: process.env.POSTGRES_HOST || 'localhost',
     port: process.env.POSTGRES_PORT || 5432,
@@ -84,14 +84,14 @@ const config = {
     username: process.env.POSTGRES_USER || 'intelgraph',
     password: process.env.POSTGRES_PASSWORD || 'devpassword'
   },
-  
+
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: process.env.REDIS_PORT || 6379,
     password: process.env.REDIS_PASSWORD || 'devpassword',
     db: process.env.REDIS_DB || 0
   },
-  
+
   // JWT configuration
   jwt: {
     secret: process.env.JWT_SECRET || 'dev_jwt_secret_12345',
@@ -99,18 +99,18 @@ const config = {
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret_67890',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
   },
-  
+
   // Security
   bcrypt: {
     rounds: parseInt(process.env.BCRYPT_ROUNDS) || 12
   },
-  
+
   // Rate limiting
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100
   },
-  
+
   // CORS
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
@@ -184,7 +184,7 @@ async function connectNeo4j() {
 
     // Create constraints and indexes
     await createNeo4jConstraints();
-    
+
     logger.info('✅ Connected to Neo4j');
     return neo4jDriver;
   } catch (error) {
@@ -195,7 +195,7 @@ async function connectNeo4j() {
 
 async function createNeo4jConstraints() {
   const session = neo4jDriver.session();
-  
+
   try {
     const constraints = [
       'CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE',
@@ -235,7 +235,7 @@ async function createNeo4jConstraints() {
         }
       }
     }
-    
+
     logger.info('Neo4j constraints and indexes created');
   } catch (error) {
     logger.error('Failed to create Neo4j constraints:', error);
@@ -263,7 +263,7 @@ async function connectPostgres() {
     client.release();
 
     await createPostgresTables();
-    
+
     logger.info('✅ Connected to PostgreSQL');
     return postgresPool;
   } catch (error) {
@@ -274,7 +274,7 @@ async function connectPostgres() {
 
 async function createPostgresTables() {
   const client = await postgresPool.connect();
-  
+
   try {
     // Users table
     await client.query(`
@@ -338,7 +338,7 @@ async function createPostgresTables() {
     await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)');
-    
+
     logger.info('PostgreSQL tables created');
   } catch (error) {
     logger.error('Failed to create PostgreSQL tables:', error);
@@ -364,7 +364,7 @@ async function connectRedis() {
     });
 
     await redisClient.ping();
-    
+
     logger.info('✅ Connected to Redis');
     return redisClient;
   } catch (error) {
@@ -434,7 +434,7 @@ const typeDefs = gql`
 
   enum Role {
     ADMIN
-    ANALYST 
+    ANALYST
     VIEWER
   }
 
@@ -772,7 +772,7 @@ class AuthService {
 
   async register(userData) {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query('BEGIN');
 
@@ -822,7 +822,7 @@ class AuthService {
 
   async login(email, password, ipAddress, userAgent) {
     const client = await this.pool.connect();
-    
+
     try {
       const userResult = await client.query(
         'SELECT * FROM users WHERE email = $1 AND is_active = true',
@@ -835,7 +835,7 @@ class AuthService {
 
       const user = userResult.rows[0];
       const validPassword = await argon2.verify(user.password_hash, password);
-      
+
       if (!validPassword) {
         throw new Error('Invalid credentials');
       }
@@ -889,7 +889,7 @@ class AuthService {
       if (!token) return null;
 
       const decoded = jwt.verify(token, config.jwt.secret);
-      
+
       const client = await this.pool.connect();
       const userResult = await client.query(
         'SELECT * FROM users WHERE id = $1 AND is_active = true',
@@ -945,7 +945,7 @@ const resolvers = {
 
     investigations: async (_, { page, limit, status, priority }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       // Return mock data for now
       return [
         {
@@ -968,7 +968,7 @@ const resolvers = {
 
     graphData: async (_, { investigationId }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       // Return mock graph data
       return {
         nodes: [
@@ -1015,7 +1015,7 @@ const resolvers = {
 
     linkPredictions: async (_, { investigationId, limit }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       return [
         {
           sourceEntityId: '1',
@@ -1029,7 +1029,7 @@ const resolvers = {
 
     anomalyDetection: async (_, { investigationId }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       return [
         {
           entityId: '2',
@@ -1047,7 +1047,7 @@ const resolvers = {
       const { email, password } = input;
       const ipAddress = req.ip;
       const userAgent = req.get('User-Agent');
-      
+
       return await authService.login(email, password, ipAddress, userAgent);
     },
 
@@ -1061,7 +1061,7 @@ const resolvers = {
 
     createInvestigation: async (_, { input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const investigation = {
         id: require('uuid').v4(),
         title: input.title,
@@ -1077,15 +1077,15 @@ const resolvers = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      
+
       pubsub.publish('INVESTIGATION_CREATED', { investigationCreated: investigation });
-      
+
       return investigation;
     },
 
     createEntity: async (_, { input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const entity = {
         id: require('uuid').v4(),
         uuid: require('uuid').v4(),
@@ -1101,24 +1101,24 @@ const resolvers = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      
-      pubsub.publish('ENTITY_ADDED', { 
+
+      pubsub.publish('ENTITY_ADDED', {
         entityAdded: entity,
-        investigationId: input.investigationId 
+        investigationId: input.investigationId
       });
-      
+
       return entity;
     },
 
     importEntitiesFromText: async (_, { investigationId, text }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       // Simple entity extraction
       const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
       const phonePattern = /\b(?:\+?1[-.\s]?)?\(?[2-9][0-8][0-9]\)?[-.\s]?[2-9][0-9]{2}[-.\s]?[0-9]{4}\b/g;
-      
+
       const entities = [];
-      
+
       const emails = text.match(emailPattern) || [];
       emails.forEach(email => {
         entities.push({
@@ -1136,7 +1136,7 @@ const resolvers = {
           updatedAt: new Date().toISOString()
         });
       });
-      
+
       const phones = text.match(phonePattern) || [];
       phones.forEach(phone => {
         entities.push({
@@ -1154,7 +1154,7 @@ const resolvers = {
           updatedAt: new Date().toISOString()
         });
       });
-      
+
       return entities;
     }
   },
@@ -1163,7 +1163,7 @@ const resolvers = {
     investigationUpdated: {
       subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
     },
-    
+
     entityAdded: {
       subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED'])
     }
@@ -1198,11 +1198,11 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 const config = require('./src/config');
 const logger = require('./src/utils/logger');
-const { 
-  connectNeo4j, 
-  connectPostgres, 
+const {
+  connectNeo4j,
+  connectPostgres,
   connectRedis,
-  closeConnections 
+  closeConnections
 } = require('./src/config/database');
 
 const { typeDefs } = require('./src/graphql/schema');
@@ -1213,7 +1213,7 @@ async function startServer() {
   try {
     const app = express();
     const httpServer = createServer(app);
-    
+
     const io = new Server(httpServer, {
       cors: {
         origin: config.cors.origin,
@@ -1237,26 +1237,26 @@ async function startServer() {
         }
       }
     }));
-    
+
     app.use(cors({
       origin: config.cors.origin,
       credentials: true
     }));
-    
+
     const limiter = rateLimit({
       windowMs: config.rateLimit.windowMs,
       max: config.rateLimit.maxRequests,
       message: 'Too many requests from this IP'
     });
     app.use(limiter);
-    
+
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-    
-    app.use(morgan('combined', { 
+
+    app.use(morgan('combined', {
       stream: { write: message => logger.info(message.trim()) }
     }));
-    
+
     app.get('/health', (req, res) => {
       res.status(200).json({
         status: 'OK',
@@ -1275,7 +1275,7 @@ async function startServer() {
         }
       });
     });
-    
+
     const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
@@ -1283,15 +1283,15 @@ async function startServer() {
         if (connection) {
           return connection.context;
         }
-        
+
         const token = req.headers.authorization?.replace('Bearer ', '');
         let user = null;
-        
+
         if (token) {
           const authService = new AuthService();
           user = await authService.verifyToken(token);
         }
-        
+
         return {
           user,
           req,
@@ -1302,12 +1302,12 @@ async function startServer() {
         onConnect: async (connectionParams) => {
           const token = connectionParams.authorization?.replace('Bearer ', '');
           let user = null;
-          
+
           if (token) {
             const authService = new AuthService();
             user = await authService.verifyToken(token);
           }
-          
+
           return { user };
         }
       },
@@ -1326,44 +1326,44 @@ async function startServer() {
         }
       ]
     });
-    
+
     await apolloServer.start();
-    apolloServer.applyMiddleware({ 
-      app, 
+    apolloServer.applyMiddleware({
+      app,
       path: '/graphql',
       cors: false
     });
 
     io.on('connection', (socket) => {
       logger.info(`Client connected: ${socket.id}`);
-      
+
       socket.on('join_investigation', (investigationId) => {
         socket.join(`investigation_${investigationId}`);
         logger.info(`Client ${socket.id} joined investigation ${investigationId}`);
       });
-      
+
       socket.on('leave_investigation', (investigationId) => {
         socket.leave(`investigation_${investigationId}`);
         logger.info(`Client ${socket.id} left investigation ${investigationId}`);
       });
-      
+
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
       });
     });
-    
+
     app.use((err, req, res, next) => {
       logger.error(`Unhandled error: ${err.message}`, err);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal Server Error',
         message: config.env === 'development' ? err.message : 'Something went wrong'
       });
     });
-    
+
     app.use('*', (req, res) => {
       res.status(404).json({ error: 'Endpoint not found' });
     });
-    
+
     const PORT = config.port;
     httpServer.listen(PORT, () => {
       logger.info(`🚀 IntelGraph AI Server running on port ${PORT}`);
@@ -1374,7 +1374,7 @@ async function startServer() {
       logger.info(`🛡️  Security features enabled`);
       logger.info(`📈 Real-time updates enabled`);
     });
-    
+
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
       await apolloServer.stop();
@@ -1384,7 +1384,7 @@ async function startServer() {
         process.exit(0);
       });
     });
-    
+
   } catch (error) {
     logger.error(`Failed to start server: ${error.message}`, error);
     process.exit(1);

@@ -46,7 +46,7 @@ http {
     server {
         listen 80 default_server;
         server_name _;
-        
+
         location / {
             proxy_pass http://maestro;
             proxy_set_header Host $host;

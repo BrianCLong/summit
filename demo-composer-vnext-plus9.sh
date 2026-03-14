@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # IntelGraph Maestro Composer vNext+9: Federal Intelligence Integration & Advanced Analytics Demo
-# 
+#
 # Demonstrates comprehensive federal intelligence community integration with advanced ML analytics,
 # multi-agency data fusion, predictive threat intelligence, and automated compliance validation.
 

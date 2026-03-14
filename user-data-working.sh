@@ -22,7 +22,7 @@ const http = require('http');
 
 const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  
+
   if (req.url === '/healthz' || req.url === '/health') {
     res.writeHead(200);
     res.end(JSON.stringify({
@@ -94,14 +94,14 @@ http {
     log_format main '$remote_addr - $remote_user [$time_local] "$request" '
                     '$status $body_bytes_sent "$http_referer" '
                     '"$http_user_agent" "$http_x_forwarded_for"';
-    
+
     access_log /var/log/nginx/access.log main;
     sendfile on;
     tcp_nopush on;
     tcp_nodelay on;
     keepalive_timeout 65;
     types_hash_max_size 2048;
-    
+
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
@@ -112,14 +112,14 @@ http {
     server {
         listen 80 default_server;
         server_name _;
-        
+
         location / {
             proxy_pass http://maestro;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            
+
             # Health check settings
             proxy_connect_timeout 30s;
             proxy_send_timeout 30s;

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # IntelGraph Maestro Composer vNext+8: Quantum-Ready Cryptography & Advanced Security Demo
-# 
+#
 # Demonstrates comprehensive quantum-resistant cryptographic systems with zero-trust architecture,
 # hybrid security schemes, ML-powered threat detection, and autonomous security operations.
 

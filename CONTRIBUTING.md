@@ -149,6 +149,8 @@ source ~/.bashrc
 
 ## ⚖️ Governance
 
+For detailed rules on how maintainers and contributors collaborate, including the PR review process, branching strategies, and mandatory CI gates, you must read the canonical [Summit Governance Specification](docs/governance/GOVERNANCE.md).
+
 - **Code of Conduct**: Please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
 - **License**: Contributions are accepted under the terms in [`CONTRIBUTOR_LICENSE_AGREEMENT.md`](CONTRIBUTOR_LICENSE_AGREEMENT.md).
 

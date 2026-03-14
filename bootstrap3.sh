@@ -544,4 +544,3 @@ cat <<'EOF'
 #    PGPASSWORD=pass psql -h 127.0.0.1 -U postgres -c '\l'
 EOF
 ```
-

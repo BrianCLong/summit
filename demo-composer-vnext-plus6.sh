@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # IntelGraph Maestro Composer vNext+6: Advanced Analytics & Insights Platform Demo
-# 
+#
 # Demonstrates comprehensive analytics with predictive modeling, real-time insights,
 # anomaly detection, and intelligent recommendations for optimal developer experience.
 

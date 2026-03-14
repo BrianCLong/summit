@@ -146,4 +146,3 @@ if ! command -v cosign >/dev/null 2>&1; then
   sudo install -m 0755 /tmp/cosign /usr/local/bin/cosign && rm -f /tmp/cosign
 fi
 command -v syft  >/dev/null 2>&1 || curl -fsSL https
-
