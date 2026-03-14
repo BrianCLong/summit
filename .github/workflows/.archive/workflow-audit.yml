@@ -26,6 +26,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Full history for better analysis
+          fetch-tags: true
       
       - name: Set up environment
         run: |

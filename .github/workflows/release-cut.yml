@@ -123,6 +123,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Get SHA
         id: sha

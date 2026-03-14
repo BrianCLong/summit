@@ -57,6 +57,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Detect versions
         id: detect
@@ -212,6 +213,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Secret scanning (Gitleaks)
         uses: gitleaks/gitleaks-action@v2

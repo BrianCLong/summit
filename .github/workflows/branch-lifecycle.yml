@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
           fetch-depth: 0 # Full history for branch analysis
+          fetch-tags: true
 
       - name: Delete merged branches older than 7 days
         run: |
@@ -73,6 +74,7 @@ jobs:
         uses: actions/checkout@v4
 
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Find stale unmerged branches (21-30 days)
         id: find-stale
@@ -190,6 +192,7 @@ jobs:
         uses: actions/checkout@v4
 
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Delete unmerged branches older than 30 days
         run: |
@@ -239,6 +242,7 @@ jobs:
         uses: actions/checkout@v4
 
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Generate branch statistics
         run: |

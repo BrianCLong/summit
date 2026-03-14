@@ -117,6 +117,7 @@ jobs:
         uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0 # Full history for snapshot branch access
+          fetch-tags: true
 
       - name: Download Orchestrator Artifacts
         env:

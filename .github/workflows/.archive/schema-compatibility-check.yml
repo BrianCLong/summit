@@ -67,6 +67,7 @@ jobs:
         uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Check for RC Phase
         id: rc-phase

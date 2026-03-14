@@ -172,6 +172,7 @@ jobs:
         with:
           ref: refs/tags/v${{ inputs.version }}
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Run schema safety checks
         id: schema-report

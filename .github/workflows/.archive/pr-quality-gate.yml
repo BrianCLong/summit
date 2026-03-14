@@ -25,6 +25,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Needed for some checks
+          fetch-tags: true
 
       - uses: actions/setup-node@v4
         with:
@@ -184,6 +185,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v2

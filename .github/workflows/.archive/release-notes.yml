@@ -30,6 +30,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          fetch-tags: true
 
       - name: Setup Node.js
         uses: pnpm/action-setup@v4
