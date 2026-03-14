@@ -1,0 +1,103 @@
+name: Affected Packages CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - release/*
+
+jobs:
+  detect-affected:
+    runs-on: ubuntu-latest
+    outputs:
+      affected_packages: ${{ steps.set-affected.outputs.packages }}
+      should_run: ${{ steps.set-affected.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          version: 10.0.0
+
+      - name: Determine Affected Packages
+        id: set-affected
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            PACKAGES=$(node .github/scripts/get-affected-packages.cjs)
+            echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+            if [ "$PACKAGES" != "[]" ] && [ -n "$PACKAGES" ]; then
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            else
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-test:
+    needs: detect-affected
+    if: needs.detect-affected.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.detect-affected.outputs.affected_packages) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          version: 10.0.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm --filter ./${{ matrix.package }} run build --if-present
+
+      - name: Test package
+        run: pnpm --filter ./${{ matrix.package }} run test --if-present
+
+  full-build:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          version: 10.0.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all
+        run: pnpm -r run build --if-present
+
+      - name: Test all
+        run: pnpm test:quick --if-present
