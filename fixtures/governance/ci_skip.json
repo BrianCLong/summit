@@ -1,0 +1,5 @@
+{
+  "scenario_id": "ci_skip",
+  "actual_outcome": "blocked",
+  "actual_reason": "Merge blocked: required status checks must pass"
+}

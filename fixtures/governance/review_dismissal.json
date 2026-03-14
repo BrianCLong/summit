@@ -1,0 +1,5 @@
+{
+  "scenario_id": "review_dismissal",
+  "actual_outcome": "blocked",
+  "actual_reason": "API Error: insufficient privileges to dismiss reviews"
+}

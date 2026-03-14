@@ -1,0 +1,26 @@
+scenarios:
+  - id: force_push
+    name: "Force Push Attempt"
+    description: "Attempt to force push over the main branch."
+    expected_outcome: "blocked"
+    expected_reason: "fast-forward only"
+  - id: review_dismissal
+    name: "Review Dismissal Attempt"
+    description: "Attempt to dismiss an approved review."
+    expected_outcome: "blocked"
+    expected_reason: "insufficient privileges to dismiss reviews"
+  - id: ci_skip
+    name: "CI Skip Attempt"
+    description: "Attempt to bypass required status checks using [skip ci]."
+    expected_outcome: "blocked"
+    expected_reason: "required status checks must pass"
+  - id: direct_main_push
+    name: "Direct Main Push Attempt"
+    description: "Attempt to push commits directly to the main branch."
+    expected_outcome: "blocked"
+    expected_reason: "branch is protected"
+  - id: permission_escalation
+    name: "Permission Escalation Attempt"
+    description: "Attempt to elevate repository permissions without approval."
+    expected_outcome: "blocked"
+    expected_reason: "unauthorized permission modification"
