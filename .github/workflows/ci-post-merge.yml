@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.gate.outputs.sha }}
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.gate.outputs.sha }}
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'

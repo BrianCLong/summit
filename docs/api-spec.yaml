@@ -1,5 +1,8 @@
 openapi: 3.0.0
 info:
+  contact:
+    name: "Summit Support"
+    email: "support@example.com"
   title: IntelGraph Summit API
   version: 1.1.0
   description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
@@ -13,6 +16,8 @@ servers:
 paths:
   /monitoring/metrics:
     get:
+      operationId: get__monitoring_metrics
+      description: "get__monitoring_metrics operation"
       operationId: getMonitoringMetrics
       summary: Prometheus metrics
       tags: [Observability]
@@ -26,6 +31,8 @@ paths:
 
   /health:
     get:
+      operationId: get__health
+      description: "get__health operation"
       operationId: getHealth
       summary: System health check
       tags: [Observability]
@@ -45,6 +52,8 @@ paths:
 
   /api/tenants:
     post:
+      operationId: post__api_tenants
+      description: "post__api_tenants operation"
       summary: Create a new tenant
       tags: [Tenancy]
       requestBody:
@@ -62,6 +71,8 @@ paths:
                 $ref: '#/components/schemas/Tenant'
 
     get:
+      operationId: get__api_tenants
+      description: "get__api_tenants operation"
       summary: List tenants (Admin only)
       tags: [Tenancy]
       responses:
@@ -76,6 +87,8 @@ paths:
 
   /api/policy/simulate:
     post:
+      operationId: post__api_policy_simulate
+      description: "post__api_policy_simulate operation"
       summary: Simulate a policy decision (Preflight)
       tags: [Governance]
       requestBody:
@@ -94,6 +107,8 @@ paths:
 
   /api/export/bundles:
     post:
+      operationId: post__api_export_bundles
+      description: "post__api_export_bundles operation"
       summary: Create an Intel Bundle export
       tags: [Disclosure]
       requestBody:
@@ -112,6 +127,8 @@ paths:
 
   /api/receipts/{id}:
     get:
+      operationId: get__api_receipts_id
+      description: "get__api_receipts_id operation"
       summary: Get a signed receipt by ID
       tags: [Provenance]
       parameters:
@@ -130,6 +147,8 @@ paths:
 
   /api/maestro/route/preview:
     post:
+      operationId: post__api_maestro_route_preview
+      description: "post__api_maestro_route_preview operation"
       operationId: previewRoute
       summary: Preview routing candidates for a task
       tags: [Maestro]
@@ -154,6 +173,8 @@ paths:
 
   /api/maestro/route/execute:
     post:
+      operationId: post__api_maestro_route_execute
+      description: "post__api_maestro_route_execute operation"
       operationId: executeRoute
       summary: Execute a task with selected candidates
       tags: [Maestro]
@@ -180,6 +201,8 @@ paths:
 
   /api/maestro/web/interfaces:
     get:
+      operationId: get__api_maestro_web_interfaces
+      description: "get__api_maestro_web_interfaces operation"
       operationId: getWebInterfaces
       summary: Get available web interfaces
       tags: [Maestro]
@@ -193,6 +216,8 @@ paths:
 
   /api/maestro/web/run:
     post:
+      operationId: post__api_maestro_web_run
+      description: "post__api_maestro_web_run operation"
       operationId: runWebOrchestration
       summary: Orchestrate web search/content tasks
       tags: [Maestro]
@@ -219,6 +244,8 @@ paths:
 
   /api/maestro/budgets:
     get:
+      operationId: get__api_maestro_budgets
+      description: "get__api_maestro_budgets operation"
       operationId: getBudgets
       summary: Get budget and usage information
       tags: [Maestro]
@@ -232,6 +259,8 @@ paths:
 
   /api/maestro/policy/check:
     post:
+      operationId: post__api_maestro_policy_check
+      description: "post__api_maestro_policy_check operation"
       operationId: checkPolicy
       summary: Check policy for an action
       tags: [Maestro]
@@ -256,6 +285,8 @@ paths:
 
   /api/maestro/runs:
     post:
+      operationId: post__api_maestro_runs
+      description: "post__api_maestro_runs operation"
       operationId: createRun
       summary: Create and run a new pipeline
       tags: [Maestro]
@@ -280,6 +311,8 @@ paths:
 
   /api/tenants/{tenantId}/workflows:
     post:
+      operationId: post__api_tenants_tenantId_workflows
+      description: "post__api_tenants_tenantId_workflows operation"
       operationId: createWorkflowDefinition
       summary: Create or update a workflow definition
       tags: [Maestro]
@@ -305,6 +338,8 @@ paths:
 
   /api/tenants/{tenantId}/runs:
     post:
+      operationId: post__api_tenants_tenantId_runs
+      description: "post__api_tenants_tenantId_runs operation"
       operationId: startRun
       summary: Start a new run from a workflow definition
       tags: [Maestro]
@@ -330,6 +365,8 @@ paths:
 
   /api/tenants/{tenantId}/runs/{runId}:
     get:
+      operationId: get__api_tenants_tenantId_runs_runId
+      description: "get__api_tenants_tenantId_runs_runId operation"
       operationId: getRun
       summary: Get run details including receipts
       tags: [Maestro]
@@ -354,6 +391,8 @@ paths:
 
   /api/tenants/{tenantId}/runs/{runId}/approve:
     post:
+      operationId: post__api_tenants_tenantId_runs_runId_approve
+      description: "post__api_tenants_tenantId_runs_runId_approve operation"
       operationId: approveRun
       summary: Approve or reject a run/step
       tags: [Maestro]
@@ -384,6 +423,8 @@ paths:
 
   /api/tenants/{tenantId}/runs/{runId}/events:
     get:
+      operationId: get__api_tenants_tenantId_runs_runId_events
+      description: "get__api_tenants_tenantId_runs_runId_events operation"
       operationId: getRunEvents
       summary: Get timeline events for a run
       tags: [Maestro]

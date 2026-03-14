@@ -23,7 +23,7 @@ jobs:
           node-version: 20
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --filter @intelgraph/summit-lineage-normalizer...

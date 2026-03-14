@@ -110,7 +110,7 @@ jobs:
           echo "⚠️  Falling back to pinned pnpm 10.0.0"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3 # v4
+        uses: pnpm/action-setup@v4 # v4
         with:
           version: ${{ steps.resolve-pnpm.outputs.pnpm }}
           run_install: ${{ inputs.install-deps }}

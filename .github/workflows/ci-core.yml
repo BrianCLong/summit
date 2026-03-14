@@ -37,8 +37,8 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
 
@@ -75,7 +75,7 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -102,7 +102,7 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -197,7 +197,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -228,7 +228,7 @@ jobs:
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -275,7 +275,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -302,7 +302,7 @@ jobs:
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -341,7 +341,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -388,7 +388,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
 
       - name: Use Node
         uses: actions/setup-node@v4
@@ -419,7 +419,7 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

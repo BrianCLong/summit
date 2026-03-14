@@ -1,0 +1,17 @@
+{
+  "name": "@summit/connector-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "validate:connectors": "node ../../scripts/validate-connectors.mjs",
+    "replay:connectors": "node ../../scripts/replay-connectors.mjs",
+    "check:determinism": "node ../../scripts/check-determinism.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "5.7.3",
+    "@types/node": "20.17.5"
+  }
+}

@@ -26,9 +26,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
       - uses: actions/setup-node@v4
         with:
           node-version: '20.14.x'
@@ -106,9 +106,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -206,9 +206,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
       - uses: actions/setup-node@v4
         with:
           node-version: '20.14.x'
