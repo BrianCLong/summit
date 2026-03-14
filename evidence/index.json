@@ -1,41 +1,8 @@
 {
-  "version": "1.0",
-  "mappings": {
-    "EVD-nato-cogwar-techfamilies-ai-001": {
-      "report": "EVD-nato-cogwar-techfamilies-ai-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-ai-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-ai-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
-    },
-    "EVD-nato-cogwar-techfamilies-synth-001": {
-      "report": "EVD-nato-cogwar-techfamilies-synth-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-synth-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-synth-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
-    },
-    "EVD-nato-cogwar-techfamilies-iw-001": {
-      "report": "EVD-nato-cogwar-techfamilies-iw-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-iw-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-iw-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
-    },
-    "EVD-nato-cogwar-techfamilies-gov-001": {
-      "report": "EVD-nato-cogwar-techfamilies-gov-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-gov-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-gov-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
-    },
-    "EVD-nato-cogwar-techfamilies-xr-001": {
-      "report": "EVD-nato-cogwar-techfamilies-xr-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-xr-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-xr-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
-    },
-    "EVD-nato-cogwar-techfamilies-neuro-001": {
-      "report": "EVD-nato-cogwar-techfamilies-neuro-001/report.json",
-      "metrics": "EVD-nato-cogwar-techfamilies-neuro-001/metrics.json",
-      "stamp": "EVD-nato-cogwar-techfamilies-neuro-001/stamp.json",
-      "files": ["report.json", "metrics.json", "stamp.json"]
+  "items": [
+    {
+      "evidence_id": "EVD-DISINFO-EVAL-001",
+      "type": "eval_report"
     }
-  }
+  ]
 }

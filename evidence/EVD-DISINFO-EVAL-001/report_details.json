@@ -1,0 +1,42 @@
+{
+  "metrics": {
+    "accuracy": 0.6153846153846154,
+    "false_positive_rate": 0.0,
+    "total_tp": 2,
+    "total_fp": 0,
+    "total_tn": 6,
+    "total_fn": 5
+  },
+  "detailed_scenarios": {
+    "false_claims": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 2,
+      "fn": 2
+    },
+    "cib_signals": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0
+    },
+    "source_credibility": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 1
+    },
+    "contradictions": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0
+    },
+    "narrative_manipulation": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 2
+    }
+  }
+}
