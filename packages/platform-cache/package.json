@@ -34,7 +34,7 @@
     "eslint": "9.39.2"
   },
   "peerDependencies": {
-    "typescript": "5.0.0"
+    "typescript": "^5.0.0"
   },
   "files": [
     "dist",
