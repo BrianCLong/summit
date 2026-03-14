@@ -1,0 +1,52 @@
+name: Daily GraphRAG Benchmarks
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily
+  workflow_dispatch: # Allow manual triggers
+
+permissions:
+  contents: read
+
+jobs:
+  run-benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run GraphRAG Benchmarks
+        run: npx tsx scripts/benchmarks/run_graphrag.ts
+
+      - name: Move artifacts to correct location
+        run: |
+          mkdir -p artifacts/benchmarks/graphrag/
+          mv scripts/benchmarks/metrics.json artifacts/benchmarks/graphrag/metrics.json || true
+          mv scripts/benchmarks/report.json artifacts/benchmarks/graphrag/report.json || true
+
+      - name: Generate stamp
+        run: |
+          echo "{\"timestamp\": \"$(date -Iseconds)\"}" > artifacts/benchmarks/graphrag/stamp.json
+
+      - name: Upload Benchmark Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-artifacts
+          path: artifacts/benchmarks/graphrag/*.json
+          retention-days: 14

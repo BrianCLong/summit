@@ -318,5 +318,19 @@
       "busboy": ">=1.6.0",
       "html-minifier": "npm:html-minifier-terser@^5.1.1"
     }
-  }
+  },
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrianCLong/summit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BrianCLong/summit/issues"
+  },
+  "homepage": "https://github.com/BrianCLong/summit#readme"
 }
