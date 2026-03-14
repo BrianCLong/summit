@@ -25,18 +25,28 @@ const collectArtifacts = (workspaces: any[], outDir: string): string[] => {
   const collectedFiles: string[] = [];
   fs.mkdirSync(outDir, { recursive: true });
 
+  const copyRecursiveSync = (src: string, dest: string) => {
+    const exists = fs.existsSync(src);
+    const stats = exists && fs.statSync(src);
+    const isDirectory = exists && stats.isDirectory();
+    if (isDirectory) {
+      if (!fs.existsSync(dest)) {
+        fs.mkdirSync(dest, { recursive: true });
+      }
+      fs.readdirSync(src).forEach((childItemName) => {
+        copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+      });
+    } else {
+      fs.copyFileSync(src, dest);
+      collectedFiles.push(dest);
+    }
+  };
+
   for (const workspace of workspaces) {
     const distPath = path.join(workspace.path, 'dist');
     if (fs.existsSync(distPath)) {
       const packageOutDir = path.join(outDir, workspace.name);
-      fs.mkdirSync(packageOutDir, { recursive: true });
-      const files = fs.readdirSync(distPath);
-      for (const file of files) {
-        const srcFile = path.join(distPath, file);
-        const destFile = path.join(packageOutDir, file);
-        fs.copyFileSync(srcFile, destFile);
-        collectedFiles.push(destFile);
-      }
+      copyRecursiveSync(distPath, packageOutDir);
     }
   }
   return collectedFiles;
