@@ -4,29 +4,47 @@ from sqlalchemy.engine import Engine
 from summit.cache.redis_client import RedisClient
 import os
 import configparser
+import logging
 from functools import lru_cache
+from pathlib import Path
 
 router = APIRouter(tags=["Health"])
+logger = logging.getLogger(__name__)
 
 @lru_cache()
 def get_db_engine() -> Engine:
-    # Priority: Env var, then alembic.ini
+    """
+    Creates and caches a SQLAlchemy engine for health checks.
+    Priority: DATABASE_URL env var, then alembic.ini discovery.
+    """
     db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        try:
-            config = configparser.ConfigParser()
-            # Try multiple locations for alembic.ini
-            config_locations = ["summit/alembic.ini", "alembic.ini"]
-            for loc in config_locations:
-                if os.path.exists(loc):
-                    config.read(loc)
-                    db_url = config.get("alembic", "sqlalchemy.url")
-                    break
-        except Exception:
-            pass
 
     if not db_url:
-        db_url = "sqlite:///summit.db" # Default Fallback
+        # Robust discovery of alembic.ini
+        base_dir = Path(__file__).resolve().parent.parent.parent.parent
+        config_locations = [
+            base_dir / "summit" / "alembic.ini",
+            base_dir / "alembic.ini",
+            Path("summit/alembic.ini"),
+            Path("alembic.ini")
+        ]
+
+        for loc in config_locations:
+            if loc.exists():
+                try:
+                    config = configparser.ConfigParser()
+                    config.read(loc)
+                    if config.has_section("alembic"):
+                        db_url = config.get("alembic", "sqlalchemy.url")
+                        if db_url:
+                            logger.info(f"Discovered database URL from {loc}")
+                            break
+                except Exception as e:
+                    logger.debug(f"Failed to read config from {loc}: {e}")
+
+    if not db_url:
+        logger.warning("No database configuration found. Falling back to SQLite for health checks.")
+        db_url = "sqlite:///summit.db"
 
     return create_engine(db_url, pool_pre_ping=True)
 

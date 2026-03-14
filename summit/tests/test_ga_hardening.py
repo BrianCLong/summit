@@ -12,10 +12,9 @@ def test_health_endpoints():
     assert response.status_code == 200
     assert response.json() == {"status": "alive"}
 
-    # Health/Ready endpoints (might be 503 if DB/Redis not running, but let's check structure)
+    # Health/Ready endpoints
     response = client.get("/health")
-    # We expect 503 since we don't have real DB/Redis in test env usually,
-    # but the structure should be correct.
+    # We expect 200 or 503 depending on real DB/Redis availability
     assert response.status_code in [200, 503]
     data = response.json()
     assert "status" in data
@@ -52,5 +51,4 @@ def test_graphrag_instrumentation():
 
     assert "answer" in result
     assert "citations" in result
-    # We know Alice is in mock graph
     assert len(result["citations"]) > 0

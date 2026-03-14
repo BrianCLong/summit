@@ -146,8 +146,9 @@ def setup_observability(app: FastAPI):
 
     # --- Prometheus Setup ---
     # Expose /metrics endpoint for Prometheus scraping
-    # We rely on Prometheus config to attach service labels via 'job' or 'service' label in scrape config
-    Instrumentator().instrument(app).expose(app)
+    # Note: We use custom PrometheusMiddleware for detailed metrics (active connections, path-based latency)
+    # The Instrumentator is used primarily to expose the /metrics endpoint
+    Instrumentator().expose(app)
 
     logger = structlog.get_logger()
     logger.info("Observability initialized", service_name=service_name, otlp_endpoint=otlp_endpoint)
