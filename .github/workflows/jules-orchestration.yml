@@ -1,0 +1,39 @@
+name: Jules Orchestration Supervisor
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run daily at midnight UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  supervisor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate Orchestration Report
+        run: python3 scripts/orchestration/jules_supervisor.py
+
+      - name: Archive Orchestration Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jules-orchestration-report
+          path: artifacts/jules-orchestration-report.json
+
+      - name: Commit report if changed
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add artifacts/jules-orchestration-report.json
+          git commit -m "chore: Update Jules orchestration report [skip ci]" || echo "No changes to commit"
+          # Push step omitted for safety, usually it would push here or create a PR.
+          # git push || echo "No changes to push"
