@@ -22,10 +22,12 @@ export default function CognitiveBattlespacePage() {
   const [compatibility, setCompatibility] = useState<CompatibilityBreakdown | null>(null);
   const [anomaly, setAnomaly] = useState<LinguisticFingerprint | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     void (async () => {
       try {
+        setIsLoading(true);
         setError(null);
         const [diffusion, geojson, ling] = await Promise.all([
           fetchDiffusionMap(narrativeId),
@@ -44,6 +46,8 @@ export default function CognitiveBattlespacePage() {
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unknown error");
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [narrativeId, timeBucket]);
@@ -56,14 +60,28 @@ export default function CognitiveBattlespacePage() {
   async function handleSelectRegion(regionId: string) {
     const point = diffusionMap?.points.find((p) => p.regionId === regionId);
     if (!point) return;
-    setCompatibility(await fetchCompatibility(point.populationId, narrativeId));
+    setIsLoading(true);
+    try {
+      setCompatibility(await fetchCompatibility(point.populationId, narrativeId));
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6" aria-busy={isLoading}>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Cognitive Battlespace</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">Cognitive Battlespace</h1>
+            {isLoading && (
+              <div
+                role="status"
+                aria-label="Loading data"
+                className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"
+              />
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             Narrative diffusion, cultural compatibility, and linguistic anomaly detection.
           </p>
@@ -75,6 +93,7 @@ export default function CognitiveBattlespacePage() {
         onNarrativeIdChange={setNarrativeId}
         timeBucket={timeBucket}
         onTimeBucketChange={setTimeBucket}
+        isLoading={isLoading}
       />
 
       {error ? <div className="rounded-2xl border border-red-500 p-4 text-red-600">{error}</div> : null}
