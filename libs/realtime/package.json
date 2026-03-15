@@ -12,7 +12,7 @@
     "ws": "8.13.0"
   },
   "devDependencies": {
-    "typescript": "5.0.0",
+    "typescript": "5.3.3",
     "@types/ws": "8.5.5"
   }
 }

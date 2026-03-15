@@ -54876,11 +54876,6 @@ snapshots:
       '@apollo/server': 5.4.0(graphql@16.12.0)
       express: 5.2.1
 
-  '@as-integrations/express4@1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)':
-    dependencies:
-      '@apollo/server': 5.4.0(graphql@16.12.0)
-      express: 5.2.1
-
   '@asamuzakjp/css-color@3.2.0':
     dependencies:
       '@csstools/css-calc': 2.1.4(@csstools/css-parser-algorithms@3.0.5(@csstools/css-tokenizer@3.0.4))(@csstools/css-tokenizer@3.0.4)

@@ -1,7 +1,7 @@
 {
-  "item_slug": "agent-fleet-control-plane-2027",
+  "item_slug": "agent-fleet-control-plane-20-27",
   "category": "ecosystem_scan",
-  "source": "CIO: 21 agent orchestration tools for managing your AI fleet",
+  "source": "CIO - 21 agent orchestration tools for managing your AI fleet",
   "source_date": "2026-03-05",
   "verified_inputs": [
     "Enterprises deploy multiple AI agents across workflows",

@@ -1,0 +1,61 @@
+{
+  "artifacts": [
+    {
+      "kind": "metrics",
+      "path": "metrics.json"
+    },
+    {
+      "kind": "stamp",
+      "path": "stamp.json"
+    }
+  ],
+  "evidence_id": "EVD-TEMPORAL-REASONING-EVAL-001",
+  "findings": {
+    "results": [
+      {
+        "fixture_type": "accuracy",
+        "reason": "Date found in answer",
+        "score": 1.0
+      },
+      {
+        "fixture_type": "historical_vs_current",
+        "reason": "Correct state 'down' not reflected",
+        "score": 0.0
+      },
+      {
+        "fixture_type": "temporal_ordering",
+        "reason": "Not all events found in answer",
+        "score": 0.0
+      },
+      {
+        "fixture_type": "recency_bias",
+        "is_recency_bias": true,
+        "reason": "Incorrect policy used (likely recency bias)",
+        "score": 0.0
+      },
+      {
+        "fixture_type": "relative_time",
+        "reason": "Correct year for relative reference found",
+        "score": 1.0
+      },
+      {
+        "fixture_type": "stale_source",
+        "is_stale_ignored": true,
+        "reason": "No stale source warning or date present",
+        "score": 0.0
+      }
+    ],
+    "summary": {
+      "passed": 2,
+      "recency_bias_rate": 1.0,
+      "temporal_accuracy_score": 0.3333333333333333,
+      "total": 6
+    }
+  },
+  "module": "temporal_reasoning",
+  "result": "fail",
+  "subject": {
+    "name": "temporal-reasoning-harness",
+    "type": "eval"
+  }
+}

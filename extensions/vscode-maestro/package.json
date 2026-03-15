@@ -5,7 +5,7 @@
   "version": "4.2.3",
   "publisher": "intelgraph",
   "engines": {
-    vscode: "1.74.0"
+    "vscode": "1.74.0"
   },
   "categories": [
     "Other"
