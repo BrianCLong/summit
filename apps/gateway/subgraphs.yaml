@@ -1,0 +1,7 @@
+subgraphs:
+  server:
+    url: http://server:4000/graphql
+  prov-ledger:
+    url: http://prov-ledger:4010/graphql
+  prediction-service:
+    url: http://prediction-service:3000/graphql

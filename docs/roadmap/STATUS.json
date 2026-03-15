@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-12T00:00:00Z",
+  "revision_note": "Added GA release artifact convergence with deterministic manifest/SBOM/provenance generation and release-integrity verifier gate.",
   "initiatives": [
+    {
+      "id": "ga-release-artifact-convergence",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Implemented deterministic GA release surface, manifest, SBOM, provenance, verifier, rollback spec, CI enforcement, and release evidence artifacts."
+    },
     {
       "id": "antigravity-governance-ledger",
       "status": "completed",
@@ -187,7 +193,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -205,7 +211,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
@@ -270,12 +276,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
+    },
+    {
+      "id": "ga-gateway-orchestration-hardening",
+      "status": "completed",
+      "owner": "antigravity",
+      "notes": "Consolidated Apollo Gateway logic, fixed docker-compose service structure, aligned subgraphs, and verified web proxy for GA readiness."
     }
   ],
   "summary": {
-    "total_initiatives": 32,
+    "total_initiatives": 34,
     "completed": 8,
-    "in_progress": 24,
+    "in_progress": 21,
     "at_risk": 0
   }
 }

@@ -21,7 +21,8 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-run_install: false
+          version: 10.0.0
+          run_install: false
 
       - name: Lint Markdown Files
         run: pnpm dlx markdownlint-cli '**/*.md' --ignore 'node_modules'

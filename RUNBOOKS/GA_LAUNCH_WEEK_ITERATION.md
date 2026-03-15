@@ -44,9 +44,15 @@ In GA launch week, the goal is to resolve P0/P1 issues within a 4-hour window fr
 | Signal | Threshold | Action |
 |--------|-----------|--------|
 | **Launch Health Score** | < 70 | Immediate P1 triage session. |
-| **AI Rejection Rate** | > 10% (1h window) | Activate `ai_strict_mode` feature flag. |
+| **AI Rejection Rate** | > 10% (1h window) | Activate `hallucination-mitigation` profile. |
 | **P0 Issues** | > 0 | Declare incident; notify stakeholders. |
-| **Latency P95** | > 2s | Trigger Neo4j index health audit. |
+
+### 🛡️ Rapid Mitigation
+In case of critical regressions, use the emergency controls to apply pre-defined mitigation profiles:
+```bash
+node scripts/ga-emergency-controls.mjs apply [profile-name]
+```
+Available profiles: `hallucination-mitigation`, `load-shedding`, `safety-first`.
 
 ---
 

@@ -27,7 +27,9 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-- name: Setup Node.js ${{ matrix.node-version }}
+          version: 10.0.0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
@@ -81,7 +83,9 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-- name: Setup Node.js
+          version: 10.0.0
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -154,7 +158,9 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-- name: Setup Node.js
+          version: 10.0.0
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20

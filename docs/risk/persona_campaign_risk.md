@@ -1,25 +1,21 @@
-# Persona & Campaign Risk Objects and Scoring
+# Persona and Campaign Risk
 
-## Commander's Intent
-This module introduces structured risk objects for personas and campaigns. Its goal is to improve signal-to-noise and defensive responsiveness by providing a transparent, additive scoring model. Instead of relying on raw, disparate events or black-box models, we aggregate risk factors into a clear, unified risk tier (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`). This allows for consistent and explainable alerting workflows.
+This document describes the structured risk objects for personas and campaigns within the risk-based alerting layer.
 
 ## Scoring Model
-The risk score is calculated using an additive logic framework based on input signals.
-Each signal is processed into a `RiskFactor` containing:
-- `name`: Identifier for the signal.
-- `weight`: The multiplier for the signal's value.
-- `value`: The raw value of the signal.
-- `contribution`: The calculated contribution to the total score (`weight` * `value`).
+The risk score is a numerical value between 0 and 100, which maps to a tiered risk level:
+- LOW: 0-24
+- MEDIUM: 25-49
+- HIGH: 50-74
+- CRITICAL: 75-100
 
-The total risk score is the sum of all signal contributions, capped at 100.
+### Inputs
+Persona risks use factors such as `deception_profile`, `cross_platform_spread`, `persona_army_patterns`, and `watchlist_hit`.
+Campaign risks use factors such as `target_criticality`, `amplification_volume`, `negative_sentiment`, and `executive_targeting`.
 
-### Tier Boundaries
-The calculated total score determines the `RiskLevel`:
-- **LOW**: `< 25`
-- **MEDIUM**: `25` to `< 50`
-- **HIGH**: `50` to `< 75`
-- **CRITICAL**: `>= 75`
+### Commander's Intent
+This model establishes a transparent, explainable risk-based foundation for defensive persona and campaign monitoring, ensuring we elevate signals into actionable risk tiers without generating alert fatigue.
 
-## Abuse Analysis
-**Potential Misuse:** Risk scores could be misused for over-surveillance or unwarranted targeting of entities by inappropriately altering weights or introducing biased signals.
-**Mitigation:** This layer is strictly designed for internal defensive monitoring. The logic is explicit and additive, ensuring transparency in how a score is derived. No automated actions (e.g., banning or public engagement) are taken based on these scores. Any resulting actions or integrations with playbooks require human oversight, and the framework will be governed by the Governance Council OS.
+### Abuse Analysis
+**Risk:** The risk objects could be misused to establish unauthorized surveillance or target personas for non-defensive operations.
+**Mitigation:** The model is scoped strictly for defensive internal monitoring. It computes risk purely to inform internal investigations and generates no outward action, blocking, or banning.

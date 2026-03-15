@@ -98,7 +98,17 @@ services:
       - POLICY_DRY_RUN=true
       - ENABLE_INSECURE_DEV_AUTH=true
       - GRAPH_SERVICE_URL=http://server:4000
-    depends_on: [ redis ]
+      - PROV_LEDGER_URL=http://prov-ledger:4010
+      - PREDICTIVE_SUITE_URL=http://prediction-service:3000
+      - RAG_SERVICE_URL=http://rag:8001
+      - GRAPHRAG_SERVICE_URL=http://graphrag:8002
+    depends_on:
+      - redis
+      - server
+      - prov-ledger
+      - prediction-service
+      - rag
+      - graphrag
     networks:
       - default
       - observability
@@ -110,6 +120,7 @@ services:
     ports: [ "8080:8080" ]
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - API_GATEWAY_URL=http://api-gateway:4000
     depends_on: [ api-gateway ]
     networks:
       - default
@@ -144,25 +155,23 @@ services:
       dockerfile: apps/web/Dockerfile.dev
     ports: [ "3000:3000" ]
     environment:
-      - VITE_API_URL=http://localhost:4000/graphql
-      - VITE_WS_URL=ws://localhost:4000/graphql
+      - VITE_API_URL=http://localhost:3000/graphql
+      - VITE_WS_URL=ws://localhost:3000/graphql
     networks:
       - default
       - observability
       - intelgraph
 
-volumes:
-  neo4j_data: {}
-  pg_data: {}
-  redis_data: {}
-  prometheus_data: {}
-  grafana_data: {}
-
-networks:
-  observability:
-    driver: bridge
-  intelgraph:
-    external: true
+  prediction-service:
+    build:
+      context: .
+      dockerfile: services/prediction-service/Dockerfile
+    ports: [ "4025:3000" ]
+    environment:
+      - NODE_ENV=development
+    networks:
+      - default
+      - observability
 
   rag:
     build:
@@ -177,6 +186,25 @@ networks:
     depends_on:
       - redis
       - postgres
+    networks:
+      - default
+      - observability
+
+  graphrag:
+    build:
+      context: .
+      dockerfile: services/graphrag/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - neo4j
+      - redis
     networks:
       - default
       - observability
@@ -212,21 +240,15 @@ networks:
     networks:
       - observability
 
-  graphrag:
-    build:
-      context: .
-      dockerfile: services/graphrag/Dockerfile
-    ports:
-      - "8002:8002"
-    environment:
-      - NEO4J_URI=bolt://neo4j:7687
-      - NEO4J_USERNAME=${NEO4J_USER}
-      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - neo4j
-      - redis
-    networks:
-      - default
-      - observability
+volumes:
+  neo4j_data: {}
+  pg_data: {}
+  redis_data: {}
+  prometheus_data: {}
+  grafana_data: {}
+
+networks:
+  observability:
+    driver: bridge
+  intelgraph:
+    external: true

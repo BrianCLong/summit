@@ -39,6 +39,18 @@ export default defineConfig({
         target: 'http://localhost:8002',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/graphrag/, '')
+      },
+      '/graphql': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/health': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/api/health': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       }
     },
     port: 3000,

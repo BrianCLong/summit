@@ -1,18 +1,15 @@
-# Risk-Based Alerting Engine
+# Alerting Engine
 
-## Commander's Intent
-This module implements the alerting logic over the persona and campaign risk objects. To prevent alert fatigue and provide low-noise, tiered defensive alerts, we only surface alerts when aggregated signals meet specific thresholds (either by total score or by the frequency of high-severity events) within a rolling time window. All active alerts are de-duplicated to ensure analysts focus on unified, escalating entity states.
+This document details the Risk-Based Alerting (RBA) Engine.
 
-## Alerting Mechanics
-- **Rolling Windows:** The engine evaluates events over a configurable window (default: 24 hours). Older events naturally expire.
-- **Thresholds:**
-  - `score_threshold`: Total accumulated risk score in the window (default: 75.0).
-  - `high_event_threshold`: Number of HIGH/CRITICAL events in the window (default: 3).
-- **De-duplication & Escalation:** If an entity crosses a threshold while already having an active (non-`HANDLED`) alert, a new alert is NOT created. Instead, the existing alert is updated, and its severity is escalated if necessary (e.g., from `HIGH` to `CRITICAL`).
+## Logic
+The engine consumes stream `RiskEvent` objects, aggregating them per-subject (persona or campaign) within a defined rolling time window (e.g., 24 hours). An alert is generated if the maximum risk score in the window crosses a defined threshold.
 
-## Analyst Triage
-Alerts support human-driven state transitions (`NEW`, `IN_REVIEW`, `HANDLED`). The engine maintains an audit log (`state_history`) for all transitions.
+Deduplication occurs by silencing subsequent alerts for the same subject within the rolling window.
 
-## Abuse Analysis
-**Potential Misuse:** The alerting engine might be misconfigured to lower thresholds excessively, creating noise that masks actual threats, or configured to trigger automated responses (e.g., blocking) without human oversight.
-**Mitigation:** The alerting engine logic is strictly read-only and analytical. It produces `RiskAlert` objects and manages their states but does not trigger external actions. Any future integrations that operationalize automated responses will be governed by explicit SAFE_AUTOMATION policies and require human-in-the-loop review.
+### Commander's Intent
+The RBA engine dramatically improves signal-to-noise ratio by ensuring that only sustained or critical aggregated risks produce alerts, allowing analysts to focus on real defensive priorities.
+
+### Abuse Analysis
+**Risk:** Aggregated alerting could be weaponized to trigger automated, disproportionate countermeasures against subjects.
+**Mitigation:** The engine produces `RiskAlert` objects internally only. It strictly isolates detection from response and does not integrate with active remediation or blocking tools.

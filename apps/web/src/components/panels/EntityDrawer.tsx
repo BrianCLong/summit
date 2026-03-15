@@ -224,93 +224,50 @@ export function EntityDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-96">
-        <DrawerHeader>
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">
-              {getEntityIcon(selectedEntity.type)}
-            </span>
-            <div className="flex-1 min-w-0">
-              <DrawerTitle className="truncate">
-                {selectedEntity.name}
-              </DrawerTitle>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline">{selectedEntity.type}</Badge>
-                <Badge
-                  variant={
-                    selectedEntity.confidence > 0.8
-                      ? 'success'
-                      : selectedEntity.confidence > 0.6
-                        ? 'warning'
-                        : 'error'
-                  }
-                  icon={
-                    selectedEntity.confidence > 0.8 ? (
-                      <CheckCircle2 className="h-3 w-3" />
-                    ) : selectedEntity.confidence > 0.6 ? (
-                      <AlertTriangle className="h-3 w-3" />
-                    ) : (
-                      <AlertCircle className="h-3 w-3" />
-                    )
-                  }
-                >
-                  {Math.round(selectedEntity.confidence * 100)}% confidence
-                </Badge>
+      <DrawerContent side="right" className="w-[450px] border-l border-border bg-background shadow-2xl">
+        <DrawerHeader className="p-0 border-b border-border">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between px-6 py-2 bg-muted/30 border-b border-border">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Entity Dossier // {selectedEntity.id}</span>
+              <div className="flex gap-1">
+                <Button variant="ghost" size="icon" className="h-6 w-6 border border-border" onClick={() => onAction?.('edit', selectedEntity)}><Edit3 className="h-3 w-3" /></Button>
+                <Button variant="ghost" size="icon" className="h-6 w-6 border border-border" onClick={() => onAction?.('export', selectedEntity)}><ExternalLink className="h-3 w-3" /></Button>
+                <Button variant="ghost" size="icon" className="h-6 w-6 border border-destructive/50 text-destructive" onClick={() => onAction?.('delete', selectedEntity)}><Trash2 className="h-3 w-3" /></Button>
               </div>
             </div>
-            <div className="flex gap-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Edit entity"
-                    onClick={() => onAction?.('edit', selectedEntity)}
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit entity</TooltipContent>
-              </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete entity"
-                    onClick={() => onAction?.('delete', selectedEntity)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Delete entity</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Export entity"
-                    onClick={() => onAction?.('export', selectedEntity)}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Export entity</TooltipContent>
-              </Tooltip>
+            <div className="p-6 flex items-start gap-4">
+              <div className="h-16 w-16 border border-border bg-card flex items-center justify-center text-3xl shadow-inner">
+                {getEntityIcon(selectedEntity.type)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <DrawerTitle className="text-2xl font-bold tracking-tight uppercase truncate">
+                  {selectedEntity.name}
+                </DrawerTitle>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <Badge variant="outline" className="rounded-sm border-primary/50 text-primary bg-primary/5 px-2 font-bold uppercase tracking-tighter text-[10px]">
+                    {selectedEntity.type}
+                  </Badge>
+                  <div className={cn(
+                    "flex items-center gap-1 px-2 py-0.5 border text-[10px] font-bold uppercase tracking-tighter",
+                    selectedEntity.confidence > 0.8 ? "border-green-500/50 text-green-500 bg-green-500/5" : "border-amber-500/50 text-amber-500 bg-amber-500/5"
+                  )}>
+                    {selectedEntity.confidence > 0.8 ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+                    <span className="mono-data">{Math.round(selectedEntity.confidence * 100)}% CONFIDENCE</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-hidden">
-          <Tabs defaultValue="overview" className="h-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="relationships">Relations</TabsTrigger>
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
-              <TabsTrigger value="comments">Comments</TabsTrigger>
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <Tabs defaultValue="overview" className="flex-1 flex flex-col">
+            <TabsList className="flex w-full h-10 items-stretch bg-muted/30 border-b border-border rounded-none p-0">
+              <TabsTrigger value="overview" className="flex-1 rounded-none border-r border-border text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-b-primary">Overview</TabsTrigger>
+              <TabsTrigger value="relationships" className="flex-1 rounded-none border-r border-border text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-b-primary">Graph</TabsTrigger>
+              <TabsTrigger value="timeline" className="flex-1 rounded-none border-r border-border text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-b-primary">Logs</TabsTrigger>
+              <TabsTrigger value="comments" className="flex-1 rounded-none text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-b-primary">Audit</TabsTrigger>
             </TabsList>
 
             <TabsContent
@@ -459,7 +416,7 @@ export function EntityDrawer({
 
               <div className="space-y-3">
                 <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                  <div className="w-2 h-2 bg-green-500 mt-2"></div>
                   <div>
                     <div className="font-medium text-sm">Entity Created</div>
                     <div className="text-xs text-muted-foreground">
@@ -469,7 +426,7 @@ export function EntityDrawer({
                 </div>
 
                 <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                  <div className="w-2 h-2 bg-blue-500 mt-2"></div>
                   <div>
                     <div className="font-medium text-sm">Last Updated</div>
                     <div className="text-xs text-muted-foreground">

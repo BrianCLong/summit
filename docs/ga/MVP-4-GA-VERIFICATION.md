@@ -16,6 +16,7 @@ This sweep captures the minimum credible verification for the GA-hardening surfa
 | GA Gate Artifact Closure         | `docs/ga/MVP4_GA_GATE_ARTIFACTS.md` (gate artifact closure runbook + evidence map)                                          | C    | `make ga-verify`          | Forces closure of Terraform/DR/Canary/Migrations gate artifacts before GA readiness changes.                  |
 | Media Authenticity & Provenance  | `scripts/ci/verify_media_provenance.ts` + `docs/governance/media_provenance.md`                                             | B    | `make ga-verify`          | Blocks marketing/public media changes without deterministic provenance evidence.                              |
 | GA Exit Criteria Scorecard       | `docs/ga/GA_EXIT_CRITERIA_v1.md` (binary release gate, weighted GA Readiness Index, and acceptance criteria)     | C    | `make ga-verify`          | Anchors GA promotion to an explicit scorecard with auditable acceptance tests and status tracking.            |
+| GA Release Artifact Convergence | `scripts/release/generate-release-artifacts.mjs` + `scripts/release/verify-release.mjs` + `.github/workflows/release-integrity.yml` | A    | `node scripts/release/verify-release.mjs` | Produces deterministic release surface, manifest, SBOM, provenance, and fails CI on any integrity or reproducibility drift. |
 
 ## Deferred / To-Improve Items
 

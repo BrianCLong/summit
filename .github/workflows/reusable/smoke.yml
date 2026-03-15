@@ -21,6 +21,9 @@ jobs:
       PNPM_CACHE_FOLDER: ${{ inputs.pnpm_cache_folder }}
     steps:
       - uses: actions/checkout@v4 # v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
@@ -28,7 +31,8 @@ jobs:
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
-run_install: false
+          version: 10.0.0
+          run_install: false
       - name: Cache pnpm store
         uses: actions/cache@v4 # v4
         with:

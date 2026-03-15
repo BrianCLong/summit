@@ -1,8 +1,44 @@
 @import 'tailwindcss';
 
 @layer base {
-  /* IntelGraph specific colors */
+  /* IntelGraph specific colors - mapped to the architectural spec */
   :root {
+    /* Summit Obsidian Theme - Architectural, Dark-First, High-Contrast */
+    --background: 0 0% 4%; /* #0a0a0a */
+    --foreground: 0 0% 98%; /* #fafafa */
+
+    --card: 0 0% 7%; /* #121212 */
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%; /* Stark white primary for commands */
+    --primary-foreground: 0 0% 4%;
+
+    --secondary: 0 0% 12%; /* #1e1e1e */
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%; /* #a3a3a3 */
+
+    --accent: 0 0% 16%; /* #292929 */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84% 60%; /* #f87171 - Stark red */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 15%; /* #262626 - 1px stark borders */
+    --input: 0 0% 15%;
+    --ring: 0 0% 98%;
+
+    /* Architectural Radii - Sharp, serious, non-playful */
+    --radius: 0.125rem; /* 2px */
+    --radius-lg: 0.125rem;
+    --radius-md: 0.125rem;
+    --radius-sm: 0px;
+
+    /* IntelGraph specific colors - modernized */
     --color-intel-50: #f0f9ff;
     --color-intel-100: #e0f2fe;
     --color-intel-200: #bae6fd;
@@ -15,58 +51,34 @@
     --color-intel-900: #0c4a6e;
     --color-intel-950: #082f49;
 
-    /* Threat severity colors */
+    /* Threat severity colors - precise */
     --color-threat-low: #10b981;
     --color-threat-medium: #f59e0b;
     --color-threat-high: #ef4444;
     --color-threat-critical: #dc2626;
-
-    /* Legacy CSS custom properties for components that still use them */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 40%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-    --radius-lg: 0.5rem;
-    --radius-md: calc(0.5rem - 2px);
-    --radius-sm: calc(0.5rem - 4px);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 70%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    /* Identical to :root as Summit is strictly dark-first/command-center grade */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 98%;
   }
 }
 
@@ -119,68 +131,70 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* IntelGraph specific styles */
+/* Summit Base Typographic Rules */
+.mono-data {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+}
+
+/* IntelGraph specific styles - Subdued */
 .intel-gradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(3, 105, 161, 0.1) 100%);
 }
 
 .intel-grid {
   background-image:
-    linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 .glass-morphism {
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cyber-glow {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  /* Removed glow for a stark, sharp aesthetic, replaced with precise box shadow */
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5);
 }
 
 /* Graph canvas styles */
 .graph-canvas {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(6, 182, 212, 0.1) 0%,
-    transparent 50%
+    rgba(255, 255, 255, 0.02) 0%,
+    transparent 100%
   );
 }
 
-/* Loading animations */
+/* Loading animations - Restrained */
 .pulse-ring {
-  animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  animation: pulse-ring 2s cubic-bezier(0.2, 0, 0.8, 1) infinite;
 }
 
 @keyframes pulse-ring {
-  0% {
-    transform: scale(0.33);
-  }
-  40%,
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.33);
-  }
+  0% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.5; }
 }
 
-/* Scrollbar styles */
+/* Scrollbar styles - Sharp */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -188,10 +202,10 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 0;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(156, 163, 175, 0.8);
+  background-color: rgba(255, 255, 255, 0.3);
 }

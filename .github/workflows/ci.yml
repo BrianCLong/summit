@@ -17,6 +17,22 @@ env:
   NODE_OPTIONS: --max-old-space-size=8192
 
 jobs:
+  conflict-marker-gate:
+    name: Conflict Marker Gate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify no merge conflict markers in changed files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/ci/verify_no_conflict_markers.mjs
+
   config-guard:
     name: Build & Test (Untrusted)
     runs-on: ubuntu-latest

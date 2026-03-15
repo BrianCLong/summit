@@ -1,77 +1,106 @@
-from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Optional
+from pydantic import BaseModel, Field
 
-class RiskLevel(Enum):
+class RiskLevel(str, Enum):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
-@dataclass
-class RiskFactor:
+class RiskFactor(BaseModel):
     name: str
     weight: float
     value: float
     contribution: float
 
-@dataclass
-class PersonaRisk:
+class PersonaRisk(BaseModel):
     persona_id: str
-    risk_score: float
+    risk_score: float = Field(ge=0, le=100)
     risk_level: RiskLevel
-    factors: List[RiskFactor] = field(default_factory=list)
+    factors: List[RiskFactor] = []
 
-@dataclass
-class CampaignRisk:
+class CampaignRisk(BaseModel):
     campaign_id: str
-    risk_score: float
+    risk_score: float = Field(ge=0, le=100)
     risk_level: RiskLevel
-    factors: List[RiskFactor] = field(default_factory=list)
+    factors: List[RiskFactor] = []
 
-def determine_risk_level(score: float) -> RiskLevel:
-    if score < 25:
-        return RiskLevel.LOW
-    elif score < 50:
-        return RiskLevel.MEDIUM
-    elif score < 75:
-        return RiskLevel.HIGH
-    else:
-        return RiskLevel.CRITICAL
+class RiskScoringModel:
+    @staticmethod
+    def calculate_risk_level(score: float) -> RiskLevel:
+        if score < 25:
+            return RiskLevel.LOW
+        elif score < 50:
+            return RiskLevel.MEDIUM
+        elif score < 75:
+            return RiskLevel.HIGH
+        else:
+            return RiskLevel.CRITICAL
 
-def _calculate_score_and_factors(signals: List[Dict]) -> tuple[float, List[RiskFactor]]:
-    factors = []
-    total_score = 0.0
-    for signal in signals:
-        name = signal.get("name", "unknown")
-        weight = signal.get("weight", 1.0)
-        value = signal.get("value", 0.0)
-        contribution = weight * value
+    @classmethod
+    def evaluate_persona_risk(cls, persona_id: str, signals: Dict[str, float]) -> PersonaRisk:
+        factors = []
+        total_score = 0.0
 
-        factor = RiskFactor(name=name, weight=weight, value=value, contribution=contribution)
-        factors.append(factor)
-        total_score += contribution
+        # Simple additive model with weights
+        weights = {
+            "deception_profile": 0.4,
+            "cross_platform_spread": 0.3,
+            "persona_army_patterns": 0.3,
+            "watchlist_hit": 0.5 # can push over easily
+        }
 
-    # cap score at 100
-    final_score = min(max(total_score, 0.0), 100.0)
-    return final_score, factors
+        for signal_name, value in signals.items():
+            weight = weights.get(signal_name, 0.1)
+            contribution = value * weight
+            total_score += contribution
+            factors.append(RiskFactor(
+                name=signal_name,
+                weight=weight,
+                value=value,
+                contribution=contribution
+            ))
 
-def calculate_persona_risk(persona_id: str, signals: List[Dict]) -> PersonaRisk:
-    score, factors = _calculate_score_and_factors(signals)
-    level = determine_risk_level(score)
-    return PersonaRisk(
-        persona_id=persona_id,
-        risk_score=score,
-        risk_level=level,
-        factors=factors
-    )
+        final_score = min(max(total_score, 0.0), 100.0)
+        risk_level = cls.calculate_risk_level(final_score)
 
-def calculate_campaign_risk(campaign_id: str, signals: List[Dict]) -> CampaignRisk:
-    score, factors = _calculate_score_and_factors(signals)
-    level = determine_risk_level(score)
-    return CampaignRisk(
-        campaign_id=campaign_id,
-        risk_score=score,
-        risk_level=level,
-        factors=factors
-    )
+        return PersonaRisk(
+            persona_id=persona_id,
+            risk_score=final_score,
+            risk_level=risk_level,
+            factors=factors
+        )
+
+    @classmethod
+    def evaluate_campaign_risk(cls, campaign_id: str, signals: Dict[str, float]) -> CampaignRisk:
+        factors = []
+        total_score = 0.0
+
+        weights = {
+            "target_criticality": 0.4,
+            "amplification_volume": 0.3,
+            "negative_sentiment": 0.2,
+            "executive_targeting": 0.4
+        }
+
+        for signal_name, value in signals.items():
+            weight = weights.get(signal_name, 0.1)
+            contribution = value * weight
+            total_score += contribution
+            factors.append(RiskFactor(
+                name=signal_name,
+                weight=weight,
+                value=value,
+                contribution=contribution
+            ))
+
+        final_score = min(max(total_score, 0.0), 100.0)
+        risk_level = cls.calculate_risk_level(final_score)
+
+        return CampaignRisk(
+            campaign_id=campaign_id,
+            risk_score=final_score,
+            risk_level=risk_level,
+            factors=factors
+        )
