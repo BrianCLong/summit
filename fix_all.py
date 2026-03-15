@@ -72,12 +72,7 @@ def fix_package_json(filepath):
     except Exception as e:
         print(f"Error processing {filepath}: {e}")
 
-for root, dirs, files in os.walk('packages'):
-    if 'node_modules' in dirs:
-        dirs.remove('node_modules')
-    if 'package.json' in files:
-        fix_package_json(os.path.join(root, 'package.json'))
-for root, dirs, files in os.walk('apps'):
+for root, dirs, files in os.walk('.'):
     if 'node_modules' in dirs:
         dirs.remove('node_modules')
     if 'package.json' in files:
