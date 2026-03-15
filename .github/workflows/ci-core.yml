@@ -37,6 +37,9 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
@@ -48,6 +51,9 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
@@ -75,6 +81,9 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -102,6 +111,9 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -135,6 +147,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -197,6 +212,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -228,6 +246,9 @@ jobs:
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -275,6 +296,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -302,6 +326,9 @@ jobs:
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -341,6 +368,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -386,6 +416,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -419,6 +452,9 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:

@@ -1,26 +1,25 @@
 # CI Bootstrap Failure Analysis
 
-## Symptoms
-CI workflows occasionally fail with a `git exit 128` error during the bootstrap phase, frequently originating in steps that require full repository history or tags (e.g., standard versioning tools, semantic diffs, git descriptive commands).
+## Issue
+Many CI workflows fail with a `git exit 128` error. This typically occurs during standard versioning, changelog generation, or any operation that requires full git history and tags.
 
-## Diagnosis Steps
-- An audit of the `.github/workflows/` directory indicates roughly 500 instances of `actions/checkout@v4`.
-- The majority omit arguments to `actions/checkout`, resulting in a default shallow fetch (depth=1, without tags).
-- Several shared `.github/workflows/reusable/*.yml` pipelines define common tasks like building, unit testing, and E2E verification, where they also perform shallow clones. As a result, when CI jobs attempt to use standard git tools, they inevitably fail and return a fatal code 128.
+## Root Cause
+The `actions/checkout` action by default fetches only a shallow commit (depth=1). When the CI steps require git history (e.g. for creating changelogs or computing standard versions based on previous tags/commits), git fails with an error `128` because the local repository doesn't have the necessary commits and tags.
 
-## Root Cause Analysis
-Default checkout operations inside GitHub Actions only retrieve a shallow list. When downstream tools such as release tooling or commit history analyzers attempt to run during the build/CI bootstrap phase, the lack of complete history/tags causes git to fail, interrupting the entire CI pipeline. The problem lies specifically in the reusable bootstrap workflows.
+## Fix Matrix
+The fix requires explicitly configuring the `actions/checkout` action to fetch the full history and tags.
+According to our repository guidelines, "To prevent 'git exit 128' errors during CI operations that require git history (e.g., standard versioning, changelog generation), GitHub Actions workflows must specify fetch-depth: 0 and fetch-tags: true when using actions/checkout."
 
-## Proposed Fix Matrix
-1. **Apply universally:** Use `sed` to replace every instance of `actions/checkout@v4` with `fetch-depth: 0` and `fetch-tags: true`. *Con: Slows down CI across hundreds of jobs that don't need it, unnecessarily increases load.*
-2. **Apply explicitly in specific apps:** Define checkout arguments inside each individual application's repository. *Con: Poor maintenance model, doesn't address the shared CI problem.*
-3. **Smallest Central Fix (Recommended):** Directly update the core `.github/workflows/reusable/` pipelines that serve as the CI bootstrap mechanism. By adding `fetch-depth: 0` and `fetch-tags: true` to these central actions (`build-test.yml`, `e2e.yml`, `package.yml`, `security.yml`, `smoke.yml`, `unit.yml`, `sbom.yml`, `policy_opa.yml`, etc.), we provide a unified fix for all apps relying on standard CI without needing to edit unrelated application code.
+| Affected Workflow | Problematic Step | Required Configuration |
+| :--- | :--- | :--- |
+| `.github/workflows/ci-core.yml` | `actions/checkout@v4` | `fetch-depth: 0`, `fetch-tags: true` |
 
-## Implementation Details
-We will patch the `actions/checkout@v4` usages inside `.github/workflows/reusable/*.yml` to explicitly include:
+## Proposed Fix
+We will apply a minimal bootstrap repair by modifying the central `ci-core.yml` workflow, and ensuring `actions/checkout` step includes the required configuration. Since `ci-core.yml` is the primary continuous integration pipeline, applying the fix there provides the smallest central fix.
+
 ```yaml
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
 ```
-This guarantees any application integrating standard reusable workflows receives the complete repository state required to run standard toolchains without encountering a `git exit 128` error.
