@@ -1,8 +1,8 @@
 {
-  "id": "EVID:graphrag:001:abcd",
   "content": "The Summit OS execution harness operates as a deterministic runtime layer for AI agents.",
+  "id": "EVID:graphrag:001:abcd",
   "metadata": {
-    "source": "Summit Architecture Guide v1",
-    "classification": "internal"
+    "classification": "internal",
+    "source": "Summit Architecture Guide v1"
   }
 }

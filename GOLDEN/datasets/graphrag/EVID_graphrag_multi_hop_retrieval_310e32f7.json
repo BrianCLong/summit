@@ -1,9 +1,0 @@
-{
-  "id": "EVID:graphrag:multi_hop_retrieval:310e32f7",
-  "case": "multi_hop_retrieval",
-  "content": "This is some evidence for multi_hop_retrieval test number 13.",
-  "metadata": {
-    "source": "doc_13",
-    "confidence": 0.82
-  }
-}

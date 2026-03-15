@@ -1,0 +1,26 @@
+[
+  {
+    "id": "EVID:tooluse:case1",
+    "required_evidence": [
+      "EVID:tooluse:9048e3d6",
+      "EVID:tooluse:d7c57644"
+    ],
+    "task": "Execute database query using sql_tool"
+  },
+  {
+    "id": "EVID:tooluse:case2",
+    "required_evidence": [
+      "EVID:tooluse:726b539e",
+      "EVID:tooluse:c7b21d87"
+    ],
+    "task": "Fetch external API data using http_get"
+  },
+  {
+    "id": "EVID:tooluse:case3",
+    "required_evidence": [
+      "EVID:tooluse:63833acf",
+      "EVID:tooluse:4dc010b1"
+    ],
+    "task": "Process local file using file_reader"
+  }
+]

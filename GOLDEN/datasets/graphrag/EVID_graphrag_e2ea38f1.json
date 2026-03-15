@@ -1,0 +1,9 @@
+{
+  "case": "EVID:graphrag:case5",
+  "content": "Deterministic evidence for EVID:graphrag:e2ea38f1",
+  "id": "EVID:graphrag:e2ea38f1",
+  "metadata": {
+    "confidence": 0.95,
+    "source": "doc_1"
+  }
+}

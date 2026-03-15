@@ -1,11 +1,13 @@
 {
-  "schema_version": "1.0.0",
-  "tool_name": "search_db",
-  "run_id": "12345-abcde",
   "action": "execute",
-  "parameters": { "query": "test query 4" },
-  "declared_scope": "db:read",
   "data_class": "INTERNAL",
   "decision": "ALLOW",
-  "reason": "Policy matched."
+  "declared_scope": "db:read",
+  "parameters": {
+    "query": "test query 4"
+  },
+  "reason": "Policy matched.",
+  "run_id": "12345-abcde",
+  "schema_version": "1.0.0",
+  "tool_name": "search_db"
 }

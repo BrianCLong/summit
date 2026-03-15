@@ -1,10 +1,10 @@
 {
   "fixtures": [
     {
+      "hash": "sha256:dummysha",
       "id": "EVD-GRAPHRAG-FIXTURE-001",
       "name": "basic-entity-extraction",
-      "path": "basic.json",
-      "hash": "sha256:dummysha"
+      "path": "basic.json"
     }
   ]
 }

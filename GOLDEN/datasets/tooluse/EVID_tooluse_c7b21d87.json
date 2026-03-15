@@ -1,0 +1,9 @@
+{
+  "case": "EVID:tooluse:case2",
+  "content": "Deterministic evidence for EVID:tooluse:c7b21d87",
+  "id": "EVID:tooluse:c7b21d87",
+  "metadata": {
+    "confidence": 0.95,
+    "source": "doc_1"
+  }
+}
