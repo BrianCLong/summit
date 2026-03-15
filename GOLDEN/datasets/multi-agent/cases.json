@@ -1,0 +1,26 @@
+[
+  {
+    "id": "EVID:multi-agent:case1",
+    "required_evidence": [
+      "EVID:multi-agent:0048ce9b",
+      "EVID:multi-agent:706eb21b"
+    ],
+    "task": "Coordinate between Planner and Executor agents"
+  },
+  {
+    "id": "EVID:multi-agent:case2",
+    "required_evidence": [
+      "EVID:multi-agent:af042689",
+      "EVID:multi-agent:cae2f810"
+    ],
+    "task": "Resolve conflict between Critic and Generator"
+  },
+  {
+    "id": "EVID:multi-agent:case3",
+    "required_evidence": [
+      "EVID:multi-agent:b173bc94",
+      "EVID:multi-agent:c7e16a62"
+    ],
+    "task": "Synthesize results from parallel Workers"
+  }
+]

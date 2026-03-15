@@ -1,7 +1,42 @@
 [
   {
     "id": "EVID:graphrag:case1",
-    "task": "Identify relationship between entity A and entity B",
-    "required_evidence": ["EVID:doc123", "EVID:doc456"]
+    "required_evidence": [
+      "EVID:graphrag:2b12b156",
+      "EVID:graphrag:e3d64adf"
+    ],
+    "task": "Find connection between Alpha and Beta"
+  },
+  {
+    "id": "EVID:graphrag:case2",
+    "required_evidence": [
+      "EVID:graphrag:34532630",
+      "EVID:graphrag:29612023"
+    ],
+    "task": "Explain multi-hop reasoning path"
+  },
+  {
+    "id": "EVID:graphrag:case3",
+    "required_evidence": [
+      "EVID:graphrag:6ee210e0",
+      "EVID:graphrag:2da8306e"
+    ],
+    "task": "Resolve conflicting claims from multiple nodes"
+  },
+  {
+    "id": "EVID:graphrag:case4",
+    "required_evidence": [
+      "EVID:graphrag:87771235",
+      "EVID:graphrag:29c5d069"
+    ],
+    "task": "Identify implicit relationships from disconnected subgraphs"
+  },
+  {
+    "id": "EVID:graphrag:case5",
+    "required_evidence": [
+      "EVID:graphrag:19ce0e47",
+      "EVID:graphrag:e2ea38f1"
+    ],
+    "task": "Analyze temporal progression of entities in graph"
   }
 ]

@@ -1,0 +1,9 @@
+{
+  "case": "EVID:multi-agent:case2",
+  "content": "Deterministic evidence for EVID:multi-agent:af042689",
+  "id": "EVID:multi-agent:af042689",
+  "metadata": {
+    "confidence": 0.95,
+    "source": "doc_0"
+  }
+}

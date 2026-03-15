@@ -1,11 +1,43 @@
 {
-  "version": 1,
-  "evidence_id_prefix": "EID-CIG-",
   "campaign": {
-    "name": "Storm-like coordinated narrative surge",
     "cognitive_objective": "CONFUSE",
     "confidence": 0.6,
-    "contested": true
+    "contested": true,
+    "name": "Storm-like coordinated narrative surge"
+  },
+  "evidence_id_prefix": "EID-CIG-",
+  "narratives": [
+    {
+      "channels": [
+        "telegram",
+        "x",
+        "tiktok"
+      ],
+      "claim": "Strike was 'precision engagement' with no civilians harmed",
+      "synthesis_method": "HYBRID",
+      "synthetic_credibility_markers": [
+        "cloned_media_brand",
+        "forged_evidence"
+      ]
+    }
+  ],
+  "responses": {
+    "institutional": [
+      {
+        "evidence_ids": [
+          "EID-CIG-000010"
+        ],
+        "jurisdiction": "BR",
+        "type": "election_court_ruling"
+      }
+    ]
+  },
+  "security": {
+    "never_log": [
+      "raw_handles",
+      "pii",
+      "protected_characteristics"
+    ]
   },
   "targets": [
     {
@@ -17,33 +49,22 @@
       "protectedClass": true
     }
   ],
-  "narratives": [
-    {
-      "claim": "Strike was 'precision engagement' with no civilians harmed",
-      "synthesis_method": "HYBRID",
-      "synthetic_credibility_markers": ["cloned_media_brand", "forged_evidence"],
-      "channels": ["telegram", "x", "tiktok"]
-    }
-  ],
   "tempo": {
-    "trigger_event": {
-      "kind": "KINETIC",
-      "occurred_at": "2026-02-15T12:00:00Z",
-      "evidence_ids": ["EID-CIG-000001"]
+    "rationale_evidence_ids": [
+      "EID-CIG-000002",
+      "EID-CIG-000003"
+    ],
+    "surge_window_hours": {
+      "max": 6,
+      "min": 3
     },
-    "surge_window_hours": { "min": 3, "max": 6 },
-    "rationale_evidence_ids": ["EID-CIG-000002", "EID-CIG-000003"]
+    "trigger_event": {
+      "evidence_ids": [
+        "EID-CIG-000001"
+      ],
+      "kind": "KINETIC",
+      "occurred_at": "2026-02-15T12:00:00Z"
+    }
   },
-  "responses": {
-    "institutional": [
-      {
-        "type": "election_court_ruling",
-        "jurisdiction": "BR",
-        "evidence_ids": ["EID-CIG-000010"]
-      }
-    ]
-  },
-  "security": {
-    "never_log": ["raw_handles", "pii", "protected_characteristics"]
-  }
+  "version": 1
 }

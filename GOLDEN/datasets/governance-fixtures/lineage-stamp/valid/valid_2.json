@@ -1,10 +1,20 @@
 {
-  "schema_version": "1.0.0",
-  "run_id": "test-run-id-2",
   "dataset_id": "test-dataset",
+  "inputs": [
+    {
+      "hash": "abc",
+      "id": "input1"
+    }
+  ],
+  "outputs": [
+    {
+      "hash": "def",
+      "id": "output1"
+    }
+  ],
+  "run_id": "test-run-id-2",
+  "schema_version": "1.0.0",
   "timestamp": "2023-10-01T12:00:00Z",
-  "inputs": [ { "id": "input1", "hash": "abc" } ],
-  "outputs": [ { "id": "output1", "hash": "def" } ],
-  "transform_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "toolchain_version": "v1.2.3"
+  "toolchain_version": "v1.2.3",
+  "transform_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 }
