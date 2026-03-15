@@ -1,10 +1,13 @@
+import shlex
 import subprocess
 import sys
 
 
 def run(cmd):
     print(f"Running: {cmd}")
-    res = subprocess.run(cmd, shell=True)
+    # SEC-CRIT-004: Avoid shell=True to prevent command injection
+    args = shlex.split(cmd)
+    res = subprocess.run(args, shell=False)
     if res.returncode != 0:
         print(f"Command failed with code {res.returncode}")
         return False
