@@ -1,0 +1,252 @@
+[
+  {
+    "session_name": "Agent Performance Analytics",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "API Spec Syncer",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "API Stability Audit",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Artifact Storage Hygiene",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Backpressure Control",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Build Reproducibility enforcer",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "CI Cost Monitor",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "CI Failure Root Cause Eliminator",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Data Schema Drift Detector",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Dependency Graph Sanitizer",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Dependency Risk Monitor",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Dependency Update Safety",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Deployment Safety",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Docstring Coverage Booster",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "E2E Test Stabilization",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Error Budget Dashboard",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Evidence Artifact Validator",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Evidence Graph Builder",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Evolution Ledger",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Feature Flag Hygiene",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Frontier Entropy Monitor",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Frontier Ownership System",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "GA Readiness Report",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "GitHub Actions Optimization",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Golden Path Guardian",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Graph Query Optimization",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Graph Schema Hardening",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "GraphRAG Pipeline Stabilization",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Incident Response Playbook",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Lint Rule Harmonizer",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Merge Queue Guardian",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Multi-Agent Trace Graph",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Multi-Env Infrastructure Audit",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Observability Stack",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Patch Market Prioritizer",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Performance Benchmarking",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Policy Gate Engine",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Post-merge Regression Guard",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "PR Review Helper Scripts",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Provenance Attestation",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Rate Limit Resilience",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Release Notes Generator",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Repo Knowledge Graph",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "RepoOS Telemetry Pipeline",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Retry Strategy Auditor",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "SBOM Integrity",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Secrets Scanner",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Security Audit Report Generator",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Test Flake Eliminator",
+    "status": "orchestrated",
+    "target_branch": "main"
+  },
+  {
+    "session_name": "Timeline Intelligence",
+    "status": "orchestrated",
+    "target_branch": "main"
+  }
+]
