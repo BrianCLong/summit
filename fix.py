@@ -1,27 +1,10 @@
 import re
 
-with open('.github/workflows/parity-check.yml') as f:
+content = ""
+with open("pnpm-workspace.yaml", "r") as f:
     content = f.read()
 
-replacement = """      - name: Setup gcloud
-        if: matrix.cloud == 'gcp'
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_POOL }}/${{ secrets.GCP_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - name: Set up Cloud SDK
-        if: matrix.cloud == 'gcp'
-        uses: google-github-actions/setup-gcloud@v3
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}"""
+content = content.replace("packages:\n  - 'packages/*'\n  - 'services/*'\n  - 'services/*/*'\n  - 'apps/*'\n\n  - 'libs/*'\n\n  - 'tools/*'\n  - 'platform/*'\n  - 'agents/*'\n  - 'cli'\n  - 'client'\n  - 'server'", "packages:\n  - 'packages/*'\n  - 'services/*'\n  - 'services/*/*'\n  - 'apps/*'\n  - 'libs/*'\n  - 'libs/*/*'\n  - 'tools/*'\n  - 'platform/*'\n  - 'agents/*'\n  - 'cli'\n  - 'client'\n  - 'server'")
 
-old = """      - name: Setup gcloud
-        if: matrix.cloud == 'gcp'
-        uses: google-github-actions/setup-gcloud@v3
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}"""
-
-content = content.replace(old, replacement)
-
-with open('.github/workflows/parity-check.yml', 'w') as f:
+with open("pnpm-workspace.yaml", "w") as f:
     f.write(content)
