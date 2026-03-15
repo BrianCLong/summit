@@ -57,7 +57,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v3.0.5'
+          cosign-release: 'v3.1.1'
 
       - name: Sign and attach attestations
         env:

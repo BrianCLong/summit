@@ -158,7 +158,7 @@ jobs:
         if: inputs.sign
         uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: 'v3.0.5'
+          cosign-release: 'v3.1.1'
 
       - name: Sign image (OIDC keyless)
         if: inputs.sign && inputs.push
