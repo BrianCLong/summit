@@ -1,3 +1,10 @@
+const environment = process.env.NODE_ENV || 'development';
+const jwtSecret = process.env.JWT_SECRET;
+
+if (!jwtSecret && environment === 'production') {
+  throw new Error('SecurityError: JWT_SECRET missing in production');
+}
+
 export const config = {
   server: {
     port: parseInt(process.env.ANALYTICS_ENGINE_PORT || '4004'),
@@ -64,7 +71,7 @@ export const config = {
   },
 
   auth: {
-    jwtSecret: process.env.JWT_SECRET || 'analytics-engine-secret',
+    jwtSecret: jwtSecret || 'analytics-engine-secret',
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
   },
 
