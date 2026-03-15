@@ -1,0 +1,52 @@
+name: Hourly Repo Monitoring
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8.15.5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run CI Health
+        run: node --experimental-strip-types scripts/monitoring/ci_health.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Determinism Drift
+        run: node --experimental-strip-types scripts/monitoring/determinism_drift.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Repo Entropy
+        run: node --experimental-strip-types scripts/monitoring/repo_entropy.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Security Drift
+        run: node --experimental-strip-types scripts/monitoring/security_drift.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Monitoring Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-artifacts
+          path: artifacts/monitoring/*.json
