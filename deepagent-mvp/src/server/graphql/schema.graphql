@@ -20,6 +20,20 @@ type Tool {
   enabled: Boolean!
 }
 
+type StrategyCandidate {
+  id: ID!
+  label: String!
+  confidence: Float!
+  rationale: String!
+  nextAction: String!
+}
+
+type RunStrategy {
+  recommended: StrategyCandidate!
+  candidates: [StrategyCandidate!]!
+  generatedAt: String!
+}
+
 input StartRunInput {
   task: String!
   goalHints: [String!]
@@ -37,6 +51,7 @@ input RegisterToolInput {
 
 type Query {
   run(id: ID!): AgentRun
+  runStrategy(runId: ID!, task: String!, goalHints: [String!]): RunStrategy!
 }
 
 type Mutation {

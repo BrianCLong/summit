@@ -3,6 +3,7 @@ import { AgentLoop } from '../../agent/loop';
 import { ToolRegistry } from '../../tools/registry';
 import { MemoryStore } from '../../agent/memory/store';
 import { AuthContext } from '../auth';
+import { StrategyEngine } from '../../agent/reasoning/strategy-engine';
 
 const pubsub = new PubSub();
 
@@ -15,6 +16,16 @@ export const resolvers = {
       // This is a simplified status. A real implementation would store the status in the database.
       const status = workingMemory ? 'COMPLETED' : 'IN_PROGRESS';
       return { id, status, events: events.map(e => e.event_json) };
+    },
+    runStrategy: async (
+      _: any,
+      { runId, task, goalHints }: { runId: string; task: string; goalHints?: string[] },
+      context: AuthContext
+    ) => {
+      const memoryStore = new MemoryStore();
+      const strategyEngine = new StrategyEngine();
+      const events = await memoryStore.getEpisodicMemory(context.tenantId, runId);
+      return strategyEngine.assess(task, goalHints ?? [], events);
     },
   },
   Mutation: {
