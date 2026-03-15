@@ -5,12 +5,14 @@ const addFormats = (addFormatsModule as any).default || addFormatsModule;
 import culturalRealitySchema from "../schema/culturalReality.schema.json" with { type: "json" };
 import narrativeSignalSchema from "../schema/narrativeSignal.schema.json" with { type: "json" };
 import linguisticFingerprintSchema from "../schema/linguisticFingerprint.schema.json" with { type: "json" };
+import civilizationRealitySchema from "../schema/civilizationReality.schema.json" with { type: "json" };
 
 export interface CulturalValidators {
   ajv: typeof Ajv;
   populationValidator: ValidateFunction;
   narrativeValidator: ValidateFunction;
   fingerprintValidator: ValidateFunction;
+  civilizationValidator: ValidateFunction;
 }
 
 export function loadCulturalValidators(): CulturalValidators {
@@ -23,6 +25,7 @@ export function loadCulturalValidators(): CulturalValidators {
   ajv.addSchema(culturalRealitySchema);
   ajv.addSchema(narrativeSignalSchema);
   ajv.addSchema(linguisticFingerprintSchema);
+  ajv.addSchema(civilizationRealitySchema);
 
   const populationValidator = ajv.getSchema(
     "https://summit.local/schema/culturalReality.schema.json"
@@ -33,8 +36,11 @@ export function loadCulturalValidators(): CulturalValidators {
   const fingerprintValidator = ajv.getSchema(
     "https://summit.local/schema/linguisticFingerprint.schema.json"
   );
+  const civilizationValidator = ajv.getSchema(
+    "https://summit.local/schema/civilizationReality.schema.json"
+  );
 
-  if (!populationValidator || !narrativeValidator || !fingerprintValidator) {
+  if (!populationValidator || !narrativeValidator || !fingerprintValidator || !civilizationValidator) {
     throw new Error("Failed to compile one or more cultural validators");
   }
 
@@ -42,6 +48,7 @@ export function loadCulturalValidators(): CulturalValidators {
     ajv,
     populationValidator,
     narrativeValidator,
-    fingerprintValidator
+    fingerprintValidator,
+    civilizationValidator
   };
 }

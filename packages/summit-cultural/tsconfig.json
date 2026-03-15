@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-<<<<<<< HEAD
+    "forceConsistentCasingInFileNames": true,
     "types": []
   },
   "include": [
@@ -19,12 +19,8 @@
     "src/**/*.json"
   ],
   "exclude": [
+    "dist",
+    "node_modules",
     "src/golden-tests/**/*.ts"
   ]
-=======
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules"]
->>>>>>> origin/main
 }

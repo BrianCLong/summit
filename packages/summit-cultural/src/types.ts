@@ -85,8 +85,19 @@ export interface DiffusionMap {
   };
 }
 
+export interface CivilizationGroup {
+  id: NodeId;
+  name: string;
+  historicalNarratives?: string[];
+  mythicSymbols?: string[];
+  identityMemories?: string[];
+  longTermValueSystems?: string[];
+  metadata?: Record<string, unknown>;
+}
+
 export interface CulturalGraphSnapshot {
   populations: PopulationGroup[];
   narratives: NarrativeSignal[];
   fingerprints: LinguisticFingerprint[];
+  civilizations?: CivilizationGroup[];
 }
