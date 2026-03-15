@@ -1,0 +1,13 @@
+{
+  "content": "The backend system requires tool configuration to include an exponential backoff strategy when dealing with intermittent 503 errors.",
+  "id": "EVID:tooluse:doc1",
+  "injected_fault": {
+    "error_type": "HTTP_503",
+    "probability": 0.8
+  },
+  "required_tool_args": {
+    "backoff_factor": 2,
+    "max_retries": 3
+  },
+  "timestamp": "2026-03-15T00:00:00Z"
+}

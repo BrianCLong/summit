@@ -1,0 +1,9 @@
+[
+  {
+    "id": "EVID:multi_agent:doc1",
+    "task": "Coordinate between researcher and writer to summarize the dual-domain research",
+    "required_evidence": [
+      "EVID:multi_agent:doc1"
+    ]
+  }
+]
