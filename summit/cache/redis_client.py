@@ -14,6 +14,26 @@ from summit.flags import REDIS_CACHE_ENABLED
 
 logger = logging.getLogger(__name__)
 
+class DummyPipeline:
+    def __init__(self):
+        self.commands = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        pass
+
+    def execute(self):
+        return []
+
+    def __getattr__(self, name):
+        def method(*args, **kwargs):
+            self.commands.append((name, args, kwargs))
+            return self
+        return method
+
+
 class RedisClient:
     _instances = {}
 
@@ -129,9 +149,58 @@ class RedisClient:
 
     def pipeline(self):
         if not self.enabled:
-            return None
+            return DummyPipeline()
         try:
             return self.client.pipeline()
         except redis.RedisError as e:
             logger.error(f"Redis pipeline error: {e}")
             return None
+
+    def mget(self, keys: list[str]) -> list[Optional[Any]]:
+        if not self.enabled or not keys:
+            return [None] * len(keys)
+        try:
+            values = self.client.mget(keys)
+            parsed_values = []
+            for value in values:
+                if value:
+                    try:
+                        parsed_values.append(json.loads(value))
+                    except json.JSONDecodeError:
+                        parsed_values.append(value)
+                else:
+                    parsed_values.append(None)
+            return parsed_values
+        except redis.RedisError as e:
+            logger.error(f"Redis mget error for keys {keys}: {e}")
+            return [None] * len(keys)
+
+    def mset(self, mapping: dict[str, Any], ttl: Optional[int] = None) -> bool:
+        if not self.enabled or not mapping:
+            return False
+        try:
+            encoded_mapping = {
+                k: json.dumps(v) if isinstance(v, (dict, list)) else v
+                for k, v in mapping.items()
+            }
+            if ttl is not None:
+                pipe = self.client.pipeline()
+                pipe.mset(encoded_mapping)
+                for key in mapping.keys():
+                    pipe.expire(key, ttl)
+                pipe.execute()
+                return True
+            else:
+                return self.client.mset(encoded_mapping)
+        except redis.RedisError as e:
+            logger.error(f"Redis mset error: {e}")
+            return False
+
+    def ttl(self, key: str) -> int:
+        if not self.enabled:
+            return -2
+        try:
+            return self.client.ttl(key)
+        except redis.RedisError as e:
+            logger.error(f"Redis ttl error for key {key}: {e}")
+            return -2
