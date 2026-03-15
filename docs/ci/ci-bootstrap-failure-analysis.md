@@ -1,30 +1,26 @@
-# CI Bootstrap Failure Analysis (Git exit code 128)
+# CI Bootstrap Failure Analysis
 
-## 1. Root Cause Analysis
+## Symptoms
+CI workflows occasionally fail with a `git exit 128` error during the bootstrap phase, frequently originating in steps that require full repository history or tags (e.g., standard versioning tools, semantic diffs, git descriptive commands).
 
-Across multiple active PRs and sessions, `git` commands executed within GitHub Actions are consistently failing with **exit code 128**.
+## Diagnosis Steps
+- An audit of the `.github/workflows/` directory indicates roughly 500 instances of `actions/checkout@v4`.
+- The majority omit arguments to `actions/checkout`, resulting in a default shallow fetch (depth=1, without tags).
+- Several shared `.github/workflows/reusable/*.yml` pipelines define common tasks like building, unit testing, and E2E verification, where they also perform shallow clones. As a result, when CI jobs attempt to use standard git tools, they inevitably fail and return a fatal code 128.
 
-Based on reviewing `.github/workflows` and related automation scripts (like the recently merged `branch-ownership.yml` / `branch_ownership_enforcer.ts`), the common denominator for `exit code 128` during PRs using `actions/checkout` or subsequent `git diff` / `git rev-parse` commands revolves around running git commands in a shallow clone or detached head state without appropriate configurations or depth.
+## Root Cause Analysis
+Default checkout operations inside GitHub Actions only retrieve a shallow list. When downstream tools such as release tooling or commit history analyzers attempt to run during the build/CI bootstrap phase, the lack of complete history/tags causes git to fail, interrupting the entire CI pipeline. The problem lies specifically in the reusable bootstrap workflows.
 
-1. **Missing History / Shallow Clones (`fetch-depth`)**:
-   By default, `actions/checkout@v4` fetches only a single commit (depth 1).
-   Any script running `git diff HEAD~1 HEAD` or attempting to traverse history, such as `branch_ownership_enforcer.ts` in the `branch-ownership.yml` workflow, will fail with code 128 if the commit `HEAD~1` is not fetched.
+## Proposed Fix Matrix
+1. **Apply universally:** Use `sed` to replace every instance of `actions/checkout@v4` with `fetch-depth: 0` and `fetch-tags: true`. *Con: Slows down CI across hundreds of jobs that don't need it, unnecessarily increases load.*
+2. **Apply explicitly in specific apps:** Define checkout arguments inside each individual application's repository. *Con: Poor maintenance model, doesn't address the shared CI problem.*
+3. **Smallest Central Fix (Recommended):** Directly update the core `.github/workflows/reusable/` pipelines that serve as the CI bootstrap mechanism. By adding `fetch-depth: 0` and `fetch-tags: true` to these central actions (`build-test.yml`, `e2e.yml`, `package.yml`, `security.yml`, `smoke.yml`, `unit.yml`, `sbom.yml`, `policy_opa.yml`, etc.), we provide a unified fix for all apps relying on standard CI without needing to edit unrelated application code.
 
-2. **Detached HEAD**:
-   In `pull_request` events, GitHub actions check out a merge commit (a detached head `refs/pull/PR_NUMBER/merge`). A naive script attempting to run `git rev-parse --abbrev-ref HEAD` will return `HEAD` and might fail or crash logic down the line. It won't directly return `128` unless passing that to another command, but `git diff HEAD~1 HEAD` will fail with code 128 if the tree is detached or shallow.
-
-3. **Workspace Issues**:
-   If actions run `make bootstrap` outside the checkout directory, or if scripts implicitly assume git is configured to trust the directory (`git config --global --add safe.directory *`), git throws 128 "fatal: dubious ownership in repository" or similar workspace errors.
-
-## 2. Fix Matrix by Workflow Family
-
-| Workflow / Script | Failure Point | Required Fix |
-|-------------------|-----------------------------|----------------------------------------------------|
-| `scripts/governance/branch_ownership_enforcer.ts` | `git diff --name-only HEAD~1 HEAD` | In PRs, diff against `origin/$GITHUB_BASE_REF` instead of `HEAD~1`, since `HEAD~1` on a detached PR merge commit may refer to an arbitrary base commit or fail. |
-| workflows using `actions/checkout` requiring diffs | `git` diff commands fail | Ensure `fetch-depth: 0` is set if history traversal is needed, OR strictly fetch the base ref explicitly. |
-| Workflows modifying git config | `git config` failures | Add `git config --global --add safe.directory '*'` for scripts executing within Docker containers or alternate users. |
-
-## 3. Recommended Minimal Fix
-
-1. Update `scripts/governance/branch_ownership_enforcer.ts` to properly identify changed files for PRs using GitHub context/API or a safer Git comparison (`git diff --name-only origin/${process.env.GITHUB_BASE_REF} HEAD`).
-2. Alternatively, switch file change detection in PR-related TS scripts to use `gh pr diff --name-only` or `@actions/github` instead of raw git commands to avoid checkout state edge cases.
+## Implementation Details
+We will patch the `actions/checkout@v4` usages inside `.github/workflows/reusable/*.yml` to explicitly include:
+```yaml
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+```
+This guarantees any application integrating standard reusable workflows receives the complete repository state required to run standard toolchains without encountering a `git exit 128` error.

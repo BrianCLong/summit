@@ -26,8 +26,8 @@
     "graphql": "16.12.0",
     "@tanstack/react-query": "5.8.4",
     "electron-store": "10.0.0",
-    "electron-updater": "6.8.3",
-    "electron-log": "5.4.3"
+    "electron-updater": "6.3.10",
+    "electron-log": "5.2.6"
   },
   "devDependencies": {
     "@types/node": "20.19.27",

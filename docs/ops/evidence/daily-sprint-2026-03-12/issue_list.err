@@ -1,0 +1,4 @@
+error connecting to api.github.com
+check your internet connection or https://githubstatus.com
+
+[attempt 3/3] command failed: gh issue list --repo BrianCLong/summit --state open --limit 200 --json number,title,updatedAt,url,labels,author

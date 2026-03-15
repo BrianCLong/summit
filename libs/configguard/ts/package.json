@@ -27,5 +27,28 @@
     "yaml": "2.6.0"
   },
   "devDependencies": {
+<<<<<<< HEAD
+    @types/jest: "29.5.14",
+    @types/node: "22.10.1",
+    chalk: "5.3.0",
+    ts-jest: "29.2.6",
+    typescript: "5.7.3"
+=======
+<<<<<<< HEAD
+    fast-glob: "3.3.2",
+    @types/jest: "29.5.14",
+    @types/node: "22.10.1",
+    chalk: "5.3.0",
+    ts-jest: "29.2.6",
+    typescript: "5.7.3"
+=======
+    "@types/fast-glob": "3.2.13",
+    "@types/jest": "29.5.14",
+    "@types/node": "22.10.1",
+    "chalk": "5.3.0",
+    "ts-jest": "29.2.6",
+    "typescript": "5.7.3"
+>>>>>>> origin/main
+>>>>>>> origin/main
   }
 }
