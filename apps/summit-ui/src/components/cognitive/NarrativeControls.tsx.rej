@@ -1,0 +1,35 @@
+--- NarrativeControls.tsx
++++ NarrativeControls.tsx
+@@ -106,8 +106,8 @@
+         <div className="pt-2 border-t border-gray-100">
+           <div className="flex items-center justify-between">
+             <div className="flex items-center space-x-2">
+-              <label className="text-sm font-medium text-gray-700">Filter Noise</label>
+-              <input
++              <label htmlFor="filter-noise" className="text-sm font-medium text-gray-700">Filter Noise</label>
++              <input id="filter-noise"
+                 type="checkbox"
+                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                 onChange={(e) => {}}
+@@ -115,8 +115,8 @@
+             </div>
+
+             <div className="flex items-center space-x-2">
+-              <label className="text-sm font-medium text-gray-700">Auto-Expand</label>
+-              <input
++              <label htmlFor="auto-expand" className="text-sm font-medium text-gray-700">Auto-Expand</label>
++              <input id="auto-expand"
+                 type="checkbox"
+                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                 defaultChecked
+@@ -124,8 +124,8 @@
+             </div>
+
+             <div className="flex items-center space-x-2">
+-              <label className="text-sm font-medium text-gray-700">Group Related</label>
+-              <input
++              <label htmlFor="group-related" className="text-sm font-medium text-gray-700">Group Related</label>
++              <input id="group-related"
+                 type="checkbox"
+                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                 onChange={(e) => {}}

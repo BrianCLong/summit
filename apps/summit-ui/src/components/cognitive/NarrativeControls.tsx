@@ -21,8 +21,9 @@ export function NarrativeControls(props: {
   return (
     <div className="rounded-2xl border p-4 flex flex-col md:flex-row gap-3 md:items-end">
       <div className="flex-1">
-        <label className="text-sm font-medium block mb-1">Narrative ID</label>
+        <label htmlFor="narrativeId" className="text-sm font-medium block mb-1">Narrative ID</label>
         <input
+          id="narrativeId"
           className="border rounded-xl px-3 py-2 w-full"
           value={props.narrativeId}
           onChange={(e) => props.onNarrativeIdChange(e.target.value)}
@@ -31,8 +32,9 @@ export function NarrativeControls(props: {
       </div>
 
       <div className="w-full md:w-48">
-        <label className="text-sm font-medium block mb-1">Time bucket</label>
+        <label htmlFor="timeBucket" className="text-sm font-medium block mb-1">Time bucket</label>
         <select
+          id="timeBucket"
           className="border rounded-xl px-3 py-2 w-full"
           value={props.timeBucket}
           onChange={(e) => props.onTimeBucketChange(e.target.value)}
