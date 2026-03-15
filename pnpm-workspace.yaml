@@ -5,7 +5,6 @@ packages:
   - 'apps/*'
   - 'libs/*/*'
   - 'libs/*'
-  - 'libs/*/*'
   - 'tools/*'
   - 'platform/*'
   - 'agents/*'

@@ -84,11 +84,11 @@ jobs:
           echo "Integration Tests: ${{ needs.integration-tests.result }}"
           echo "Lint/Type Check: ${{ needs.lint-tests.result }}"
           echo "Security: ${{ needs.security.result }}"
-          
+
           # Fail if any critical job failed
           if [[ "${{ needs.unit-tests.result }}" == "failure" || "${{ needs.security.result }}" == "failure" ]]; then
             echo "❌ Critical CI jobs failed"
             exit 1
           fi
-          
+
           echo "✅ CI pipeline completed successfully"

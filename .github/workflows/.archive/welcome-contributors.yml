@@ -24,7 +24,7 @@ jobs:
             const isPR = !!pr;
             const number = issue?.number || pr?.number;
             const author = issue?.user.login || pr?.user.login;
-            
+
             // Check if this is the user's first contribution
             const { data: contributions } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -33,19 +33,19 @@ jobs:
               state: 'all',
               per_page: 100
             });
-            
+
             const prContributions = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'all',
               per_page: 100
             });
-            
+
             const userPRs = prContributions.data.filter(p => p.user.login === author);
-            
+
             const isFirstIssue = contributions.length === 1 && isIssue;
             const isFirstPR = userPRs.length === 1 && isPR;
-            
+
             if (isFirstIssue) {
               const welcomeMessage = `👋 Welcome to Summit, @${author}!
 
@@ -70,14 +70,14 @@ Thank you for opening your first issue! We're excited to have you contribute to 
 - [Documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/main/docs)
 
 Welcome aboard! 🚀`;
-              
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: number,
                 body: welcomeMessage
               });
-              
+
               // Add first-time label
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
@@ -86,7 +86,7 @@ Welcome aboard! 🚀`;
                 labels: ['first-time-contributor']
               });
             }
-            
+
             if (isFirstPR) {
               const welcomeMessage = `🎉 Congratulations on your first Pull Request to Summit, @${author}!
 
@@ -102,7 +102,7 @@ Thank you for contributing! We're thrilled to have you as part of the community.
 ### Tips for success
 
 - Ensure all tests pass
-- Respond to review comments promptly  
+- Respond to review comments promptly
 - Keep your PR focused on a single change
 - Update documentation if needed
 - Be patient - reviews may take a few days
@@ -114,14 +114,14 @@ Thank you for contributing! We're thrilled to have you as part of the community.
 - [PR Template](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/.github/PULL_REQUEST_TEMPLATE.md)
 
 Thank you for making Summit better! 🌟`;
-              
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: number,
                 body: welcomeMessage
               });
-              
+
               // Add first-time label
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,

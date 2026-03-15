@@ -17,13 +17,13 @@ jobs:
         uses: dorny/paths-filter@4512585
         with:
           filters: |
-            client: 
+            client:
               - 'client/**'
               - 'client/Dockerfile.prod'
-            server: 
+            server:
               - 'server/**'
               - 'server/Dockerfile.prod'
-            dockerfile: 
+            dockerfile:
               - '**/Dockerfile*'
 
       - name: Docker metadata

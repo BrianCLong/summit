@@ -57,8 +57,8 @@ jobs:
 Metrics API unavailable for org **${org}**.
 
 - Ensure Copilot Enterprise is enabled
-- Provide 
-`COPILOT_REPORT_TOKEN` with 
+- Provide
+`COPILOT_REPORT_TOKEN` with
 `read:org` scope
 `);
               return;
@@ -81,7 +81,7 @@ Metrics API unavailable for org **${org}**.
             const now = new Date().toISOString().slice(0,10);
             let md = `# Copilot Adoption Report
 
-Org: **${org}**  
+Org: **${org}**
 Generated: **${now} (UTC)**
 
 `;
@@ -134,9 +134,9 @@ Generated: **${now} (UTC)**
             // Guidance
             md += `
 ## Guidance & Next Steps
-- Capture “golden prompts” wins in 
+- Capture “golden prompts” wins in
 `docs/Copilot-Playbook.md`
-- Nudge low-usage teams to try PR commands: 
+- Nudge low-usage teams to try PR commands:
 `/explain-changes`
 `/generate-tests`
 - Tie Edits to CI gates (lint/test/opa/k6) for instant feedback

@@ -22,12 +22,12 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          
+
       - name: Setup git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
       - name: Get open PRs
         id: get-prs
         env:
@@ -36,31 +36,31 @@ jobs:
           # Get first 50 open PRs (can be increased)
           gh pr list --limit 50 --json number,headRefName,mergeable --jq '.[] | select(.mergeable == "MERGEABLE") | "\(.number):\(.headRefName)"' > prs.txt
           echo "Found $(wc -l < prs.txt) mergeable PRs"
-          
+
       - name: Update workflow files in PR branches
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           while IFS=: read -r pr_number branch_name; do
             echo "Processing PR #$pr_number on branch $branch_name"
-            
+
             # Fetch the PR branch
             git fetch origin "$branch_name" || continue
             git checkout -b "update-$branch_name" "origin/$branch_name" || continue
-            
+
             # Copy workflow files from main
             git checkout main -- .github/workflows/_reusable-ci-fast.yml
             git checkout main -- .github/workflows/_reusable-ci-perf.yml
             git checkout main -- .github/workflows/_reusable-toolchain-setup.yml
             git checkout main -- .husky/_/h
-            
+
             # Check if there are changes
             if git diff --quiet; then
               echo "No workflow changes needed for PR #$pr_number"
               git checkout main
               continue
             fi
-            
+
             # Commit and push
             git add .github/workflows/*.yml .husky/_/h
             git commit -m "chore(ci): update workflow files from main
@@ -68,20 +68,20 @@ jobs:
 Auto-updated by merge train to fix CI issues.
 
 [skip ci]" || continue
-            
+
             git push origin "update-$branch_name:$branch_name" || {
               echo "Failed to push to PR #$pr_number, may need manual intervention"
             }
-            
+
             git checkout main
-            
+
             # Limit to 10 PRs per run to avoid rate limits
             if [ $(git branch -a | grep update- | wc -l) -ge 10 ]; then
               echo "Updated 10 PRs, stopping to avoid rate limits"
               break
             fi
           done < prs.txt
-          
+
       - name: Clean up temp branches
         run: |
           git branch | grep update- | xargs -r git branch -D || true
@@ -93,7 +93,7 @@ Auto-updated by merge train to fix CI issues.
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Find and merge passing PRs
         env:
           GH_TOKEN: ${{ github.token }}
@@ -101,21 +101,21 @@ Auto-updated by merge train to fix CI issues.
           # Get PRs that are mergeable and have all checks passing
           gh pr list --limit 100 --json number,title,mergeable,statusCheckRollup \
             --jq '.[] | select(.mergeable == "MERGEABLE") | select(all(.statusCheckRollup[]?; .conclusion == "SUCCESS" or .conclusion == "SKIPPED" or .conclusion == "NEUTRAL")) | .number' > ready_prs.txt
-          
+
           if [ ! -s ready_prs.txt ]; then
             echo "No PRs ready to merge yet"
             exit 0
           fi
-          
+
           echo "Found $(wc -l < ready_prs.txt) PRs ready to merge"
-          
+
           # Merge PRs one at a time
           while read -r pr_number; do
             echo "Attempting to merge PR #$pr_number"
             gh pr merge "$pr_number" --auto --squash --delete-branch || {
               echo "Failed to auto-merge PR #$pr_number, may need manual review"
             }
-            
+
             # Wait a bit between merges
             sleep 10
           done < ready_prs.txt

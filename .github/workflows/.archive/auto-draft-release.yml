@@ -41,7 +41,7 @@ jobs:
             echo "## Release Notes" > release-notes.md
             git log --pretty=format:"- %s (%h)" HEAD~10..HEAD >> release-notes.md
           fi
-          
+
       - name: Get version
         id: version
         run: echo "value=v$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT

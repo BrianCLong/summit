@@ -26,9 +26,9 @@ jobs:
         run: if [ -f server/package.json ]; then (cd server && npm ci || npm install); fi
       - name: Install Python dependencies
         run: |
-          if [ -f python/pyproject.toml ]; then 
+          if [ -f python/pyproject.toml ]; then
             pip install poetry
-            (cd python && poetry install --no-interaction --no-ansi); 
+            (cd python && poetry install --no-interaction --no-ansi);
           fi
       - name: Run ESLint
         run: npm run lint

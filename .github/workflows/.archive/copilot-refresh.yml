@@ -46,11 +46,11 @@ jobs:
             echo ""
             echo "## Suggested Copilot Chat prompts"
             echo ""
-            echo "1. 
+            echo "1.
 /index repository for context"
-            echo "2. 
+            echo "2.
 /summarize docs & scaffolds changes in this commit"
-            echo "3. 
+            echo "3.
 /list new or modified OPA policies and generate tests"
           } > copilot-context-delta.md
 

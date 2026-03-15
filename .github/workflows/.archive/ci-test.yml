@@ -25,7 +25,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-          
+
       neo4j:
         image: neo4j:4.4-enterprise
         env:
@@ -42,7 +42,7 @@ jobs:
         ports:
           - 7474:7474
           - 7687:7687
-          
+
       redis:
         image: redis:7-alpine
         options: >-
@@ -62,11 +62,11 @@ jobs:
       uses: dorny/paths-filter@4512585
       with:
         filters: |
-          client: 
+          client:
             - 'client/**'
-          server: 
+          server:
             - 'server/**'
-          python: 
+          python:
             - 'python/**'
 
     - name: Setup Node.js
@@ -103,7 +103,7 @@ jobs:
     - name: Setup test database
       run: |
         PGPASSWORD=test_password psql -h localhost -U test_user -d intelgraph_test -f server/src/database/init.sql || true
-        
+
     - name: Setup test Neo4j constraints
       run: |
         cypher-shell -a bolt://localhost:7687 -u neo4j -p test_password -f server/src/database/multimodalConstraints.cypher || true
@@ -142,7 +142,7 @@ jobs:
 
     - name: Run Python ML tests
       uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868
-      with: 
+      with:
         python-version: '3.12'
       - name: Install Poetry
         run: pip install poetry

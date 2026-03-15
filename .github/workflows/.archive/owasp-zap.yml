@@ -56,7 +56,7 @@ jobs:
           cd apps/web
           pnpm run start &
           echo $! > /tmp/web-app.pid
-          
+
           # Wait for app to be ready
           timeout 60 bash -c 'until curl -f http://localhost:3000/health 2>/dev/null; do sleep 2; done' || echo "Health check skipped"
 
@@ -118,7 +118,7 @@ jobs:
           cd apps/mobile-interface
           pnpm run start &
           echo $! > /tmp/mobile-app.pid
-          
+
           # Wait for app to be ready
           timeout 60 bash -c 'until curl -f http://localhost:3001/health 2>/dev/null; do sleep 2; done' || echo "Health check skipped"
 
@@ -195,7 +195,7 @@ jobs:
           cd server
           pnpm run start &
           echo $! > /tmp/api-server.pid
-          
+
           # Wait for API to be ready
           timeout 60 bash -c 'until curl -f http://localhost:4000/health 2>/dev/null; do sleep 2; done'
         env:

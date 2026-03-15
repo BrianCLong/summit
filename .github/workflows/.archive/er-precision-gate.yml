@@ -136,16 +136,16 @@ jobs:
 
             if (fs.existsSync(metricsFile)) {
               const metrics = JSON.parse(fs.readFileSync(metricsFile, 'utf8'));
-              
+
               const status = metrics.meetsThreshold ? '✅ PASS' : '❌ FAIL';
               const precision = (metrics.precision * 100).toFixed(2);
               const threshold = (metrics.threshold * 100).toFixed(1);
-              
+
               comment += `**Status**: ${status}\n`;
               comment += `**Precision**: ${precision}% (Required: ${threshold}%)\n`;
               comment += `**Sample Size**: ${metrics.sampleSize}\n`;
               comment += `**F1 Score**: ${(metrics.f1Score * 100).toFixed(2)}%\n\n`;
-              
+
               if (metrics.meetsThreshold) {
                 comment += `🚀 **GA Core Ready** - ER precision meets requirements\n`;
               } else {
@@ -233,7 +233,7 @@ jobs:
               conclusion: success ? 'success' : 'failure',
               output: {
                 title: success ? 'GA Core ER Requirements Met' : 'GA Core ER Requirements Failed',
-                summary: success ? 
+                summary: success ?
                   '✅ All entity types meet precision thresholds for GA Core release' :
                   '❌ Entity Resolution precision below GA Core thresholds'
               }
