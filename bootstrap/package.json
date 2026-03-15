@@ -20,6 +20,6 @@
     "@types/js-yaml": "4.0.9",
     "@types/fs-extra": "11.0.4",
     "tsx": "4.7.0",
-    "typescript": "5.3.0"
+    "typescript": "^5.3.3"
   }
 }
