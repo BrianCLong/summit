@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-export * from './culturalGraph.js';
-export * from './diffusionEngine.js';
-export * from './narrativeCompatibility.js';
-=======
 export * from "./types.js";
 export * from "./culturalGraph.js";
 export * from "./narrativeCompatibility.js";
@@ -16,4 +11,3 @@ export * from "./geo/h3ToGeoJson.js";
 export * from "./validation/loadValidators.js";
 export * from "./validation/validateFixtures.js";
 export * from "./fixtures/loadFixtures.js";
->>>>>>> origin/main

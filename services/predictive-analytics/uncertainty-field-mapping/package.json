@@ -25,102 +25,66 @@
   "author": "IntelGraph Team",
   "license": "PROPRIETARY",
   "dependencies": {
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
     "@apollo/server": "4.11.3",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.13.0",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.13.0",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
-=======
-<<<<<<< HEAD
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
+    "@apollo/server": "4.11.3",
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
+    "@apollo/server": "4.11.0",
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
+    "@apollo/server": "4.13.0",
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
+    "@apollo/server": "4.13.0",
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
+    "@apollo/server": "4.11.3",
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
+    "@apollo/server": "4.11.0",
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
+    "@apollo/server": "4.11.0",
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
+    "@apollo/server": "4.11.3",
+    "graphql": "16.8.1",
+    "winston": "3.11.0",
+    "date-fns": "2.30.0",
+    "uuid": "9.0.1",
+    "lodash-es": "4.17.21"
     "@apollo/server": "4.16.0",
     "graphql": "16.8.1",
     "winston": "3.11.0",
     "date-fns": "2.30.0",
     "uuid": "9.0.1",
     "lodash-es": "4.17.21"
-=======
-    "@apollo/server": "4.11.3",
-    graphql: "16.8.1",
-    winston: "3.11.0",
-    date-fns: "2.30.0",
-    uuid: "9.0.1",
-    lodash-es: "4.17.21"
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
   },
   "devDependencies": {
     "@types/jest": "29.5.10",
