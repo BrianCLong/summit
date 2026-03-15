@@ -1,38 +1,86 @@
 [
   {
-    "id": "EVAL-COMP-001",
-    "completeness_score": 0.9142857142857143,
-    "omission_rate": 0.4285714285714286,
-    "details": {
+    "query": "How does Summit handle multi-agent orchestration and what are the security implications?",
+    "answer": "Summit uses Maestro Conductor for multi-agent orchestration, ensuring shared state via IntelGraph. Security is handled by Cosmos gateway policies.",
+    "expected_entities": [
+      "Maestro Conductor",
+      "IntelGraph",
+      "Cosmos"
+    ],
+    "sub_questions": [
+      {
+        "q": "How is orchestration handled?",
+        "keywords": [
+          "Maestro",
+          "orchestration"
+        ]
+      },
+      {
+        "q": "What are security implications?",
+        "keywords": [
+          "security",
+          "Cosmos",
+          "policy"
+        ]
+      }
+    ],
+    "context_requirements": [
+      "Maestro Conductor",
+      "Cosmos gateway policies"
+    ],
+    "relationship_requirements": [
+      {
+        "source": "Maestro Conductor",
+        "relation": "uses",
+        "target": "IntelGraph"
+      }
+    ],
+    "completeness_score": 1.0,
+    "omission_rate": 0.0,
+    "metrics": {
       "entity_coverage": 1.0,
-      "sub_question_coverage": 1.0,
-      "critical_context_score": 0.5714285714285714,
+      "subquestion_addressing": 1.0,
+      "context_preservation": 1.0,
       "length_calibration": 1.0,
       "relationship_surfacing": 1.0
     }
   },
   {
-    "id": "EVAL-COMP-002",
-    "completeness_score": 0.5552380952380952,
-    "omission_rate": 1.0,
-    "details": {
-      "entity_coverage": 0.3333333333333333,
-      "sub_question_coverage": 1.0,
-      "critical_context_score": 0.0,
-      "length_calibration": 0.44285714285714284,
-      "relationship_surfacing": 1.0
-    }
-  },
-  {
-    "id": "EVAL-COMP-003",
-    "completeness_score": 0.7150000000000001,
-    "omission_rate": 0.8,
-    "details": {
-      "entity_coverage": 0.375,
-      "sub_question_coverage": 1.0,
-      "critical_context_score": 0.2,
+    "query": "What are the core agentic primitives in Summit?",
+    "answer": "The core primitives include Workspace, Run, Plan, Step, and Artifact, all implemented in summit/core/agentic/types.ts.",
+    "expected_entities": [
+      "Workspace",
+      "Run",
+      "Plan",
+      "Step",
+      "Artifact"
+    ],
+    "sub_questions": [
+      {
+        "q": "List core primitives",
+        "keywords": [
+          "Workspace",
+          "Run",
+          "Plan",
+          "Step",
+          "Artifact",
+          "primitives"
+        ]
+      }
+    ],
+    "context_requirements": [
+      "agentic primitives",
+      "summit/core/agentic/types.ts"
+    ],
+    "relationship_requirements": [],
+    "completeness_score": 0.7,
+    "omission_rate": 0.12,
+    "metrics": {
+      "entity_coverage": 1.0,
+      "subquestion_addressing": 1.0,
+      "context_preservation": 0.5,
       "length_calibration": 1.0,
-      "relationship_surfacing": 1.0
+      "relationship_surfacing": 0.0
     }
   }
 ]

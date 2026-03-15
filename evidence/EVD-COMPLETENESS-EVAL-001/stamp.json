@@ -1,6 +1,5 @@
 {
   "evidence_id": "EVD-COMPLETENESS-EVAL-001",
-  "created_utc": "2026-03-14T20:47:49.982109Z",
-  "generated_at_utc": "2026-03-14T20:47:49.982320Z",
-  "git_commit": "HEAD"
+  "created_utc": "2026-03-15T20:00:00Z",
+  "git_commit": "65f5232c0d83c86317bc3ae294fefba2edd0e47c"
 }

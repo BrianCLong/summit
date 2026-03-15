@@ -14,9 +14,13 @@
       "name": "VerificationScripts",
       "paths": [
         "scripts/ga/",
-        "testing/ga-verification/"
+        "testing/ga-verification/",
+        "scripts/release/",
+        "release/",
+        ".repoos/release/",
+        ".repoos/evidence/"
       ],
-      "notes": "Node-native checks only; no global test runner changes."
+      "notes": "Node-native checks only; no global test runner changes. Includes deterministic release integrity tooling and evidence outputs."
     }
   ],
   "verificationRules": {
@@ -29,7 +33,11 @@
     "provenance": "Changes must cite evidence artifacts in PR summaries.",
     "verificationSurfaces": [
       "docs/ga/genui/UI_CONTRACT.md",
-      "docs/ga/MVP4_GA_GATE_ARTIFACTS.md"
+      "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
+      ".github/workflows/release-integrity.yml",
+      "scripts/release/verify-release.mjs",
+      "release/manifest.json",
+      "release/provenance.json"
     ]
   },
   "restrictedAreas": [

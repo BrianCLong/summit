@@ -1,11 +1,19 @@
 {
   "evidence_id": "EVD-COMPLETENESS-EVAL-001",
   "item_slug": "answer-completeness-harness",
-  "summary": "Evaluated answer completeness across 3 samples. Average completeness: 0.73, Omission rate: 0.74",
+  "summary": "Answer Completeness Evaluation Harness verified and tested with baseline fixtures.",
   "artifacts": [
     {
+      "path": "evals/answer-completeness/harness.py",
+      "sha256": "c58032c8df97a637e602801ecf6b1290e81d0b03e1064dce2d1136ff87e2b192"
+    },
+    {
       "path": "evals/fixtures/answer-completeness/fixtures.jsonl",
-      "sha256": "8fb64b7b20433d442e0bd77d89113129899d524e2783b5cffc9c35bc05091910"
+      "sha256": "99e8250dc19866d46b7fcea822a6a5bc76d06dfb64b70b7c581e564611cf844c"
+    },
+    {
+      "path": "evidence/EVD-COMPLETENESS-EVAL-001/results.json",
+      "sha256": "a3d926c0602322bde5bbef14651fdc3523aa636c6186cbdf8041cee9f7a203d8"
     }
   ]
 }
