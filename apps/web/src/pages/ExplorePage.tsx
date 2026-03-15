@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck, History } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
@@ -124,58 +124,76 @@ export default function ExplorePage(): React.ReactElement {
   }, [entityUpdates])
 
   // Filter data based on current filters
-  const filteredEntities = entities.filter(entity => {
-    if (
-      filters.entityTypes.length > 0 &&
-      !filters.entityTypes.includes(entity.type)
-    )
-      {return false}
-    if (
-      filters.confidenceRange.min > entity.confidence ||
-      filters.confidenceRange.max < entity.confidence
-    )
-      {return false}
-    if (
-      filters.tags.length > 0 &&
-      !entity.tags?.some(tag => filters.tags.includes(tag))
-    )
-      {return false}
-    if (
-      filters.sources.length > 0 &&
-      entity.source &&
-      !filters.sources.includes(entity.source)
-    )
-      {return false}
-    if (
-      searchQuery &&
-      !entity.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      {return false}
-    return true
-  })
+  const filteredEntities = useMemo(() => {
+    return entities.filter(entity => {
+      if (
+        filters.entityTypes.length > 0 &&
+        !filters.entityTypes.includes(entity.type)
+      )
+        {return false}
+      if (
+        filters.confidenceRange.min > entity.confidence ||
+        filters.confidenceRange.max < entity.confidence
+      )
+        {return false}
+      if (
+        filters.tags.length > 0 &&
+        !entity.tags?.some(tag => filters.tags.includes(tag))
+      )
+        {return false}
+      if (
+        filters.sources.length > 0 &&
+        entity.source &&
+        !filters.sources.includes(entity.source)
+      )
+        {return false}
+      if (
+        searchQuery &&
+        !entity.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+        {return false}
+      return true
+    })
+  }, [entities, filters, searchQuery])
 
-  const filteredRelationships = relationships.filter(rel => {
-    if (
-      filters.relationshipTypes.length > 0 &&
-      !filters.relationshipTypes.includes(rel.type)
-    )
-      {return false}
-    // Only include relationships where both entities are in filtered set
-    return (
-      filteredEntities.some(e => e.id === rel.sourceId) &&
-      filteredEntities.some(e => e.id === rel.targetId)
-    )
-  })
+  const filteredRelationships = useMemo(() => {
+    if (filteredEntities.length === 0) return []
+
+    // Performance Optimization: Use a Set for O(1) lookup of filtered entity IDs.
+    // This reduces the complexity of relationship filtering from O(R * E_filtered) to O(R).
+    const filteredEntityIds = new Set(filteredEntities.map(e => e.id))
+
+    return relationships.filter(rel => {
+      if (
+        filters.relationshipTypes.length > 0 &&
+        !filters.relationshipTypes.includes(rel.type)
+      )
+        {return false}
+      // Only include relationships where both entities are in filtered set
+      return (
+        filteredEntityIds.has(rel.sourceId) &&
+        filteredEntityIds.has(rel.targetId)
+      )
+    })
+  }, [relationships, filteredEntities, filters.relationshipTypes])
 
   // Get available filter options
-  const availableEntityTypes = Array.from(new Set(entities.map(e => e.type)))
-  const availableRelationshipTypes = Array.from(
-    new Set(relationships.map(r => r.type))
+  const availableEntityTypes = useMemo(() =>
+    Array.from(new Set(entities.map(e => e.type))),
+    [entities]
   )
-  const availableTags = Array.from(new Set(entities.flatMap(e => e.tags || [])))
-  const availableSources = Array.from(
-    new Set(entities.map(e => e.source).filter(Boolean))
-  ) as string[]
+  const availableRelationshipTypes = useMemo(() =>
+    Array.from(new Set(relationships.map(r => r.type))),
+    [relationships]
+  )
+  const availableTags = useMemo(() =>
+    Array.from(new Set(entities.flatMap(e => e.tags || []))),
+    [entities]
+  )
+  const availableSources = useMemo(() =>
+    Array.from(new Set(entities.map(e => e.source).filter(Boolean))) as string[],
+    [entities]
+  )
 
   const handleEntitySelect = (entity: Entity) => {
     setSelectedEntityId(entity.id)
