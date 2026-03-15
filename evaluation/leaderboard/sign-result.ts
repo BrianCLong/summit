@@ -1,4 +1,5 @@
 import * as crypto from 'node:crypto';
+import { deterministicStringify } from './utils.ts';
 
 export interface ResultBundlePayload {
   protocolVersion: string;
@@ -26,7 +27,7 @@ export function signResultBundle(payload: ResultBundlePayload, privateKeyHex: st
     type: 'pkcs8'
   });
 
-  const dataToSign = Buffer.from(JSON.stringify(payload));
+  const dataToSign = Buffer.from(deterministicStringify(payload));
   const signature = crypto.sign(null, dataToSign, privateKey).toString('hex');
 
   return {
