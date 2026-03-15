@@ -1,12 +1,12 @@
 {
   "name": "intelgraph-server",
-  "version": "4.2.3",
-  "description": "IntelGraph GraphQL API Server",
-  "main": "dist/index.js",
+  "version": "4.1.4",
+  "description": "IntelGraph Platform Backend API",
+  "main": "dist/src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+    "start": "node dist/src/index.js",
+    "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
     "build": "tsc -p tsconfig.build.json || echo 'TypeScript completed with warnings (noEmitOnError: false)'",
     "typecheck": "tsc --noEmit",
     "config:validate": "ts-node scripts/validate-config.ts",
@@ -39,8 +39,7 @@
     "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts"
   },
   "dependencies": {
-    "@intelgraph/outreach": "workspace:*",
-    "@apollo/server": "5.4.0",
+    "@apollo/server": "4.11.3",
     "@as-integrations/express4": "1.1.2",
     "@aws-sdk/client-s3": "3.962.0",
     "@bull-board/api": "6.12.0",
@@ -51,7 +50,6 @@
     "@intelgraph/observability": "workspace:^",
     "@intelgraph/provenance": "workspace:*",
     "@intelgraph/telemetry-config": "file:../packages/telemetry-config",
-    "@intelgraph/context-shell": "workspace:*",
     "@node-saml/node-saml": "5.1.0",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.39.0",

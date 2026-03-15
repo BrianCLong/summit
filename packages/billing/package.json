@@ -5,6 +5,6 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "stripe": "15.0.0"
+    "stripe": "20.4.1"
   }
 }
