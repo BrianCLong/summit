@@ -53,3 +53,8 @@
 **Learning:** UI components intended for inline usage (like Badges) must utilize semantic `<span>` tags rather than `<div>` to avoid invalid HTML nesting when used inside typographic elements (e.g., `<p>`, `<h1>`). A mismatch between implementation (`div`) and test expectations (`span`) often indicates a regression in accessibility and structural integrity.
 
 **Action:** Ensure all atomic inline components default to `<span>` and support flexible icon insertion to reinforce semantic meaning.
+## 2026-03-15 - Form Label Accessibility
+
+**Learning:** Use React's `useId()` to generate robust, stable IDs for form inputs and their `<label>`s, ensuring proper screen reader associations without risking ID collisions.
+
+**Action:** Always link `<label htmlFor={id}>` to `<input id={id}>` using `useId()` in reusable components.
