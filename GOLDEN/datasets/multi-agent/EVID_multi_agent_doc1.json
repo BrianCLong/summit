@@ -1,0 +1,10 @@
+{
+  "content": "The study demonstrates that agent coordination improves success rates by 42%. However, the negotiation phase often introduces a 15% latency overhead.",
+  "domain": "multi_agent_coordination",
+  "id": "EVID:multi_agent:doc1",
+  "metadata": {
+    "latency_overhead_percent": 15,
+    "success_improvement_percent": 42
+  },
+  "timestamp": "2026-03-15T00:00:00Z"
+}

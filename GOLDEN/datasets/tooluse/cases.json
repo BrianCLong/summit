@@ -1,0 +1,9 @@
+[
+  {
+    "id": "EVID:tooluse:doc1",
+    "task": "Extract the specific tool configuration details and resolve the injected network timeout.",
+    "required_evidence": [
+      "EVID:tooluse:doc1"
+    ]
+  }
+]
