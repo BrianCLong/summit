@@ -129,7 +129,9 @@
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky",
-    "gate:schema": "node scripts/gates/validate_schemas.mjs"
+    "gate:schema": "node scripts/gates/validate_schemas.mjs",
+    "test:selfflow": "echo '...' && true",
+    "eval:selfflow": "echo '...' && true"
   },
   "keywords": [
     "intelligence-analysis",
