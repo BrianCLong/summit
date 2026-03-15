@@ -10,15 +10,10 @@
     "prettier": "3.3.3"
   },
   "dependencies": {
-<<<<<<< HEAD
-    hono: "4.11.10"
-=======
-<<<<<<< HEAD
-    "hono": "4.11.10"
-=======
+<<<<<<< Updated upstream
     hono: "4.12.4"
->>>>>>> origin/main
->>>>>>> origin/main
+=======
+>>>>>>> Stashed changes
   },
   "version": "4.2.3"
 }

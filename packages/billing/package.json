@@ -5,10 +5,9 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
-<<<<<<< HEAD
-    "stripe": "15.0.0"
-=======
+<<<<<<< Updated upstream
     stripe: "20.4.1"
->>>>>>> origin/main
+=======
+>>>>>>> Stashed changes
   }
 }

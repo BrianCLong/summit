@@ -26,17 +26,7 @@
   "author": "Summit/IntelGraph Team",
   "license": "PROPRIETARY",
   "dependencies": {
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
-=======
-<<<<<<< HEAD
+<<<<<<< Updated upstream
     "@apollo/server": "4.11.3",
     graphql: "16.8.1",
     neo4j-driver: "5.15.0",
@@ -46,104 +36,7 @@
     pino: "8.17.2",
     prom-client: "15.1.0"
 =======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.13.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.13.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.0",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
-=======
-<<<<<<< HEAD
-    @apollo/server: "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
-=======
-<<<<<<< HEAD
-    "@apollo/server": "4.16.0",
-    "graphql": "16.8.1",
-    "neo4j-driver": "5.15.0",
-    "mathjs": "12.2.0",
-    "simple-statistics": "7.8.3",
-    "d3-array": "3.2.4",
-    "pino": "8.17.2",
-    "prom-client": "15.1.0"
-=======
-    "@apollo/server": "4.11.3",
-    graphql: "16.8.1",
-    neo4j-driver: "5.15.0",
-    mathjs: "12.2.0",
-    simple-statistics: "7.8.3",
-    d3-array: "3.2.4",
-    pino: "8.17.2",
-    prom-client: "15.1.0"
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
+>>>>>>> Stashed changes
   },
   "devDependencies": {
     "@types/node": "20.10.6",
