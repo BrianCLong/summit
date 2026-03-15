@@ -22,7 +22,7 @@ jobs:
           cache: pnpm
 
       - name: Install
-        run: corepack enable && pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Unit tests
         run: pnpm test --runInBand tests/graphrag/evidence/writer.test.ts tests/graphrag/evidence/schema-validation.test.ts

@@ -1,0 +1,48 @@
+name: Graph Guardrail Fuzz
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
+    paths:
+      - "test/fuzz/graphGuardrails/**"
+      - "server/src/middleware/cypher-sandbox.ts"
+      - ".github/workflows/graph-guardrail-fuzz.yml"
+      - "package.json"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guardrail-fuzz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.14.0
+          cache: pnpm
+      - run: pnpm install --no-frozen-lockfile
+      - name: Run guardrail fuzz (PR subset)
+        if: github.event_name == 'pull_request'
+        run: pnpm test:fuzz:graph-guardrails
+        env:
+          GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 80
+          GRAPH_GUARDRAIL_FUZZ_SEED: 8339
+          GRAPH_GUARDRAIL_FUZZ_MAX_ITERATIONS: 120
+      - name: Run guardrail fuzz (nightly full)
+        if: github.event_name == 'schedule'
+        run: pnpm test:fuzz:graph-guardrails
+        env:
+          GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 300
+          GRAPH_GUARDRAIL_FUZZ_SEED: 8339
+          GRAPH_GUARDRAIL_FUZZ_MAX_ITERATIONS: 300

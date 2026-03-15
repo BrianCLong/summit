@@ -1,0 +1,19 @@
+name: Weekly Hygiene
+
+on:
+  schedule: [{ cron: '0 9 * * 1' }]
+  workflow_dispatch:
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dead link check
+        uses: lycheeverse/lychee-action@v1
+        with: { args: --exclude-mail --no-progress './**/*.md' }
+      - name: Lint markdown
+        uses: avto-dev/markdown-lint@v1
+      - name: Dockerfile linter
+        uses: hadolint/hadolint-action@v3.1.0
+        with: { dockerfile: 'deploy/docker/Dockerfile' }

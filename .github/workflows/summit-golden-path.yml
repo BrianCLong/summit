@@ -32,7 +32,7 @@ jobs:
 >>>>>>> origin/main
 
       - name: Install dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Policy checks (OPA placeholder)
         run: pnpm exec tsx governance/policy-check.ts

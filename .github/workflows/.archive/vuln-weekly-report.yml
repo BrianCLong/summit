@@ -1,0 +1,137 @@
+name: Vulnerability Weekly Report
+
+on:
+  schedule:
+    - cron: '0 9 * * MON'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  weekly-report:
+    runs-on: ubuntu-latest
+    env:
+      PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL || vars.PROMETHEUS_URL }}
+      EXCEPTION_SOURCE_URL: ${{ secrets.EXCEPTION_SOURCE_URL || vars.EXCEPTION_SOURCE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate weekly vulnerability report
+        run: |
+          python3 - <<'PY'
+          import datetime
+          import json
+          import os
+          import sys
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          prom_url = (os.getenv("PROMETHEUS_URL") or "").rstrip("/")
+          exception_url = os.getenv("EXCEPTION_SOURCE_URL") or ""
+
+          def fetch_json(url: str):
+            try:
+              with urllib.request.urlopen(url, timeout=15) as resp:
+                return json.loads(resp.read())
+            except Exception as exc:  # noqa: BLE001
+              print(f"warning: failed to fetch {url}: {exc}", file=sys.stderr)
+              return None
+
+          def prom_query(query: str):
+            if not prom_url:
+              return None
+            encoded = urllib.parse.urlencode({"query": query})
+            return fetch_json(f"{prom_url}/api/v1/query?{encoded}")
+
+          def extract_scalar(response):
+            try:
+              result = response["data"]["result"][0]["value"][1]
+              return float(result)
+            except Exception:  # noqa: BLE001
+              return None
+
+          now = datetime.datetime.utcnow()
+          opened_critical = prom_query(
+            "sum(increase(security_vulnerability_opened_total{severity=\"critical\"}[7d]))"
+          )
+          opened_high = prom_query(
+            "sum(increase(security_vulnerability_opened_total{severity=\"high\"}[7d]))"
+          )
+          closed_critical = prom_query(
+            "sum(increase(security_vulnerability_closed_total{severity=\"critical\"}[7d]))"
+          )
+          closed_high = prom_query(
+            "sum(increase(security_vulnerability_closed_total{severity=\"high\"}[7d]))"
+          )
+          backlog = prom_query(
+            "sum(max_over_time(security_vulnerability_info{severity=~\"critical|high\",status=\"open\"}[1d]))"
+          )
+          exceptions = prom_query(
+            "security_vulnerability_exception_expiry_info{days_remaining=~\"0|1|2|3|4|5|6|7|8|9|10|11|12|13|14\"}"
+          )
+
+          def summarize_exceptions(resp):
+            if not resp or resp.get("status") != "success":
+              return "No exception source configured or no data returned."
+            rows = []
+            for entry in resp.get("data", {}).get("result", []):
+              labels = entry.get("metric", {})
+              days = labels.get("days_remaining", "?")
+              vuln = labels.get("vulnerability", labels.get("id", "unknown"))
+              rows.append(f"- {vuln}: {days}d remaining")
+            return "\n".join(sorted(rows)) if rows else "No expiring exceptions within 14d."
+
+          report_lines = [
+            "# Weekly vulnerability trend",
+            f"Generated: {now.isoformat()}Z",
+            "",
+          ]
+
+          def line_for(title, response):
+            value = extract_scalar(response) if response else None
+            if value is None:
+              return f"- {title}: data unavailable"
+            return f"- {title}: {value:.0f}"
+
+          report_lines.extend(
+            [
+              line_for("Critical opened (7d)", opened_critical),
+              line_for("High opened (7d)", opened_high),
+              line_for("Critical closed (7d)", closed_critical),
+              line_for("High closed (7d)", closed_high),
+              line_for("Open critical/high backlog", backlog),
+            ]
+          )
+
+          report_lines.append("")
+          report_lines.append("## Exceptions expiring soon")
+          report_lines.append(summarize_exceptions(exceptions))
+
+          if exception_url:
+            report_lines.append("")
+            report_lines.append(f"Exception source: {exception_url}")
+
+          output_path = "vulnerability-weekly-report.md"
+          with open(output_path, "w", encoding="utf-8") as handle:
+            handle.write("\n".join(report_lines))
+
+          print("\n".join(report_lines))
+          PY
+
+      - name: Upload weekly report
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerability-weekly-report
+          path: vulnerability-weekly-report.md
+
+      - name: Add summary
+        if: always()
+        run: |
+          echo "## Weekly vulnerability report" >> "$GITHUB_STEP_SUMMARY"
+          echo "\n\`\`\`markdown" >> "$GITHUB_STEP_SUMMARY"
+          cat vulnerability-weekly-report.md >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"

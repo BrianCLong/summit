@@ -1,0 +1,59 @@
+name: Environment Specific Tests
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/environment-specific-tests.yml'
+      - 'docker-compose.env-tests.yml'
+      - 'scripts/tests/**'
+      - 'docs/ci/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/environment-specific-tests.yml'
+      - 'docker-compose.env-tests.yml'
+      - 'scripts/tests/**'
+      - 'docs/ci/**'
+
+jobs:
+  environment-tests:
+    name: ${{ matrix.service }} service - ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - environment: dev
+            service: node
+            runtime: docker
+          - environment: dev
+            service: python
+            runtime: docker
+          - environment: staging
+            service: node
+            runtime: kubernetes
+          - environment: staging
+            service: python
+            runtime: kubernetes
+          - environment: prod
+            service: node
+            runtime: docker
+          - environment: prod
+            service: python
+            runtime: docker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Kind for staging tests
+        if: matrix.runtime == 'kubernetes'
+        uses: helm/kind-action@v1.8.0
+        with:
+          version: v0.22.0
+
+      - name: Run environment synthetic tests
+        run: ./scripts/tests/run_env_tests.sh ${{ matrix.environment }} ${{ matrix.service }}
+        shell: bash

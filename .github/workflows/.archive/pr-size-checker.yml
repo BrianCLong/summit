@@ -1,0 +1,203 @@
+name: PR Size Checker
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-size:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR size and add labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+
+            // Calculate PR metrics
+            const filesChanged = files.length;
+            const additions = pullRequest.additions;
+            const deletions = pullRequest.deletions;
+            const totalChanges = additions + deletions;
+
+            console.log(`PR Metrics:
+              - Files changed: ${filesChanged}
+              - Lines added: ${additions}
+              - Lines deleted: ${deletions}
+              - Total changes: ${totalChanges}
+            `);
+
+            // Define size thresholds
+            let size = 'XS';
+            let sizeLabel = 'size: XS';
+            let shouldSuggestSplit = false;
+            let warningLevel = 'info';
+
+            // Determine size based on lines changed and files
+            if (totalChanges < 50 && filesChanged < 5) {
+              size = 'XS';
+              sizeLabel = 'size: XS';
+            } else if (totalChanges < 200 && filesChanged < 15) {
+              size = 'S';
+              sizeLabel = 'size: S';
+            } else if (totalChanges < 500 && filesChanged < 30) {
+              size = 'M';
+              sizeLabel = 'size: M';
+            } else if (totalChanges < 1000 && filesChanged < 50) {
+              size = 'L';
+              sizeLabel = 'size: L';
+              shouldSuggestSplit = true;
+              warningLevel = 'warning';
+            } else {
+              size = 'XL';
+              sizeLabel = 'size: XL';
+              shouldSuggestSplit = true;
+              warningLevel = 'error';
+            }
+
+            // Remove old size labels
+            const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const sizeLabels = currentLabels
+              .filter(label => label.name.startsWith('size: '))
+              .map(label => label.name);
+
+            for (const label of sizeLabels) {
+              if (label !== sizeLabel) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: label,
+                }).catch(() => {}); // Ignore errors if label doesn't exist
+              }
+            }
+
+            // Add new size label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [sizeLabel]
+            });
+
+            // Post comment if PR is too large
+            if (shouldSuggestSplit) {
+              const emoji = warningLevel === 'error' ? '🚨' : '⚠️';
+              const title = warningLevel === 'error' ? 'PR is very large' : 'PR is large';
+
+              let comment = `${emoji} **${title}** (${size})\n\n`;
+              comment += `This PR has **${totalChanges} lines changed** across **${filesChanged} files**.\n\n`;
+
+              if (warningLevel === 'error') {
+                comment += `### 🎯 Recommendation: Consider splitting this PR\n\n`;
+                comment += `Large PRs are harder to review, test, and debug. Consider:\n\n`;
+                comment += `1. **Split by feature**: Separate independent features into multiple PRs\n`;
+                comment += `2. **Split by layer**: Separate backend, frontend, and infrastructure changes\n`;
+                comment += `3. **Split by type**: Separate refactoring from new features\n`;
+                comment += `4. **Progressive delivery**: Submit foundational changes first, then build on them\n\n`;
+                comment += `### 📊 PR Size Guidelines\n\n`;
+                comment += `| Size | Lines Changed | Files | Review Complexity |\n`;
+                comment += `|------|---------------|-------|-------------------|\n`;
+                comment += `| XS   | < 50          | < 5   | ⚡ Very Easy      |\n`;
+                comment += `| S    | < 200         | < 15  | ✅ Easy           |\n`;
+                comment += `| M    | < 500         | < 30  | 🟡 Moderate       |\n`;
+                comment += `| L    | < 1000        | < 50  | 🟠 Hard           |\n`;
+                comment += `| XL   | > 1000        | > 50  | 🔴 Very Hard      |\n\n`;
+              } else {
+                comment += `### 💡 Tip\n\n`;
+                comment += `This PR is approaching the recommended size limit. `;
+                comment += `Consider reviewing if all changes need to be in a single PR.\n\n`;
+              }
+
+              // Analyze file changes to suggest splits
+              const filesByExtension = {};
+              const filesByDirectory = {};
+
+              files.forEach(file => {
+                const ext = file.filename.split('.').pop() || 'no-ext';
+                const dir = file.filename.split('/')[0] || 'root';
+
+                filesByExtension[ext] = (filesByExtension[ext] || 0) + 1;
+                filesByDirectory[dir] = (filesByDirectory[dir] || 0) + 1;
+              });
+
+              // Suggest splits based on analysis
+              const topDirs = Object.entries(filesByDirectory)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+
+              const topExts = Object.entries(filesByExtension)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+
+              if (shouldSuggestSplit && warningLevel === 'error') {
+                comment += `### 🔍 Analysis\n\n`;
+                comment += `**Top directories changed:**\n`;
+                topDirs.forEach(([dir, count]) => {
+                  comment += `- \`${dir}\`: ${count} files\n`;
+                });
+                comment += `\n**File types changed:**\n`;
+                topExts.forEach(([ext, count]) => {
+                  comment += `- \`.${ext}\`: ${count} files\n`;
+                });
+                comment += `\n_This analysis may help identify logical boundaries for splitting._\n`;
+              }
+
+              // Check if we already posted a similar comment
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+
+              const botComments = comments.filter(c =>
+                c.user.type === 'Bot' &&
+                c.body.includes('PR is large') || c.body.includes('PR is very large')
+              );
+
+              if (botComments.length > 0) {
+                // Update the existing comment
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComments[0].id,
+                  body: comment
+                });
+              } else {
+                // Post new comment
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: comment
+                });
+              }
+            }
+
+            // Set output for potential use in other jobs
+            core.setOutput('size', size);
+            core.setOutput('total_changes', totalChanges);
+            core.setOutput('files_changed', filesChanged);
+            core.setOutput('should_suggest_split', shouldSuggestSplit);
+
+            console.log(`✅ PR size: ${size} (${sizeLabel})`);

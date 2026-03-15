@@ -1,0 +1,227 @@
+name: 🏗️ Closed PR Excavator - Advanced Recovery
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      recovery_mode:
+        description: 'Recovery mode'
+        required: false
+        default: 'smart'
+        type: choice
+        options:
+          - smart
+          - aggressive
+          - conservative
+      max_prs:
+        description: 'Max PRs to recover per run'
+        required: false
+        default: '10'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  excavate:
+    name: Advanced PR Recovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "PR Excavator Bot"
+          git config user.email "excavator@summit.dev"
+          git config pull.rebase false
+
+      - name: Discover closed unmerged PRs
+        id: discover
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "=== DISCOVERING CLOSED UNMERGED PRS ==="
+
+          # Get all closed PRs that were never merged
+          gh pr list --state closed --limit 500 --json number,title,closedAt,mergedAt,headRefName,additions,deletions,author \
+            --jq '.[] | select(.mergedAt == null) | {
+              number,
+              title,
+              branch: .headRefName,
+              closed_days: ((now - (.closedAt | fromdateiso8601)) / 86400 | floor),
+              size: (.additions + .deletions),
+              author: .author.login
+            }' > closed_unmerged.json
+
+          total=$(jq 'length' closed_unmerged.json)
+          echo "Found $total closed unmerged PRs"
+          echo "total_closed=$total" >> $GITHUB_OUTPUT
+
+          # Prioritize by size and recency
+          jq 'sort_by(.size, -.closed_days) | .[0:20]' closed_unmerged.json > priority_recovery.json
+
+      - name: Smart recovery analysis
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ inputs.recovery_mode || 'smart' }}
+        run: |
+          echo "=== SMART RECOVERY ANALYSIS (Mode: $MODE) ==="
+
+          recovered_count=0
+          max_prs=${{ inputs.max_prs || 10 }}
+
+          jq -c '.[]' priority_recovery.json | while read -r pr_data; do
+            if [ $recovered_count -ge $max_prs ]; then
+              echo "Reached max PR limit ($max_prs)"
+              break
+            fi
+
+            pr_num=$(echo "$pr_data" | jq -r '.number')
+            branch_name=$(echo "$pr_data" | jq -r '.branch')
+            pr_size=$(echo "$pr_data" | jq -r '.size')
+
+            echo "Analyzing PR #$pr_num ($branch_name, size: $pr_size)..."
+
+            # Check if branch still exists
+            if ! git ls-remote --heads origin "$branch_name" | grep -q "$branch_name"; then
+              echo "⚠️  Branch $branch_name no longer exists, skipping"
+              continue
+            fi
+
+            # Fetch the branch
+            git fetch origin "$branch_name" || continue
+
+            # Create revival branch name
+            revival_branch="revival/pr-${pr_num}-excavated"
+
+            # Check if revival already exists
+            if gh pr list --head "$revival_branch" --json number --jq length | grep -q "1"; then
+              echo "ℹ️  Revival PR already exists for #$pr_num"
+              continue
+            fi
+
+            # Create new branch from main
+            git checkout main
+            git pull origin main
+            git checkout -b "$revival_branch"
+
+            # Try to merge the old PR branch
+            echo "Attempting smart merge of $branch_name..."
+
+            if git merge --no-commit --no-ff "origin/$branch_name" 2>&1; then
+              # Merge succeeded, commit it
+              git commit -m "Revival: PR #$pr_num - $(echo "$pr_data" | jq -r '.title')
+
+Original PR: #$pr_num
+Original branch: $branch_name
+Recovery mode: $MODE
+
+This PR recovers work from a closed unmerged PR.
+All conflicts resolved, rebased on latest main.
+
+🤖 Auto-recovered by PR Excavator"
+
+              # Push and create PR
+              if git push origin "$revival_branch" 2>&1; then
+                # Create the revival PR
+                gh pr create \
+                  --base main \
+                  --head "$revival_branch" \
+                  --title "🏗️ Recovery: $(echo "$pr_data" | jq -r '.title')" \
+                  --body "## Automated PR Recovery
+
+**Original PR:** #$pr_num
+**Original Author:** @$(echo "$pr_data" | jq -r '.author')
+**Recovery Mode:** $MODE
+**Size:** $pr_size lines changed
+
+### What This Is
+
+This PR recovers work from closed PR #$pr_num which was never merged. The code has been:
+- ✅ Rebased on latest \`main\`
+- ✅ Conflicts resolved automatically
+- ✅ Ready for review and merge
+
+### Original Context
+
+$(gh pr view $pr_num --json body --jq '.body' 2>/dev/null || echo 'Original PR body not available')
+
+---
+
+🤖 Auto-generated by [PR Excavator](https://github.com/${{ github.repository }}/actions/workflows/closed-pr-excavator.yml)
+*This ensures no work is lost from the repository*" && \
+
+                echo "✅ Created revival PR for #$pr_num" && \
+                recovered_count=$((recovered_count + 1))
+              fi
+            else
+              # Merge failed, try cherry-pick
+              git merge --abort
+
+              echo "Direct merge failed, trying cherry-pick strategy..."
+
+              # Get list of commits
+              commits=$(git log --reverse --pretty=format:"%H" "origin/$branch_name" ^main | head -20)
+
+              cherry_picked=0
+              echo "$commits" | while read commit; do
+                if git cherry-pick "$commit" 2>&1; then
+                  cherry_picked=$((cherry_picked + 1))
+                else
+                  echo "Cherry-pick failed for $commit, using theirs strategy..."
+                  git cherry-pick --strategy=recursive -X theirs "$commit" || {
+                    git cherry-pick --abort
+                    break
+                  }
+                fi
+              done
+
+              if [ $cherry_picked -gt 0 ]; then
+                git push origin "$revival_branch" && \
+                gh pr create \
+                  --base main \
+                  --head "$revival_branch" \
+                  --title "🏗️ Recovery (Cherry-picked): $(echo "$pr_data" | jq -r '.title')" \
+                  --body "Recovered from PR #$pr_num via cherry-pick. Some conflicts resolved automatically." && \
+                recovered_count=$((recovered_count + 1))
+              fi
+            fi
+
+            git checkout main
+            sleep 3
+          done
+
+          echo "Recovered $recovered_count PRs in this run"
+
+      - name: Generate excavation report
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > excavation_report.md << EOF
+          # 🏗️ PR Excavation Report
+
+          **Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Mode:** ${{ inputs.recovery_mode || 'smart' }}
+
+          ## Results
+
+          - Total closed unmerged PRs: ${{ steps.discover.outputs.total_closed }}
+          - PRs recovered this run: (see logs)
+          - Recovery success rate: TBD
+
+          ## Next Steps
+
+          - Excavator runs every 6 hours
+          - Recovered PRs enter merge train automatically
+          - All work will be incorporated
+
+          EOF
+
+          cat excavation_report.md

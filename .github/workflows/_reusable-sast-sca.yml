@@ -36,7 +36,7 @@ jobs:
         run: pnpm config set store-dir "$PNPM_CACHE_FOLDER"
 
       - name: Install dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Lint for vulnerabilities and quality
         run: pnpm run lint:check

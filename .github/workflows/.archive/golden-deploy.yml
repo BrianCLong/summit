@@ -1,0 +1,54 @@
+name: Golden Path Deploy (Stage -> Prod)
+
+on:
+  push:
+    tags: ['v*'] # Deploy on version tag
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+
+jobs:
+  deploy-stage:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Deploy to Stage
+        run: |
+          echo "Deploying ${{ inputs.version || github.ref_name }} to STAGING..."
+          # helm upgrade --install intelgraph-api ./charts/intelgraph-api \
+          #   --namespace companyos-stage \
+          #   -f charts/intelgraph-api/values.stage.yaml \
+          #   --set image.tag=${{ inputs.version || github.ref_name }}
+
+      - name: Run Smoke Tests
+        run: |
+          echo "Running post-deploy smoke tests..."
+          # ./scripts/smoke-test.sh https://api.stage.topicality.co
+
+  deploy-prod:
+    needs: deploy-stage
+    runs-on: ubuntu-latest
+    environment: production # Requires Approval in GitHub Settings
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Deploy to Production
+        run: |
+          echo "Deploying ${{ inputs.version || github.ref_name }} to PRODUCTION..."
+          # helm upgrade --install intelgraph-api ./charts/intelgraph-api \
+          #   --namespace companyos-prod \
+          #   -f charts/intelgraph-api/values.prod.yaml \
+          #   --set image.tag=${{ inputs.version || github.ref_name }}
+
+      - name: Monitor Rollout
+        run: |
+          echo "Monitoring Argo Rollout..."
+          # kubectl argo rollouts status intelgraph-api

@@ -36,7 +36,7 @@ jobs:
       - name: Configure pnpm store
         run: pnpm config set store-dir ${{ inputs.pnpm_cache_folder }}
       - name: Install dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Lint
         run: pnpm -w run lint
       - name: Typecheck
@@ -93,7 +93,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
       - name: Install dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Build workspace
         run: pnpm -w run build
       - name: Unit & integration tests

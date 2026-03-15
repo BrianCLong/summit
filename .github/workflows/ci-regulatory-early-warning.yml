@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 18
           cache: pnpm
-      - run: corepack enable && pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: node .github/scripts/verify-regulatory-ew-evidence.ts
       - run: pnpm test -- tests/graphrag/regulatory/earlywarning
 =======
@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      - run: corepack enable && pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: npx tsx .github/scripts/verify-regulatory-ew-evidence.ts
       # We will run tests once we actually have them added
       #- run: pnpm test -- tests/graphrag/regulatory/earlywarning

@@ -1,0 +1,212 @@
+name: Pilot Hardened Stage Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/pilot-hardened-stage.yml
+      - ops/pilot-hardening/**
+      - policy/pilot/**
+      - policy/allowlist.yaml
+  pull_request:
+    paths:
+      - .github/workflows/pilot-hardened-stage.yml
+      - ops/pilot-hardening/**
+      - policy/pilot/**
+      - policy/allowlist.yaml
+  workflow_dispatch:
+    inputs:
+      verify_stage:
+        type: boolean
+        default: true
+        description: Run stage verification
+      enforce_opa:
+        type: boolean
+        default: false
+        description: Enforce OPA gate (otherwise warn-only)
+
+concurrency:
+  group: pilot-hardened-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  DEPLOY_ENABLED: ${{ vars.DEPLOY_ENABLED || 'false' }}
+  OIDC_ENABLED: ${{ vars.OIDC_ENABLED || 'true' }}
+  SIGN_ENABLED: ${{ vars.SIGN_ENABLED || 'true' }}
+  SBOM_ENABLED: ${{ vars.SBOM_ENABLED || 'true' }}
+  VERIFY_ENABLED_STAGE: ${{ vars.VERIFY_ENABLED_STAGE || 'true' }}
+  VERIFY_ENABLED_PROD: ${{ vars.VERIFY_ENABLED_PROD || 'false' }}
+  OPA_ENFORCE: ${{ github.event.inputs.enforce_opa || vars.OPA_ENFORCE || 'false' }}
+  ALLOWLIST_PATH: ${{ vars.ALLOWLIST_PATH || 'policy/allowlist.yaml' }}
+  AWS_STAGE_ROLE_ARN: ${{ vars.AWS_STAGE_ROLE_ARN }}
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/pilot-hardened
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build_and_sign:
+    name: Build + SBOM + Sign
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build pilot artifact (OCI archive)
+        run: |
+          mkdir -p build
+          docker buildx build \
+            --platform=linux/amd64 \
+            --output=type=oci,dest=build/image.tar \
+            --tag "$IMAGE_NAME:$IMAGE_TAG" \
+            ops/pilot-hardening
+          sha256sum build/image.tar | awk '{print "sha256:"$1}' > build/digest.txt
+
+      - name: Generate SBOM
+        if: env.SBOM_ENABLED == 'true'
+        uses: anchore/sbom-action@v0
+        with:
+          image: oci-archive:build/image.tar
+          format: cyclonedx-json
+          output-file: build/sbom.cdx.json
+
+      - name: Install cosign
+        if: env.SIGN_ENABLED == 'true'
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Keyless sign digest
+        if: env.SIGN_ENABLED == 'true'
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign sign-blob \
+            --yes \
+            --oidc-issuer=https://token.actions.githubusercontent.com \
+            --oidc-client-id=sigstore \
+            --output-signature build/image.sig \
+            --output-certificate build/image.pem \
+            build/digest.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pilot-stage-artifacts
+          path: |
+            build/image.tar
+            build/digest.txt
+            build/sbom.cdx.json
+            build/image.sig
+            build/image.pem
+          if-no-files-found: error
+
+  policy_gate:
+    name: OPA policy gate
+    runs-on: ubuntu-latest
+    needs: build_and_sign
+    continue-on-error: ${{ env.OPA_ENFORCE != 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install OPA
+        uses: open-policy-agent/setup-opa@v1
+        with:
+          version: v0.66.0
+
+      - name: Evaluate pilot gate
+        env:
+          ALLOWLIST_PATH: ${{ env.ALLOWLIST_PATH }}
+        run: |
+          opa test policy/pilot --data "${ALLOWLIST_PATH}"
+
+  verify_stage:
+    name: Verify signed artifact
+    runs-on: ubuntu-latest
+    needs:
+      - build_and_sign
+      - policy_gate
+    if: github.event.inputs.verify_stage != 'false'
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: pilot-stage-artifacts
+          path: build
+
+      - name: Install cosign
+        if: env.VERIFY_ENABLED_STAGE == 'true'
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Verify signature
+        if: env.VERIFY_ENABLED_STAGE == 'true'
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign verify-blob \
+            --certificate build/image.pem \
+            --signature build/image.sig \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}(/.*)?" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            build/digest.txt
+
+      - name: Check SBOM presence
+        if: env.SBOM_ENABLED == 'true'
+        run: |
+          test -f build/sbom.cdx.json
+
+      - name: Summarize verification
+        run: |
+          echo "digest=$(cat build/digest.txt)" >> $GITHUB_OUTPUT
+
+  deploy_stage:
+    name: Stage deploy (OIDC only)
+    runs-on: ubuntu-latest
+    needs: verify_stage
+    if: env.DEPLOY_ENABLED == 'true' && (env.OPA_ENFORCE != 'true' || needs.policy_gate.result == 'success')
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: pilot-stage-artifacts
+          path: build
+
+      - name: Honor OIDC toggle
+        run: |
+          if [ "${OIDC_ENABLED}" != "true" ]; then
+            echo "OIDC_DISABLED: deploy skipped" && exit 0
+          fi
+
+      - name: Configure AWS credentials (OIDC only)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_STAGE_ROLE_ARN }}
+          role-session-name: pilot-hardening-stage
+          aws-region: ${{ env.AWS_REGION }}
+          audience: https://github.com/${{ github.repository }}
+
+      - name: Validate caller identity
+        run: aws sts get-caller-identity
+
+      - name: Deploy stage artifact
+        run: |
+          echo "Deploying digest $(cat build/digest.txt) to stage with OIDC role ${AWS_STAGE_ROLE_ARN}"

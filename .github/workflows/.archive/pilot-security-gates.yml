@@ -1,0 +1,42 @@
+name: Pilot Security Gates
+
+on:
+  pull_request:
+    paths:
+      - 'security/pilot/**'
+      - 'tools/security-gates/**'
+      - '.github/workflows/pilot-security-gates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  packages: read
+
+jobs:
+  gates:
+    name: Enforce pilot gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@d667e5d86909ebc1e279160ce0caa49005a140a9
+        with:
+
+
+      - name: Install dependencies (scoped)
+        run: pnpm install --filter @intelgraph/security-gates --recursive
+
+      - name: Run unit tests
+        run: pnpm --filter @intelgraph/security-gates test
+
+      - name: Enforce gates
+        run: pnpm --filter @intelgraph/security-gates run check -- security/pilot/gate-config.json

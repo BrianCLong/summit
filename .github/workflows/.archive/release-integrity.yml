@@ -1,0 +1,45 @@
+name: Release Integrity
+
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Generate SBOM
+        run: npx tsx scripts/compliance/generate_sbom.ts
+
+      - name: Sign Artifacts
+        run: npx tsx scripts/compliance/sign_artifacts.ts
+
+      - name: Vulnerability Scan & OPA Input Generation
+        run: npx tsx scripts/security/mock_scan.ts
+
+      - name: Policy Gate (OPA)
+        run: |
+          # Install OPA
+          curl -L -o opa_bin_bin_bin_bin https://openpolicyagent.org/downloads/v0.60.0/opa_linux_amd64_static
+          chmod +x opa_bin_bin_bin_bin
+
+          # Evaluate Policy
+          ./opa_bin_bin_bin_bin eval -i .evidence/results/input.json -d policy/release-gates/ "data.release_gates.allow" | grep "true" || exit 1

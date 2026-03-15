@@ -1,0 +1,84 @@
+name: CD - Deploy to Staging
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  ENVIRONMENT: staging
+  REGION: us-west-2
+
+jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infra/terraform/envs/${{ env.ENVIRONMENT }}
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra/terraform/envs/${{ env.ENVIRONMENT }}
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        working-directory: infra/terraform/envs/${{ env.ENVIRONMENT }}
+        run: terraform apply -auto-approve -input=false tfplan
+
+      - name: Export Terraform Outputs
+        id: tf-outputs
+        working-directory: infra/terraform/envs/${{ env.ENVIRONMENT }}
+        run: |
+          echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
+
+    outputs:
+      cluster_name: ${{ steps.tf-outputs.outputs.cluster_name }}
+
+  deploy-app:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.REGION }}
+
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ needs.deploy-infra.outputs.cluster_name }} --region ${{ env.REGION }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.11.1
+
+      - name: Deploy Summit Chart
+        run: |
+          helm upgrade --install summit deploy/helm/summit \
+            --namespace summit-${{ env.ENVIRONMENT }} \
+            --create-namespace \
+            --values deploy/helm/summit/values.${{ env.ENVIRONMENT }}.yaml \
+            --set image.tag=sha-${{ github.sha }}

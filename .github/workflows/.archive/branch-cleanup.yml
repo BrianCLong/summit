@@ -1,0 +1,61 @@
+name: Branch Cleanup
+on:
+  schedule:
+    - cron: '0 2 * * 0' # Every Sunday at 2 AM UTC
+  workflow_dispatch:
+    inputs:
+      apply_deletions:
+        description: 'Apply deletions (set to true to delete branches)'
+        type: boolean
+        default: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find and delete stale branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "--- Deleting branches for merged PRs ---"
+          gh pr list --state merged --limit 300 --json headRefName --jq '.[] | .headRefName' | while read branch;
+            if [ -n "$branch" ] && git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+              echo "Deleting remote branch for merged PR: $branch"
+              git push origin --delete "$branch"
+            fi
+          done
+
+          echo "--- Finding inactive branches (>90 days) ---"
+          stale_branches=$(git for-each-ref --sort=-committerdate refs/remotes/origin/ --format='%(committerdate:iso8601)|%(refname:short)' | \
+            awk -F'|' -v date="$(date -d '90 days ago' -I'seconds')" '$1 < date {print $2}' | \
+            sed 's/origin\///' | \
+            grep -vE '^(main|master|develop|release/.*)$')
+
+          if [ -z "$stale_branches" ]; then
+            echo "No stale branches found."
+            exit 0
+          fi
+
+          echo "The following branches are inactive for more than 90 days:"
+          echo "$stale_branches"
+
+          if [ "${{ github.event.inputs.apply_deletions }}" == "true" ]; then
+            echo "--- Deleting stale branches ---"
+            echo "$stale_branches" | while read branch;
+              has_open_pr=$(gh pr list --head "$branch" --state open --limit 1 --json number | jq 'length > 0')
+              if [ "$has_open_pr" == "true" ]; then
+                echo "Skipping branch $branch as it has an open PR."
+              else
+                echo "Deleting remote branch: $branch"
+                git push origin --delete "$branch"
+              fi
+            done
+          else
+            echo "--- Dry Run ---"
+            echo "To delete these branches, run this workflow with 'apply_deletions' set to true."
+          fi

@@ -13,5 +13,5 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - run: corepack enable && pnpm install
+      - run: pnpm install
       - run: pnpm test tests/contracts/concern.contract.test.ts tests/contracts/signal.contract.test.ts tests/integration/concern-registry.integration.test.ts

@@ -1,0 +1,186 @@
+name: PR Auto-Assign Reviewers
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    # Don't assign for draft PRs or dependabot PRs
+    if: |
+      github.event.pull_request.draft == false &&
+      github.actor != 'dependabot[bot]'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/CODEOWNERS
+
+      - name: Auto-assign reviewers from CODEOWNERS
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Read CODEOWNERS file
+            let codeownersContent;
+            try {
+              codeownersContent = fs.readFileSync('.github/CODEOWNERS', 'utf8');
+            } catch (error) {
+              console.log('No CODEOWNERS file found, skipping auto-assignment');
+              return;
+            }
+
+            // Get list of changed files in the PR
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            const changedFiles = files.map(f => f.filename);
+            console.log('Changed files:', changedFiles);
+
+            // Parse CODEOWNERS and find matching owners
+            const lines = codeownersContent.split('\n');
+            const ownerMap = new Map();
+
+            for (const line of lines) {
+              // Skip comments and empty lines
+              if (line.trim().startsWith('#') || !line.trim()) continue;
+
+              const parts = line.trim().split(/\s+/);
+              if (parts.length < 2) continue;
+
+              const pattern = parts[0];
+              const owners = parts.slice(1).filter(o => o.startsWith('@'));
+
+              if (owners.length === 0) continue;
+
+              // Check if pattern matches any changed file
+              for (const file of changedFiles) {
+                if (matchesPattern(file, pattern)) {
+                  owners.forEach(owner => {
+                    ownerMap.set(owner, (ownerMap.get(owner) || 0) + 1);
+                  });
+                }
+              }
+            }
+
+            // Helper function to match file patterns
+            function matchesPattern(file, pattern) {
+              // Convert CODEOWNERS pattern to regex
+              // Handle wildcards and directory patterns
+              let regexPattern = pattern
+                .replace(/\./g, '\\.')
+                .replace(/\*\*/g, '.*')
+                .replace(/\*/g, '[^/]*')
+                .replace(/\?/g, '.');
+
+              // If pattern ends with /, match everything in that directory
+              if (pattern.endsWith('/')) {
+                regexPattern = '^' + regexPattern;
+              } else {
+                regexPattern = '^' + regexPattern + '$';
+              }
+
+              return new RegExp(regexPattern).test(file);
+            }
+
+            // Sort owners by number of matching files
+            const sortedOwners = Array.from(ownerMap.entries())
+              .sort((a, b) => b[1] - a[1])
+              .map(([owner, _]) => owner);
+
+            console.log('Matched owners:', sortedOwners);
+
+            if (sortedOwners.length === 0) {
+              console.log('No matching owners found');
+              return;
+            }
+
+            // Separate users and teams
+            const users = [];
+            const teams = [];
+
+            for (const owner of sortedOwners) {
+              const ownerName = owner.substring(1); // Remove @
+              if (ownerName.includes('/')) {
+                // It's a team (org/team format)
+                teams.push(ownerName.split('/')[1]);
+              } else {
+                // It's a user
+                // Don't assign the PR author as a reviewer
+                if (ownerName !== context.payload.pull_request.user.login) {
+                  users.push(ownerName);
+                }
+              }
+            }
+
+            // Limit reviewers (max 3 users, max 2 teams)
+            const reviewerUsers = users.slice(0, 3);
+            const reviewerTeams = teams.slice(0, 2);
+
+            console.log('Assigning reviewers:', { users: reviewerUsers, teams: reviewerTeams });
+
+            // Request reviewers
+            if (reviewerUsers.length > 0 || reviewerTeams.length > 0) {
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  reviewers: reviewerUsers,
+                  team_reviewers: reviewerTeams
+                });
+
+                console.log('✅ Successfully assigned reviewers');
+              } catch (error) {
+                console.error('Error assigning reviewers:', error.message);
+                // Don't fail the workflow if assignment fails
+              }
+            }
+
+      - name: Add comment with assigned reviewers
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            const reviewers = pullRequest.requested_reviewers || [];
+            const teams = pullRequest.requested_teams || [];
+
+            if (reviewers.length === 0 && teams.length === 0) {
+              return; // No reviewers assigned, skip comment
+            }
+
+            const reviewerMentions = reviewers.map(r => `@${r.login}`).join(', ');
+            const teamMentions = teams.map(t => `@${context.repo.owner}/${t.slug}`).join(', ');
+
+            let message = '👋 **Auto-assigned reviewers based on CODEOWNERS:**\n\n';
+
+            if (reviewers.length > 0) {
+              message += `**Users:** ${reviewerMentions}\n`;
+            }
+            if (teams.length > 0) {
+              message += `**Teams:** ${teamMentions}\n`;
+            }
+
+            message += '\n_Reviewers were automatically assigned based on the files changed in this PR._';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });

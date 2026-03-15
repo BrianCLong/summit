@@ -1,0 +1,194 @@
+name: Projects SLA automation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *" # daily at 06:00 UTC
+  issues:
+    types: [opened, reopened]
+
+env:
+  PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
+  PROJECT_OWNER: ${{ vars.PROJECT_OWNER || github.repository_owner }}
+  PROJECT_OWNER_TYPE: ${{ vars.PROJECT_OWNER_TYPE || 'organization' }}
+  DONE_AFTER_DAYS: 14
+  SLA_LABEL: "SLA: Breached"
+
+jobs:
+  add_issue_to_project:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add issue to project
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const projectNumber = parseInt(process.env.PROJECT_NUMBER, 10);
+            const ownerType = (process.env.PROJECT_OWNER_TYPE || 'organization').toLowerCase();
+            const owner = process.env.PROJECT_OWNER;
+
+            if (!projectNumber || !owner) {
+              throw new Error('PROJECT_NUMBER and PROJECT_OWNER must be set (use repository variables).');
+            }
+
+            const projectQuery = ownerType === 'user'
+              ? `query($login: String!, $number: Int!){ user(login: $login) { projectV2(number: $number) { id } } }`
+              : `query($login: String!, $number: Int!){ organization(login: $login) { projectV2(number: $number) { id } } }`;
+
+            const projectResponse = await github.graphql(projectQuery, { login: owner, number: projectNumber });
+            const project = ownerType === 'user' ? projectResponse.user?.projectV2 : projectResponse.organization?.projectV2;
+
+            if (!project?.id) {
+              throw new Error(`Project ${projectNumber} not found for ${ownerType} ${owner}.`);
+            }
+
+            await github.graphql(
+              `mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }`,
+              { projectId: project.id, contentId: context.payload.issue.node_id }
+            );
+
+            core.info(`Added issue #${context.payload.issue.number} to project ${projectNumber}.`);
+
+  audit_project:
+    if: github.event_name != 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Audit SLA and archive done items
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const projectNumber = parseInt(process.env.PROJECT_NUMBER, 10);
+            const ownerType = (process.env.PROJECT_OWNER_TYPE || 'organization').toLowerCase();
+            const owner = process.env.PROJECT_OWNER;
+            const doneAfterDays = parseInt(process.env.DONE_AFTER_DAYS, 10);
+            const slaLabel = process.env.SLA_LABEL;
+
+            if (!projectNumber || !owner) {
+              throw new Error('PROJECT_NUMBER and PROJECT_OWNER must be set (use repository variables).');
+            }
+
+            const projectQuery = ownerType === 'user'
+              ? `query($login: String!, $number: Int!){ user(login: $login) { projectV2(number: $number) { id title url fields(first: 50) { nodes { id name dataType ... on ProjectV2SingleSelectField { options { id name } } } } } } }`
+              : `query($login: String!, $number: Int!){ organization(login: $login) { projectV2(number: $number) { id title url fields(first: 50) { nodes { id name dataType ... on ProjectV2SingleSelectField { options { id name } } } } } } }`;
+
+            const projectResponse = await github.graphql(projectQuery, { login: owner, number: projectNumber });
+            const project = ownerType === 'user' ? projectResponse.user?.projectV2 : projectResponse.organization?.projectV2;
+
+            if (!project?.id) {
+              throw new Error(`Project ${projectNumber} not found for ${ownerType} ${owner}.`);
+            }
+
+            const fields = project.fields.nodes;
+            const statusField = fields.find((f) => f.name === 'Status' && f.dataType === 'SINGLE_SELECT');
+            const slaField = fields.find((f) => f.name === 'SLA');
+            const ownerField = fields.find((f) => f.name === 'Owner');
+
+            const statusOptions = statusField?.options || [];
+            const doneOption = statusOptions.find((o) => o.name.toLowerCase() === 'done');
+            const blockedOption = statusOptions.find((o) => o.name.toLowerCase() === 'blocked');
+
+            const projectId = project.id;
+            const overdueItems = [];
+            const archiveCandidates = [];
+
+            const itemQuery = `
+              query($projectId: ID!, $cursor: String) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    items(first: 50, after: $cursor) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        id
+                        content {
+                          ... on Issue { id number title state closedAt updatedAt url node_id: id labels(first: 20) { nodes { name } } }
+                          ... on PullRequest { id number title state closedAt updatedAt url node_id: id labels(first: 20) { nodes { name } } }
+                        }
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldDateValue { date field { ... on ProjectV2Field { id name } } }
+                            ... on ProjectV2ItemFieldSingleSelectValue { optionId field { ... on ProjectV2Field { id name } } }
+                            ... on ProjectV2ItemFieldUserValue { users(first: 5) { nodes { login } } field { ... on ProjectV2Field { id name } } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const items = [];
+            let cursor;
+            do {
+              const response = await github.graphql(itemQuery, { projectId, cursor });
+              const page = response.node.items;
+              items.push(...page.nodes);
+              cursor = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : undefined;
+            } while (cursor);
+
+            const today = new Date();
+            const doneThreshold = new Date(today.getTime() - doneAfterDays * 24 * 60 * 60 * 1000);
+
+            for (const item of items) {
+              if (!item.content) continue;
+
+              const statusValue = item.fieldValues.nodes.find((v) => v.field?.name === 'Status');
+              const statusOptionId = statusValue?.optionId;
+              const isDone = statusOptionId && doneOption && statusOptionId === doneOption.id;
+
+              const slaValue = item.fieldValues.nodes.find((v) => v.field?.name === 'SLA');
+              const slaDate = slaValue?.date ? new Date(`${slaValue.date}T00:00:00Z`) : undefined;
+              const updatedAt = item.content.updatedAt ? new Date(item.content.updatedAt) : undefined;
+
+              if (slaDate && slaDate < today && !isDone) {
+                overdueItems.push({ item, slaDate });
+              }
+
+              if (isDone && updatedAt && updatedAt < doneThreshold) {
+                archiveCandidates.push(item);
+              }
+            }
+
+            for (const { item, slaDate } of overdueItems) {
+              if (blockedOption && statusField?.id) {
+                await github.graphql(
+                  `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) { updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId } }) { projectV2Item { id } } }`,
+                  { projectId, itemId: item.id, fieldId: statusField.id, optionId: blockedOption.id }
+                );
+              }
+
+              if (item.content.__typename === 'Issue') {
+                const labels = item.content.labels?.nodes?.map((l) => l.name) || [];
+                if (!labels.includes(slaLabel)) {
+                  try {
+                    await github.rest.issues.addLabels({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: item.content.number,
+                      labels: [slaLabel],
+                    });
+                  } catch (error) {
+                    core.warning(`Failed to add SLA label to #${item.content.number}: ${error.message}`);
+                  }
+                }
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: item.content.number,
+                  body: `🚨 SLA breached on ${slaDate.toISOString().split('T')[0]} — automatically flagged by the projects automation.`,
+                });
+              }
+            }
+
+            for (const item of archiveCandidates) {
+              await github.graphql(
+                `mutation($projectId: ID!, $itemId: ID!) { archiveProjectV2Item(input: { projectId: $projectId, itemId: $itemId, archived: true }) { item { id } } }`,
+                { projectId, itemId: item.id }
+              );
+            }
+
+            core.info(`Overdue items flagged: ${overdueItems.length}`);
+            core.info(`Archived done items: ${archiveCandidates.length}`);

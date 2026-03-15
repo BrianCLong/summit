@@ -1,0 +1,123 @@
+name: IntelGraph CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  PYTHON_VERSION: '3.11'
+  # Docker image details
+  IMAGE_NAME: intelgraph-psyops-orchestrator
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js for evidence bundle generation
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: 20
+
+      - name: Install ts-node runtime
+        run: npm install -g ts-node typescript
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Install specific client dependencies
+          pip install confluent-kafka[avro] requests neo4j psycopg2-binary
+          # Install NLP dependencies
+          pip install nltk spacy transformers networkx
+          python -m nltk.downloader punkt
+          python -m spacy download en_core_web_sm
+          pip install python-dotenv # For config_loader
+
+      - name: Run tests (Placeholder)
+        run: |
+          echo "No specific tests defined yet. Add your pytest commands here."
+          # pytest ./tests/
+
+      - name: Run linting (Placeholder)
+        run: |
+          echo "No specific linting rules defined yet. Add your linting commands (e.g., flake8, black) here."
+          # flake8 .
+          # black --check .
+
+      - name: Generate evidence bundle
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_WORKFLOW: ${{ github.workflow }}
+          GITHUB_JOB: build-and-test
+          TEST_RESULTS_SUMMARY: "Placeholder: add pytest command when available."
+          SECURITY_SCAN_SUMMARY: "Security scans not yet configured for this job."
+        run: ts-node scripts/ops/generate-evidence-bundle.ts
+
+      - name: Upload evidence bundle artifact
+        uses: actions/upload-artifact@v4          name: evidence-bundle-${{ github.sha }}
+          path: evidence-bundles/evidence-${{ github.sha }}.json
+
+  build-and-deploy:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' # Only deploy from main branch pushes
+    runs-on: ubuntu-latest
+    environment: production # Or staging, based on your setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                       -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Deploy to Kubernetes (Placeholder)
+        uses: azure/k8s-set-context@v3 # Example for Azure, replace with your cloud provider's action
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Apply Kubernetes manifests (Placeholder)
+        run: |
+          echo "Applying Kubernetes manifests..."
+          # kubectl apply -f k8s/deployment.yaml
+          # kubectl apply -f k8s/service.yaml
+          # kubectl set image deployment/${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          echo "Deployment commands go here. Ensure your Kubeconfig is correctly set up."
+
+      - name: Clean up old Docker images (Optional)
+        run: |
+          echo "Running Docker image cleanup..."
+          # docker image prune -f

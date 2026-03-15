@@ -46,7 +46,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Prepare evidence directories
         run: |

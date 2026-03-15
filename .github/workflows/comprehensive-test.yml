@@ -34,7 +34,7 @@ jobs:
           cache: 'pip'
 
       - name: Install Node Dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Install Python Dependencies
         run: |

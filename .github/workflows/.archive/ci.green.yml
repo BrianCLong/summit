@@ -1,0 +1,12 @@
+name: CI (green) [deprecated]
+
+on:
+  workflow_dispatch:
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Legacy stub
+        run: |
+          echo "CI (green) was retired in favor of the new ci-lint-and-unit and ci-golden-path workflows."

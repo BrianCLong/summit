@@ -50,7 +50,7 @@ jobs:
           version: latest
 
       - name: Install dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Prepare Gate Artifacts
         # In a real production pipeline, these artifacts (coverage, audit, etc.)

@@ -19,7 +19,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: pnpm/action-setup@v4
       - name: Install
-        run: corepack enable && pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Strict Lint
         run: pnpm lint:strict
       - name: Typecheck
@@ -39,7 +39,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
       - uses: pnpm/action-setup@v4
       - name: Install
-        run: corepack enable && pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Run Flaky Tests
         run: pnpm test:quarantine
 

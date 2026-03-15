@@ -23,7 +23,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
       - name: Install
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Strict Lint
         run: pnpm lint:strict
       - name: Typecheck
@@ -42,7 +42,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
       - name: Install
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run Flaky Tests
         run: pnpm test:quarantine
 

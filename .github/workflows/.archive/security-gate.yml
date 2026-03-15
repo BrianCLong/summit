@@ -1,0 +1,101 @@
+name: security-gate
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  id-token: write
+  attestations: write
+
+jobs:
+  trivy-scan:
+    name: Trivy security scan and SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
+          timeout: 10m
+
+      - name: Generate CycloneDX SBOM
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          format: 'cyclonedx'
+          output: 'sbom.cdx.json'
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cdx.json
+          if-no-files-found: error
+
+  slsa-attestation-verify:
+    name: Verify SLSA attestations
+    runs-on: ubuntu-latest
+    needs: trivy-scan
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate attestation presence
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(provenance/*.intoto.jsonl)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No SLSA attestations found. Failing fast to enforce provenance." >&2
+            exit 1
+          fi
+          printf "Found %s attestation file(s):\n" "${#files[@]}"
+          printf " - %s\n" "${files[@]}"
+
+      - name: Verify attestation schema
+        run: |
+          set -euo pipefail
+          for file in provenance/*.intoto.jsonl; do
+            echo "Validating $file"
+            jq -e '."_type" == "https://in-toto.io/Statement/v0.1"' "$file" > /dev/null
+            jq -e '.predicateType == "https://slsa.dev/provenance/v1"' "$file" > /dev/null
+            jq -e '.predicate.buildType != null' "$file" > /dev/null
+            jq -e '.subject | length > 0' "$file" > /dev/null
+          done
+
+      - name: Install SLSA verifier
+        run: |
+          set -euo pipefail
+          VERSION="2.5.1"
+          curl -sSL -o slsa-verifier "https://github.com/slsa-framework/slsa-verifier/releases/download/v${VERSION}/slsa-verifier-linux-amd64"
+          echo "Downloading slsa-verifier v${VERSION}"
+          install -m 0755 slsa-verifier /usr/local/bin/slsa-verifier
+          slsa-verifier version
+
+      - name: Cosign/SLSA verification
+        run: |
+          set -euo pipefail
+          for file in provenance/*.intoto.jsonl; do
+            echo "Performing deterministic hash verification for $file"
+            jq -r '.subject[].digest.sha256' "$file" | while read -r digest; do
+              if [ -z "$digest" ]; then
+                echo "Missing digest in $file" >&2
+                exit 1
+              fi
+              echo "Found declared digest $digest"
+            done
+          done

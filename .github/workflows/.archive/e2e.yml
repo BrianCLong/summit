@@ -1,0 +1,231 @@
+name: E2E (Playwright)
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.filter.outputs.server }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paths filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            server:
+              - 'server/**'
+              - 'client/**'
+              - 'docker-compose.yml'
+              - 'docs/realtime/**'
+              - '.github/workflows/e2e.yml'
+
+  test-golden-path:
+    name: test:golden-path
+    runs-on: ubuntu-latest
+    needs: changes
+    if: (((github.event_name == 'workflow_dispatch' || needs.changes.outputs.server == 'true') && (always())) && (always())) && (github.event_name == 'pull_request')
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 18
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: 20
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Generate persisted queries (required for test)
+        run: pnpm run generate:persisted
+        working-directory: client
+
+      - name: Start services for testing
+        run: |
+          docker compose -f docker-compose.yml up -d neo4j postgres redis
+
+          for i in {1..30}; do
+            if docker compose -f docker-compose.yml exec -T postgres pg_isready -U postgres >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+
+          cd server && pnpm run build
+          cd server && pnpm run seed:demo
+
+          cd server && pnpm start &
+          cd client && pnpm run dev &
+          sleep 15
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: client
+
+      - name: Run Golden Path CI Gate Test (REQUIRED)
+        run: >-
+          npx playwright test ../e2e/client/golden-path-ci-gate.spec.ts
+          --config=../e2e/client/playwright.config.ts
+          --project=chromium
+        working-directory: client
+        env:
+          NODE_ENV: test
+          WEB_URL: http://localhost:3000
+          RECORD_GOLDEN_PATH_VIDEO: 'true'
+
+      - name: Locate Golden Path video
+        id: golden-path-video
+        run: |
+          VIDEO_FILE=$(find e2e/client/test-results -name "*.webm" -type f -print -quit)
+          echo "video=${VIDEO_FILE}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Golden Path artifacts
+        id: upload-golden-path
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-path-recording
+          path: |
+            e2e/client/test-results/**/*.webm
+            e2e/client/playwright-report/**
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Comment PR with Golden Path video
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const artifactId = '${{ steps.upload-golden-path.outputs.artifact-id }}';
+            if (!artifactId) {
+              core.info('No Golden Path artifact uploaded; skipping PR comment.');
+              return;
+            }
+
+            const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${artifactId}`;
+            const videoPath = '${{ steps.golden-path-video.outputs.video }}';
+            const bodyLines = [
+              '🎥 Golden Path run captured.',
+              `- Video artifact: [download here](${artifactUrl})`,
+            ];
+
+            if (videoPath) {
+              bodyLines.push(`- Recorded file: \`${videoPath.replace(/^\.\.\//, '')}\``);
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: bodyLines.join('\n'),
+            });
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [changes, test-golden-path] # Golden Path must pass first
+    if: (((((((needs.changes.outputs.server == 'true') && (failure())) && (always())) && (|)) && (failure())) && (failure())) && (failure())) && (always())
+    strategy:
+      fail-fast: false
+      matrix:
+        layout: [cose-bilkent, dagre]
+        sprite: ['0', '1']
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 18
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: 20
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Launch stack (server+client+deps)
+        run: |
+          docker compose -f docker-compose.yml up -d --build postgres neo4j redis
+          sleep 8
+          docker compose -f docker-compose.yml up -d --build server client
+          # wait for client and server
+          for i in {1..60}; do curl -fsS http://localhost:4000/health && break || sleep 2; done
+          for i in {1..60}; do curl -fsS http://localhost:3000 || sleep 2; done
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Run E2E tests (layout=${{ matrix.layout }}, sprite=${{ matrix.sprite }})
+        env:
+          LAYOUT: ${{ matrix.layout }}
+          SPRITE_LABELS: ${{ matrix.sprite }}
+        run: cd client && pnpm run test:e2e
+      - name: Dump compose logs (on failure)
+        run: docker compose -f docker-compose.yml logs --no-color server client | tail -n 300
+      - name: Tear down
+        run: docker compose -f docker-compose.yml down -v
+
+  e2e-analytics-bridge:
+    name: E2E (Analytics Bridge)
+    runs-on: ubuntu-latest
+    needs: changes
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+        (contains(toJson(github.event.pull_request.labels), 'server') || needs.changes.outputs.server == 'true'))
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 18
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: 20
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Launch backend stack (Redis+server)
+        env:
+          DISABLE_SOCKET_AUTH: '1'
+        run: |
+          docker compose -f docker-compose.yml up -d --build redis postgres neo4j
+          # launch server with auth bypass for analytics namespace
+          docker compose -f docker-compose.yml up -d --build server
+          # wait for server
+          for i in {1..60}; do curl -fsS http://localhost:4000/health && break || sleep 2; done
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Run analytics bridge E2E (with trace)
+        env:
+          E2E_WS_URL: http://localhost:4000
+          E2E_REDIS_URL: redis://localhost:6379/1
+        run: cd client && pnpm run test:e2e -- tests/e2e/analytics-bridge.spec.ts -- --trace on
+      - name: Upload Playwright traces (on failure)
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces-analytics-bridge
+          path: |
+            client/test-results/**
+            client/playwright-report/**
+          retention-days: 7
+      - name: Add trace viewer instructions (on failure)
+        run: |
+          echo "## Analytics Bridge E2E – Debug Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifact: 'playwright-traces-analytics-bridge' (kept 7 days)" >> $GITHUB_STEP_SUMMARY
+          echo "- Includes 'client/test-results' (Playwright traces) and 'client/playwright-report' (HTML report)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### View HTML report" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download the artifact from this run's Artifacts section" >> $GITHUB_STEP_SUMMARY
+          echo "2. Open 'client/playwright-report/index.html' locally in a browser" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### View trace in Playwright Trace Viewer" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download the artifact" >> $GITHUB_STEP_SUMMARY
+          echo "2. Locate a trace file under 'client/test-results/**/trace.zip'" >> $GITHUB_STEP_SUMMARY
+          echo "3. Run:\n\n\`\`\`bash\n# install if needed\nnpx playwright show-trace client/test-results/**/trace.zip\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+      - name: Dump server logs (on failure)
+        run: docker compose -f docker-compose.yml logs --no-color server | tail -n 400
+      - name: Tear down
+        run: docker compose -f docker-compose.yml down -v

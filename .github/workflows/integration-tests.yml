@@ -67,7 +67,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run Integration Tests
         working-directory: server

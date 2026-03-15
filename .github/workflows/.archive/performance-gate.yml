@@ -1,0 +1,51 @@
+name: performance-gate
+
+on:
+  pull_request:
+    branches: ["main", "develop"]
+  workflow_dispatch:
+  schedule:
+    - cron: '30 3 * * *' # nightly baseline + stress on stage
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  k6-perf:
+    runs-on: ubuntu-latest
+    env:
+      K6_BASE_URL: ${{ secrets.PERF_BASE_URL }}
+      PROM_REMOTE_URL: ${{ secrets.PERF_PROM_REMOTE_URL }}
+      K6_TENANT: test-perf
+      K6_HEADERS_JSON: '{"x-perf":"true","x-tenant":"test-perf"}'
+      K6_DURATION_FACTOR: ${{ vars.K6_DURATION_FACTOR || '1' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up k6
+        uses: grafana/setup-k6-action@v1
+        with:
+          k6-version: v0.52.0
+
+      - name: Run baseline
+        run: |
+          mkdir -p perf/results
+          k6 run k6/golden-baseline.js --summary-export perf/results/k6-baseline-summary.json --out json=perf/results/k6-baseline.json
+
+      - name: Run stress (nightly only)
+        if: github.event_name == 'schedule'
+        run: |
+          k6 run k6/golden-stress.js --summary-export perf/results/k6-stress-summary.json --out json=perf/results/k6-stress.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-results
+          path: perf/results
+
+      - name: Summarize and comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERF_SUMMARY_FILE: perf/results/k6-baseline-summary.json
+        run: python .ci/scripts/perf/pr_comment_summary.py

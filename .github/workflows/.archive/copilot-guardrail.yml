@@ -1,0 +1,10 @@
+name: Copilot Guardrail
+on: [pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          test -f docs/Copilot-Playbook.md || { echo "::error::Missing docs/Copilot-Playbook.md"; exit 1; }
+          test -f .github/PULL_REQUEST_TEMPLATE.md || { echo "::error::Missing PR template"; exit 1; }

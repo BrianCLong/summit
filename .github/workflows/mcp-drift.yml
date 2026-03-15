@@ -17,7 +17,7 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
-        run: corepack enable && pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run Drift Detector
         run: npx tsx scripts/monitoring/createos-drift.ts
       - name: Upload Drift Report

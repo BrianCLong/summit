@@ -12,7 +12,7 @@ jobs:
       - name: Enable corepack
         run: corepack enable
       - name: Install
-        run: corepack enable && pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Test graph checks
         run: npx tsx --test tests/agent-graph/*.ts tests/e2e/agent-graph-ci-gate.spec.ts
       - name: Emit deterministic artifacts

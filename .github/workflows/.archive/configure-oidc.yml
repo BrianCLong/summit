@@ -1,0 +1,206 @@
+name: Configure GitHub OIDC for Cloud Providers
+
+on:
+  workflow_dispatch:
+    inputs:
+      cloud_provider:
+        description: 'Cloud provider to configure'
+        required: true
+        type: choice
+        options:
+          - 'aws'
+          - 'oci'
+          - 'both'
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - 'staging'
+          - 'production'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  configure-aws-oidc:
+    if: inputs.cloud_provider == 'aws' || inputs.cloud_provider == 'both'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: GitHubActions-OIDC-Setup
+          aws-region: ${{ vars.AWS_REGION || 'us-west-2' }}
+
+      - name: Verify AWS OIDC Configuration
+        run: |
+          echo "🔐 Verifying AWS OIDC setup..."
+          aws sts get-caller-identity
+
+          # Test S3 access for Terraform state
+          aws s3 ls s3://intelgraph-terraform-state/ || echo "⚠️ Terraform state bucket not accessible"
+
+          # Test EKS access
+          aws eks describe-cluster --name intelgraph-${{ inputs.environment }} --region ${{ vars.AWS_REGION || 'us-west-2' }} || echo "⚠️ EKS cluster not found"
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ${{ vars.AWS_REGION || 'us-west-2' }} --name intelgraph-${{ inputs.environment }}
+          kubectl cluster-info
+          kubectl get nodes
+
+  configure-oci-oidc:
+    if: inputs.cloud_provider == 'oci' || inputs.cloud_provider == 'both'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup OCI CLI
+        uses: oracle-actions/configure-oci-cli@v1.0
+        with:
+          user: ${{ secrets.OCI_USER_OCID }}
+          fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
+          region: ${{ secrets.OCI_REGION }}
+          private_key: ${{ secrets.OCI_PRIVATE_KEY }}
+
+      - name: Verify OCI Configuration
+        run: |
+          echo "🔐 Verifying OCI configuration..."
+          oci iam user get --user-id ${{ secrets.OCI_USER_OCID }}
+
+          # Test compute instances access
+          oci compute instance list --compartment-id ${{ secrets.OCI_COMPARTMENT_OCID }} --limit 5 || echo "⚠️ OCI compute access not configured"
+
+  sops-key-rotation:
+    needs: [configure-aws-oidc, configure-oci-oidc]
+    if: always() && (needs.configure-aws-oidc.result == 'success' || needs.configure-oci-oidc.result == 'success')
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install SOPS
+        run: |
+          curl -LO https://github.com/mozilla/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
+          chmod +x sops-v3.8.1.linux.amd64
+          sudo mv sops-v3.8.1.linux.amd64 /usr/local/bin/sops
+          sops --version
+
+      - name: Install age
+        run: |
+          curl -LO https://github.com/FiloSottile/age/releases/download/v1.1.1/age-v1.1.1-linux-amd64.tar.gz
+          tar xzf age-v1.1.1-linux-amd64.tar.gz
+          sudo mv age/age /usr/local/bin/
+          sudo mv age/age-keygen /usr/local/bin/
+          age --version
+
+      - name: Generate new age key
+        run: |
+          echo "🔑 Generating new age key for ${{ inputs.environment }}..."
+          age-keygen -o age-key-${{ inputs.environment }}.txt
+
+          # Extract public key
+          PUBLIC_KEY=$(grep "# public key:" age-key-${{ inputs.environment }}.txt | cut -d' ' -f4)
+          echo "Public key: $PUBLIC_KEY"
+          echo "PUBLIC_KEY=$PUBLIC_KEY" >> $GITHUB_ENV
+
+      - name: Update .sops.yaml
+        run: |
+          # Update .sops.yaml with new age key
+          sed -i "s/AGE-SECRET-KEY/$PUBLIC_KEY/g" .sops.yaml
+
+          echo "📝 Updated .sops.yaml:"
+          cat .sops.yaml
+
+      - name: Rotate existing secrets
+        run: |
+          # Find and rotate all encrypted files
+          if [ -d "charts" ]; then
+            find charts -name "*-secrets.yaml" -o -name "*-secret.yaml" | while read -r file; do
+              if [ -f "$file" ]; then
+                echo "🔄 Rotating $file"
+                SOPS_AGE_KEY_FILE=age-key-${{ inputs.environment }}.txt sops --rotate --in-place "$file"
+              fi
+            done
+          fi
+
+      - name: Create secure secret for GitHub
+        run: |
+          # Create a GitHub secret with the private key
+          echo "🔐 Private key generated for GitHub Secrets:"
+          echo "Secret name: SOPS_AGE_KEY_${{ inputs.environment }}"
+          echo "⚠️  MANUALLY ADD THIS TO GITHUB SECRETS:"
+          echo "-----BEGIN AGE ENCRYPTED FILE-----"
+          cat age-key-${{ inputs.environment }}.txt | base64 -w 0
+          echo ""
+          echo "-----END AGE ENCRYPTED FILE-----"
+
+      - name: Commit rotated secrets
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .sops.yaml charts/
+            git commit -m "feat: rotate SOPS keys for ${{ inputs.environment }}
+
+            🔑 Rotated age encryption keys for enhanced security
+            📝 Updated .sops.yaml with new public key
+            🔄 Re-encrypted all secrets with new key
+
+            Environment: ${{ inputs.environment }}
+            Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+            🤖 Generated with [Claude Code](https://claude.ai/code)
+
+            Co-Authored-By: Claude <noreply@anthropic.com>"
+
+            echo "✅ Changes committed locally"
+            echo "🚨 MANUAL ACTION REQUIRED:"
+            echo "1. Add the age private key to GitHub Secrets as 'SOPS_AGE_KEY_${{ inputs.environment }}'"
+            echo "2. Push this commit to the repository"
+            echo "3. Verify secret decryption works in subsequent deployments"
+          else
+            echo "ℹ️  No changes to commit"
+          fi
+
+  verify-setup:
+    needs: [configure-aws-oidc, configure-oci-oidc, sops-key-rotation]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Summary
+        run: |
+          echo "## 🚀 Cloud OIDC Configuration Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Cloud Provider**: ${{ inputs.cloud_provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Configuration Results" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ inputs.cloud_provider }}" = "aws" ] || [ "${{ inputs.cloud_provider }}" = "both" ]; then
+            echo "- **AWS OIDC**: ${{ needs.configure-aws-oidc.result == 'success' && '✅ Configured' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ inputs.cloud_provider }}" = "oci" ] || [ "${{ inputs.cloud_provider }}" = "both" ]; then
+            echo "- **OCI OIDC**: ${{ needs.configure-oci-oidc.result == 'success' && '✅ Configured' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "- **SOPS Rotation**: ${{ needs.sops-key-rotation.result == 'success' && '✅ Completed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. **Manual**: Add age private key to GitHub Secrets" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Deploy**: Run staging environment deployment" >> $GITHUB_STEP_SUMMARY
+          echo "3. **Validate**: Execute load tests and monitoring checks" >> $GITHUB_STEP_SUMMARY
+          echo "4. **Promote**: Begin canary production deployment" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,41 @@
+name: security-quickscan
+
+on:
+  pull_request:
+    paths:
+      - 'server/**'
+      - '.github/workflows/security-quickscan.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sast-and-deps:
+    name: SAST and dependency scan (server)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install server dependencies (frozen)
+        run: pnpm install --filter intelgraph-server --ignore-scripts --frozen-lockfile
+
+      - name: Run Semgrep OWASP Top 10 policy
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/owasp-top-ten
+        continue-on-error: true
+
+      - name: Dependency audit (high severity)
+        run: pnpm audit --filter intelgraph-server --audit-level=high || true

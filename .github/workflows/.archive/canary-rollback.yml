@@ -1,0 +1,90 @@
+name: Canary Rollout & Auto-Rollback
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+
+jobs:
+  deploy-stage:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      # Auth...
+      - name: Deploy to Stage
+        run: |
+          helm upgrade --install summit-stage ./deploy/helm/intelgraph \
+            --namespace staging \
+            --set image.tag=${{ github.event.inputs.version || github.ref_name }} \
+            --wait
+
+  validate-stage:
+    needs: deploy-stage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run K6 Smoke
+        run: |
+          k6 run -e TARGET_HOST=https://stage.example.com tests/perf/smoke.js
+
+  deploy-prod-canary:
+    needs: validate-stage
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      # Auth...
+      - name: Deploy Canary (10%)
+        run: |
+          helm upgrade --install summit-prod ./deploy/helm/intelgraph \
+            --namespace prod \
+            --set image.tag=${{ github.event.inputs.version || github.ref_name }} \
+            --set canary.enabled=true \
+            --set canary.weight=10 \
+            --wait
+
+  monitor-canary:
+    needs: deploy-prod-canary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check SLOs
+        env:
+          PROM_URL: ${{ secrets.PROM_URL }}
+        run: |
+          chmod +x ops/check_slo.sh
+          # Check for 5 minutes
+          for i in {1..5}; do
+            ./ops/check_slo.sh $PROM_URL summit-prod
+            sleep 60
+          done
+
+  promote-full:
+    needs: monitor-canary
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Promote to 100%
+        run: |
+          helm upgrade --install summit-prod ./deploy/helm/intelgraph \
+            --namespace prod \
+            --set image.tag=${{ github.event.inputs.version || github.ref_name }} \
+            --set canary.enabled=false \
+            --wait
+
+  rollback:
+    if: failure()
+    needs: [deploy-prod-canary, monitor-canary]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rollback
+        run: |
+          helm rollback summit-prod --namespace prod
+          echo "Rolled back due to SLO breach or deployment failure."

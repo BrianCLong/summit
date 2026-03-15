@@ -1,0 +1,42 @@
+name: DR Failover/Cutback
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "failover or cutback"
+        required: true
+        type: choice
+        options: [failover, cutback]
+      trace_id:
+        description: "Trace ID for audit"
+        required: true
+      approver:
+        description: "Approver name"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log context
+        run: |
+          echo "action=${{ inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "trace_id=${{ inputs.trace_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "approver=${{ inputs.approver }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Failover
+        if: ${{ inputs.action == 'failover' }}
+        run: |
+          bash .ci/scripts/dr/failover.sh "${{ inputs.trace_id }}" "${{ inputs.approver }}"
+
+      - name: Cutback
+        if: ${{ inputs.action == 'cutback' }}
+        run: |
+          bash .ci/scripts/dr/cutback.sh "${{ inputs.trace_id }}" "${{ inputs.approver }}"

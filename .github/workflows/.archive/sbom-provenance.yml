@@ -1,0 +1,250 @@
+name: SBOM & Provenance
+
+on:
+  workflow_call:
+    inputs:
+      image-digest:
+        required: true
+        type: string
+      image-name:
+        required: true
+        type: string
+
+jobs:
+  sbom-attest:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore provenance cache
+        id: provenance-cache
+        uses: actions/cache@v4
+        with:
+          path: .provenance-cache
+          key: sbom-provenance-${{ inputs.image-digest }}
+
+      - name: Evaluate provenance cache
+        id: cache-state
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.provenance-cache.outputs.cache-hit }}" = "true" ] \
+            && [ -f .provenance-cache/metadata.json ] \
+            && jq -e --arg digest "${{ inputs.image-digest }}" '.digest == $digest' \
+              .provenance-cache/metadata.json >/dev/null; then
+            echo "use-cache=true" >>"$GITHUB_OUTPUT"
+            cp .provenance-cache/sbom.spdx.json sbom.spdx.json 2>/dev/null || true
+            cp .provenance-cache/rekor-uuids.txt rekor-uuids.txt 2>/dev/null || true
+            cp .provenance-cache/cosign.bundle.json cosign.bundle.json 2>/dev/null || true
+          else
+            echo "use-cache=false" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate SBOM
+        if: steps.cache-state.outputs.use-cache != 'true'
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ inputs.image-name }}@${{ inputs.image-digest }}
+          artifact-name: sbom.spdx.json
+          dependency-snapshot: true
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Prepare registry authentication
+        if: steps.cache-state.outputs.use-cache != 'true'
+        id: registry-auth
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Registry
+        if: steps.cache-state.outputs.use-cache == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sign Image (Keyless)
+        if: steps.cache-state.outputs.use-cache != 'true'
+        id: cosign-sign
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+          MANAGED_COSIGN_KEY: ${{ secrets.COSIGN_MANAGED_KEY }}
+          MANAGED_COSIGN_PUB: ${{ secrets.COSIGN_MANAGED_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          image="${{ inputs.image-name }}@${{ inputs.image-digest }}"
+          bundle_file="cosign.bundle.json"
+
+          annotate=("-a" "repo=${{ github.repository }}" "-a" "workflow=${{ github.workflow }}")
+          base_args=(--yes --rekor-url https://rekor.sigstore.dev --bundle "$bundle_file")
+
+          echo "Attempting keyless signing..."
+          if cosign sign --keyless "${base_args[@]}" "${annotate[@]}" "$image"; then
+            echo "mode=keyless" >>"$GITHUB_OUTPUT"
+          elif [ -n "${MANAGED_COSIGN_KEY:-}" ]; then
+            echo "Keyless signing failed; attempting managed key fallback." >&2
+            cosign sign --key "$MANAGED_COSIGN_KEY" "${base_args[@]}" "${annotate[@]}" "$image"
+            echo "mode=managed" >>"$GITHUB_OUTPUT"
+          else
+            echo "Keyless signing failed and no managed key configured." >&2
+            exit 1
+          fi
+          echo "bundle-path=$bundle_file" >>"$GITHUB_OUTPUT"
+
+      - name: Attest SBOM
+        if: steps.cache-state.outputs.use-cache != 'true'
+        run: |
+          cosign attest --yes \
+            --rekor-url https://rekor.sigstore.dev \
+            --predicate sbom.spdx.json \
+            --type spdx \
+            ${{ inputs.image-name }}@${{ inputs.image-digest }}
+
+      - name: Install otel-cli (conditional)
+        if: ${{ secrets.OTEL_EXPORTER_OTLP_ENDPOINT != '' }}
+        run: |
+          set -euo pipefail
+          version="0.4.1"
+          curl -sSfL "https://github.com/equinix-labs/otel-cli/releases/download/v${version}/otel-cli_${version}_linux_amd64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin otel-cli
+
+      - name: Capture Rekor UUIDs
+        id: rekor-uuid
+        env:
+          MANAGED_COSIGN_PUB: ${{ secrets.COSIGN_MANAGED_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          image="${{ inputs.image-name }}@${{ inputs.image-digest }}"
+          verify_args=(--output json "$image")
+          if [ "${{ steps.cosign-sign.outputs.mode }}" = "managed" ] && [ -n "${MANAGED_COSIGN_PUB:-}" ]; then
+            verify_args=(--key "$MANAGED_COSIGN_PUB" --output json "$image")
+          fi
+
+          if [ "${{ steps.cache-state.outputs.use-cache }}" != "true" ] || [ ! -s rekor-uuids.txt ]; then
+            cosign verify "${verify_args[@]}" >cosign-verify.json
+            jq -r '.critical.tlogEntries[]?.uuid' cosign-verify.json | paste -sd ',' - >rekor-uuids.txt
+          fi
+
+          if [ -s rekor-uuids.txt ]; then
+            echo "rekor_uuids=$(cat rekor-uuids.txt)" >>"$GITHUB_OUTPUT"
+          else
+            echo "rekor_uuids=unknown" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Save provenance cache
+        if: steps.cache-state.outputs.use-cache != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p .provenance-cache
+          cp sbom.spdx.json .provenance-cache/
+          cp cosign.bundle.json .provenance-cache/
+          cp rekor-uuids.txt .provenance-cache/
+          jq -n --arg digest "${{ inputs.image-digest }}" --arg image "${{ inputs.image-name }}" \
+            '{digest:$digest,image:$image,generated_at:now}' > .provenance-cache/metadata.json
+
+      - name: Emit supply-chain structured log & OTEL span
+        id: supply-chain-emit
+        env:
+          ACTOR: ${{ github.actor }}
+          COMMIT_SHA: ${{ github.sha }}
+          IMAGE_DIGEST: ${{ inputs.image-digest }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+          REKOR_UUIDS: ${{ steps.rekor-uuid.outputs.rekor_uuids }}
+          COSIGN_MODE: ${{ steps.cosign-sign.outputs.mode || 'cache' }}
+          POLICY_OUTCOME: pass
+          OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_EXPORTER_OTLP_ENDPOINT }}
+          OTEL_EXPORTER_OTLP_HEADERS: ${{ secrets.OTEL_EXPORTER_OTLP_HEADERS }}
+        run: |
+          set -euo pipefail
+          sbom_hash=$(sha256sum sbom.spdx.json | awk '{print $1}')
+          now_epoch=$(date -u +%s)
+          log_payload=$(jq -n \
+            --arg actor "$ACTOR" \
+            --arg commit "$COMMIT_SHA" \
+            --arg digest "$IMAGE_DIGEST" \
+            --arg image "$IMAGE_NAME" \
+            --arg sbom "$sbom_hash" \
+            --arg rekor "${REKOR_UUIDS:-}" \
+            --arg policy "$POLICY_OUTCOME" \
+            --arg mode "${COSIGN_MODE:-unknown}" \
+            --arg time "$now_epoch" \
+            '{
+              event:"supply_chain.build_verify",
+              actor:$actor,
+              commit:$commit,
+              image:$image,
+              digest:$digest,
+              sbom_sha256:$sbom,
+              rekor_uuids: ($rekor | split(",") | map(select(length > 0))),
+              cosign_mode:$mode,
+              policy_outcome:$policy,
+              timestamp: ($time | tonumber)
+            }')
+          echo "Structured log payload: $log_payload"
+          if [ -n "${OTEL_EXPORTER_OTLP_ENDPOINT:-}" ] && command -v otel-cli >/dev/null 2>&1; then
+            otel-cli span \
+              --name "supply_chain.build_verify" \
+              --service "ci-supply-chain" \
+              --kind internal \
+              --status ok \
+              --attrs "ci.actor=$ACTOR,ci.commit=$COMMIT_SHA,supply_chain.digest=$IMAGE_DIGEST,sbom.sha256=$sbom_hash,rekor.uuids=${REKOR_UUIDS:-none},policy.outcome=$POLICY_OUTCOME,cosign.mode=${COSIGN_MODE:-unknown}" \
+              --timeout 10s \
+              --fail
+          else
+            echo "otel-cli not configured; skipping span emission"
+          fi
+          echo "log-payload=$log_payload" >>"$GITHUB_OUTPUT"
+
+      - name: Upload signing artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-provenance-${{ github.run_id }}
+          path: |
+            sbom.spdx.json
+            cosign.bundle.json
+            rekor-uuids.txt
+          if-no-files-found: warn
+
+      - name: Export SBOM to Dependency-Track (optional)
+        if: ${{ secrets.DEPENDENCYTRACK_API_KEY != '' && (vars.DEPENDENCYTRACK_HOST != '' || secrets.DEPENDENCYTRACK_HOST != '') }}
+        env:
+          DEPENDENCYTRACK_API_KEY: ${{ secrets.DEPENDENCYTRACK_API_KEY }}
+          DEPENDENCYTRACK_HOST: ${{ vars.DEPENDENCYTRACK_HOST || secrets.DEPENDENCYTRACK_HOST }}
+        run: |
+          set -euo pipefail
+          api_host="${DEPENDENCYTRACK_HOST%/}"
+          curl -sSf -X POST "${api_host}/api/v1/bom" \
+            -H "X-Api-Key: ${DEPENDENCYTRACK_API_KEY}" \
+            -H "accept: application/json" \
+            -H "Content-Type: multipart/form-data" \
+            -F "projectName=${{ inputs.image-name }}" \
+            -F "autoCreate=true" \
+            -F "bom=@sbom.spdx.json;type=application/json" \
+            -o dependency-track-response.json
+
+      - name: Upload Dependency-Track response
+        if: ${{ secrets.DEPENDENCYTRACK_API_KEY != '' && (vars.DEPENDENCYTRACK_HOST != '' || secrets.DEPENDENCYTRACK_HOST != '') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-track-${{ github.run_id }}
+          path: dependency-track-response.json
+          if-no-files-found: warn
+
+      - name: Generate SLSA Provenance
+        if: steps.cache-state.outputs.use-cache != 'true'
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
+        with:
+          image: ${{ inputs.image-name }}
+          digest: ${{ inputs.image-digest }}
+          registry-username: ${{ github.actor }}
+        env:
+          PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}

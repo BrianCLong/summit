@@ -25,7 +25,7 @@ jobs:
       - uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: corepack enable && pnpm install
+        run: pnpm install
       - name: Run changed skill evals
         run: echo "Skill evals disabled or missing"
       - name: Upload eval artifacts
@@ -44,7 +44,7 @@ jobs:
       - uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: corepack enable && pnpm install
+        run: pnpm install
       - name: Run full skill eval suite
         run: echo "Skill evals disabled or missing"
       - name: Upload eval artifacts

@@ -22,7 +22,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: corepack enable && pnpm install
+        run: pnpm install
 
       - name: Run Budget Audit
         run: |

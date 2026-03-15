@@ -1,0 +1,91 @@
+name: Golden Path E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
+    paths:
+      - "client/**"
+      - "apps/web/**"
+      - "server/src/graphql/**"
+      - "server/src/investigations/**"
+      - "server/src/services/investigationWorkflowService.ts"
+      - "e2e/golden-path*.spec.ts"
+      - "flags/**"
+      - "!docs/**"
+      - "!**.md"
+      - "!prompts/**"
+      - "!evidence/**"
+  schedule:
+    - cron: "0 2 * * *" # Nightly at 2 AM
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
+jobs:
+  golden-path-e2e:
+    name: Golden Path E2E
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build Packages
+        run: pnpm build
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Golden Path E2E
+        env:
+          BASE_URL: http://localhost:3000
+          PLAYWRIGHT_USE_WEBSERVER: "true"
+        run: pnpm test:e2e:golden-path
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-e2e
+          path: reports/playwright
+          retention-days: 7
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-e2e
+          path: test-results
+          retention-days: 7
+
+      - name: Upload Golden Path Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-path-evidence
+          path: artifacts/evidence/
+          retention-days: 7
