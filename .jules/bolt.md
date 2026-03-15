@@ -26,3 +26,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-03-15 - [MapLibre Map Component Performance Edge Case]
+**Learning:** In the `summit-ui` React app, MapLibre map wrapper components (like `DiffusionHeatmap`) are exceptionally expensive to render. If they are rendered alongside other components in a parent page (like `CognitiveBattlespacePage`), any sibling state update (such as changing compatibility or linguistic anomaly data) will trigger a full re-render of the MapLibre map, causing noticeable UI stutter and high CPU usage.
+**Action:** Always effectively memoize MapLibre wrapper components (e.g., using `React.memo`) and ensure all callback props passed to them are wrapped in `useCallback` to prevent unnecessary re-renders when sibling state updates.
