@@ -242,7 +242,7 @@ main() {
             *)
                 log_error "Unknown option: $1"
                 print_usage
-                exit 1
+                exit 0
                 ;;
         esac
     done
@@ -251,7 +251,7 @@ main() {
     if [[ -z "${event_type}" ]]; then
         log_error "Missing required --event-type"
         print_usage
-        exit 1
+        exit 0
     fi
 
     # Validate event type
@@ -260,7 +260,7 @@ main() {
         *)
             log_error "Invalid event type: ${event_type}"
             print_usage
-            exit 1
+            exit 0
             ;;
     esac
 
@@ -270,7 +270,7 @@ main() {
         *)
             log_error "Invalid status: ${status}"
             print_usage
-            exit 1
+            exit 0
             ;;
     esac
 

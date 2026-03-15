@@ -13,9 +13,9 @@ valid_slsa if {
 default has_source_track = false
 
 has_source_track if {
-	input.predicate.buildDefinition.source
-	input.predicate.buildDefinition.source.uri
-	input.predicate.buildDefinition.source.digest
+	input.predicate.buildDefinition.externalParameters.source
+	input.predicate.buildDefinition.externalParameters.source.uri
+	input.predicate.buildDefinition.externalParameters.source.digest
 }
 
 # Check SPDX 3.0.1
