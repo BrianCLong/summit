@@ -1,0 +1,53 @@
+{
+  "gpt-4-mock": {
+    "entity_extraction": {
+      "response": "{\"organizations\": [\"United Nations\", \"Apple\"], \"locations\": [\"Geneva\"]}",
+      "latency_ms": 1200,
+      "cost": 0.03
+    },
+    "narrative_risk_scoring": {
+      "response": "10",
+      "latency_ms": 800,
+      "cost": 0.015
+    },
+    "query_response": {
+      "response": "A process is a fully independent program in execution, having its own dedicated memory space, whereas a thread is a lightweight execution unit existing within a process that shares the same memory space and resources as other threads in that process.",
+      "latency_ms": 1500,
+      "cost": 0.04
+    }
+  },
+  "claude-3-mock": {
+    "entity_extraction": {
+      "response": "{\"organizations\": [\"United Nations\", \"Apple\"], \"locations\": [\"Geneva\"]}",
+      "latency_ms": 900,
+      "cost": 0.015
+    },
+    "narrative_risk_scoring": {
+      "response": "10",
+      "latency_ms": 600,
+      "cost": 0.007
+    },
+    "query_response": {
+      "response": "A process is an isolated instance of a running program with its own memory, while a thread is a concurrent execution path within a process that shares its parent process's memory.",
+      "latency_ms": 1100,
+      "cost": 0.02
+    }
+  },
+  "llama-3-mock": {
+    "entity_extraction": {
+      "response": "{\"organizations\": [\"United Nations\"], \"locations\": [\"Geneva\"]}",
+      "latency_ms": 400,
+      "cost": 0.001
+    },
+    "narrative_risk_scoring": {
+      "response": "8",
+      "latency_ms": 300,
+      "cost": 0.0005
+    },
+    "query_response": {
+      "response": "Process has own memory. Thread shares memory with other threads in process. Here is also some extra hallucinated text about the history of UNIX.",
+      "latency_ms": 600,
+      "cost": 0.002
+    }
+  }
+}
