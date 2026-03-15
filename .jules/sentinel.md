@@ -89,3 +89,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** Command injection vulnerability in `tools/symphony.py` due to using string interpolation and `shell=True` in `subprocess.run()`.
 **Learning:** `subprocess.run(f"just {justfile} {target} {args}", shell=True)` allows an attacker to inject shell metacharacters via `args`. The vulnerability pattern `INJ-CRIT-004` appears in multiple files across the repository. It is a critical risk if input originates from an untrusted source.
 **Prevention:** Avoid `shell=True` and string concatenation when spawning subprocesses. Use an array of arguments and let `subprocess` handle the escaping securely. When dynamic arguments are supplied as a string, use `shlex.split(args)` to safely tokenize the string into arguments.
+
+## 2025-05-15 - [HIGH] Command Injection Risk in CI Verification Script
+**Vulnerability:** The `ci/verify.py` script used `shell=True` in `subprocess.run()` to execute CI checks. While currently used with hardcoded strings, the pattern itself is a liability and could lead to command injection if the input strings were ever influenced by external parameters (e.g., branch names or PR comments).
+**Learning:** Security anti-patterns like `shell=True` often propagate through CI and utility scripts where "convenience" is prioritized over "hardening". Even if currently safe (hardcoded), they set a dangerous precedent and become vulnerabilities during future refactors.
+**Prevention:** Standardize on list-based `subprocess.run` calls with `shell=False`. Use `shlex.split()` to safely parse command strings into argument lists when dynamic string execution is required.
