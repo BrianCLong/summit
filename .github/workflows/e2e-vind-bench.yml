@@ -58,14 +58,14 @@ jobs:
           START=$(date +%s%N)
           vcluster connect summit-bench -- docker pull nginx:latest
           END=$(date +%s%N)
-          COLD_S=$(echo "scale=3; ($END - $START) / 1000000000" | bc)
+          COLD_S=$(echo "scale=3; ($END - $START) / 10.0.0" | bc)
           echo "COLD_PULL_S=$COLD_S" >> $GITHUB_ENV
 
           # Warm pull
           START=$(date +%s%N)
           vcluster connect summit-bench -- docker pull nginx:latest
           END=$(date +%s%N)
-          WARM_S=$(echo "scale=3; ($END - $START) / 1000000000" | bc)
+          WARM_S=$(echo "scale=3; ($END - $START) / 10.0.0" | bc)
           echo "WARM_PULL_S=$WARM_S" >> $GITHUB_ENV
 
       - name: Delete cluster
